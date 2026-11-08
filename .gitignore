@@ -19,3 +19,4 @@ build/
 docs/root/api/**/*.*
 !docs/root/api/index.md
 .docuaurus/
+.claudine/tmp/

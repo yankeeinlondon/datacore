@@ -205,6 +205,15 @@ return function View() {
 }
 ```
 
+### Host Modules
+
+`dc.require` also loads modules provided by Obsidian itself, by name: `obsidian`, `@codemirror/*`, `@lezer/*`,
+`electron`, and Node built-ins such as `fs` or `node:path`. Node built-ins and Electron are only available on desktop.
+
+```js
+const { Notice } = await dc.require("obsidian");
+```
+
 ### Script Location
 
 Every script has two variables describing where it lives in the vault, which makes relative imports possible:

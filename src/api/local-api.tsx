@@ -25,6 +25,7 @@ import { Callout } from "./ui/views/callout";
 import { DataArray } from "./data-array";
 import { Coerce } from "./coerce";
 import { ScriptCache } from "./script-cache";
+import { isHostModule } from "utils/javascript";
 import { Expression } from "expression/expression";
 import { Card } from "./ui/views/cards";
 import { ListView } from "./ui/views/list";
@@ -91,8 +92,19 @@ export class DatacoreLocalApi {
      *
      * return { MyElement };
      * ```
+     *
+     * Host-provided modules can also be required by name: `obsidian`, `electron`, `@codemirror/*`, `@lezer/*`, and
+     * Node built-ins such as `fs` or `node:path` (Node built-ins and Electron are only available on desktop).
      */
     public async require(path: string | Link): Promise<unknown> {
+        if (typeof path === "string" && isHostModule(path)) {
+            try {
+                return require(path);
+            } catch (error) {
+                throw new Error(`Datacore: failed to require host module '${path}': ${error}`);
+            }
+        }
+
         const result = await this.scriptCache.load(path, { dc: this });
         return result.orElseThrow();
     }

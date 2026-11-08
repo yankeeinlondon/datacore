@@ -1,4 +1,4 @@
-import { Datacore } from "index/datacore";
+import { Datacore, IndexProgress } from "index/datacore";
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "preact/compat";
 import { EventRef } from "obsidian";
 import { Literal } from "expression/literal";
@@ -17,14 +17,12 @@ function LoadingProgress({ datacore }: { datacore: Datacore }) {
 
             if (!element) return;
 
-            const update = () => {
-                const initialized = datacore.initializer?.initialized ?? 0;
-                const targetTotal = datacore.initializer?.targetTotal ?? 0;
-                element.textContent = `${initialized} / ${targetTotal}`;
+            const render = ({ initialized, total }: IndexProgress) => {
+                element.textContent = `${initialized} / ${total}`;
             };
 
-            update();
-            eventRef.current = datacore.events.on("index-progress", update);
+            render(datacore.initializer?.progress() ?? { initialized: 0, total: 0 });
+            eventRef.current = datacore.on("index-progress", render);
         },
         [datacore]
     );

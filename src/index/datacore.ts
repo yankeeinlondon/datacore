@@ -273,6 +273,8 @@ export class Datacore extends Component {
     public on(evt: "rename", callback: (newPath: string, oldPath: string) => void, context?: unknown): EventRef;
     /** Called when datacore has initialized and is querable. */
     public on(evt: "initialized", callback: () => void, context?: unknown): EventRef;
+    /** Called periodically while datacore is performing its initial index, and once more when it finishes. */
+    public on(evt: "index-progress", callback: (progress: IndexProgress) => void, context?: unknown): EventRef;
 
     on<T extends Function>(evt: string, callback: T, context?: unknown): EventRef {
         return this.events.on(evt, callback as unknown as (...args: unknown[]) => unknown, context);
@@ -294,11 +296,26 @@ export class Datacore extends Component {
     private trigger(evt: "rename", newPath: string, oldPath: string): void;
     /** Trigger an initialization event. */
     private trigger(evt: "initialized"): void;
+    /** Trigger an initial-index progress event. */
+    private trigger(evt: "index-progress", progress: IndexProgress): void;
 
     /** Trigger an event. */
     private trigger(evt: string, ...args: unknown[]): void {
         this.events.trigger(evt, ...args);
     }
+
+    /** @internal Publish initial-index progress; called by the initializer. */
+    public notifyIndexProgress(progress: IndexProgress): void {
+        this.trigger("index-progress", progress);
+    }
+}
+
+/** Progress of the initial vault index. */
+export interface IndexProgress {
+    /** Number of files processed so far (imported, loaded from cache, or skipped). */
+    initialized: number;
+    /** Total number of files being indexed. */
+    total: number;
 }
 
 /** Lifecycle-respecting file queue which will import files, reading them from the file cache if needed. */
@@ -319,6 +336,8 @@ export class DatacoreInitializer extends Component {
     current: TFile[];
     /** Whether the initializer is currently yielding to the renderer. */
     yielding: boolean;
+    /** Handle of the pending renderer-yield timer, if any. */
+    yieldTimer?: number;
     /** Deferred promise which resolves when importing is done. */
     done: Deferred<InitializationStats>;
 
@@ -356,7 +375,18 @@ export class DatacoreInitializer extends Component {
         // Queue BATCH_SIZE elements from the queue to import.
         this.active = true;
 
+        // Cancel any pending renderer yield if the initializer is unloaded mid-index.
+        this.register(() => {
+            if (this.yieldTimer !== undefined) window.clearTimeout(this.yieldTimer);
+            this.yieldTimer = undefined;
+        });
+
         this.runNext();
+    }
+
+    /** Current progress of this initializer. */
+    progress(): IndexProgress {
+        return { initialized: this.initialized, total: this.targetTotal };
     }
 
     /** Promise which resolves when the initialization completes. */
@@ -420,12 +450,13 @@ export class DatacoreInitializer extends Component {
 
         // Always publish the terminal state, even if the final import completes during a yield.
         if (this.initialized == this.targetTotal) {
-            this.core.events.trigger("index-progress");
+            this.core.notifyIndexProgress(this.progress());
             this.runNext();
         } else if (this.initialized % DatacoreInitializer.YIELD_INTERVAL == 0 && !this.yielding) {
-            this.core.events.trigger("index-progress");
+            this.core.notifyIndexProgress(this.progress());
             this.yielding = true;
-            window.setTimeout(() => {
+            this.yieldTimer = window.setTimeout(() => {
+                this.yieldTimer = undefined;
                 this.yielding = false;
                 this.runNext();
             }, DatacoreInitializer.YIELD_DELAY_MS);

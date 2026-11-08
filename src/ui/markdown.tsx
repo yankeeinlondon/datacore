@@ -306,7 +306,10 @@ export function SimpleErrorBoundary({
     message,
     children,
 }: PropsWithChildren<{ title?: string; message?: string }>) {
-    const [error, reset] = useErrorBoundary();
+    // Log once per caught error (not on every render) so the full stack is inspectable in the developer console.
+    const [error, reset] = useErrorBoundary((caught) =>
+        console.error(`Datacore: ${title ?? "view failed to render"}`, caught)
+    );
 
     if (error) {
         return <ErrorMessage title={title} message={message} error={error.stack} reset={reset} />;

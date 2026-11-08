@@ -4,7 +4,7 @@ import { Result } from "./result";
 import { MarkdownCodeblock, MarkdownSection } from "index/types/markdown";
 import { Deferred, deferred } from "utils/deferred";
 import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
-import { lineRange } from "utils/normalizers";
+import { getParentFolder, lineRange } from "utils/normalizers";
 import { TFile } from "obsidian";
 import { Fragment, h } from "preact";
 
@@ -119,7 +119,7 @@ export class ScriptCache {
                 h: h,
                 Fragment: Fragment,
                 __filename: filepath,
-                __dirname: filepath.split("/").slice(0, -1).join("/"),
+                __dirname: getParentFolder(filepath),
             },
             context
         );

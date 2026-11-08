@@ -204,3 +204,19 @@ return function View() {
     return <ListItem text="whoa!" />;
 }
 ```
+
+### Script Location
+
+Every script has two variables describing where it lives in the vault, which makes relative imports possible:
+
+- `__filename` - the vault-relative path of the file containing the script. For a `datacorejs`/`jsx`/`ts`/`tsx`
+  codeblock, or a codeblock loaded with `dc.require`, this is the **markdown note** containing the codeblock; for a
+  `.js`/`.ts` file loaded with `dc.require`, it is that file.
+- `__dirname` - the folder containing `__filename` (an empty string for files at the vault root).
+
+These are vault paths using `/` separators, not filesystem paths. They differ from Node's variables of the same name.
+
+```jsx
+// In scripts/views/books.js - load a helper that sits next to this file.
+const { formatAuthor } = await dc.require(`${__dirname}/helpers.js`);
+```

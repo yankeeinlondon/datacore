@@ -7,6 +7,7 @@ import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript"
 import { LoadingBoundary, ScriptContainer } from "./loading-boundary";
 import { Datacore } from "index/datacore";
 import { Literal } from "expression/literal";
+import { getParentFolder } from "utils/normalizers";
 
 /**
  * Renders a script by executing it and handing it the appropriate React context to execute
@@ -37,7 +38,7 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
                     h: h,
                     Fragment: Fragment,
                     __filename: this.path,
-                    __dirname: this.path.split("/").slice(0, -1).join("/"),
+                    __dirname: getParentFolder(this.path),
                 })) as Promise<Literal | VNode | Function>;
             };
 

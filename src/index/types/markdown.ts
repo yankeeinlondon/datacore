@@ -459,7 +459,9 @@ export class MarkdownCodeblock extends MarkdownBlock implements Indexable, Field
             $languages: object.$languages,
             $links: object.$links.map((link) => normalizer(Link.fromObject(link))),
             $tags: object.$tags,
-            $infields: mapObjectValues(object.$infields, valueInlineField),
+            $infields: mapObjectValues(object.$infields, (field) =>
+                normalizeLinks(valueInlineField(field), normalizer)
+            ),
             $contentPosition: object.$contentPosition,
             $style: object.$style,
         });

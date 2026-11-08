@@ -207,7 +207,7 @@ export class CanvasTextCard extends BaseCanvasCard implements Linkbearing, Tagga
     /** @internal */
     public json(): JsonCanvasTextCard {
         return Object.assign(super.json(), {
-            $infields: this.$infields,
+            $infields: mapObjectValues(this.$infields, jsonInlineField),
             $links: this.$links,
             $tags: this.$tags,
             $type: "text-card",

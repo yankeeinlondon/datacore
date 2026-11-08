@@ -310,7 +310,7 @@ export class Datacore extends Component {
     }
 }
 
-/** Progress of the initial vault index. */
+/** @public Progress of the initial vault index. */
 export interface IndexProgress {
     /** Number of files processed so far (imported, loaded from cache, or skipped). */
     initialized: number;

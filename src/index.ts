@@ -13,7 +13,7 @@ export * from "expression/literal";
 export * from "expression/field";
 
 // Index types.
-export type { Datacore } from "index/datacore";
+export type { Datacore, IndexProgress } from "index/datacore";
 export type { Datastore } from "index/datastore";
 
 export type * from "index/types/indexable";

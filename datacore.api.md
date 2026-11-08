@@ -372,11 +372,14 @@ export class Datacore extends Component {
     // @internal
     initializer?: DatacoreInitializer;
     metadataCache: MetadataCache;
+    // @internal
+    notifyIndexProgress(progress: IndexProgress): void;
     off(evt: string, callback: (...data: unknown[]) => void): void;
     offref(ref: EventRef): void;
     on(evt: "update", callback: (revision: number) => void, context?: unknown): EventRef;
     on(evt: "rename", callback: (newPath: string, oldPath: string) => void, context?: unknown): EventRef;
     on(evt: "initialized", callback: () => void, context?: unknown): EventRef;
+    on(evt: "index-progress", callback: (progress: IndexProgress) => void, context?: unknown): EventRef;
     // Warning: (ae-forgotten-export) The symbol "LocalStorageCache" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -885,6 +888,12 @@ export interface IndexPath {
 
 // @public
 export type IndexPrimitive = IndexId | IndexLink | IndexConstant | IndexTyped | IndexTagged | IndexPath | IndexField | IndexValueEquals;
+
+// @public
+export interface IndexProgress {
+    initialized: number;
+    total: number;
+}
 
 // @public
 export type IndexQuery = IndexCombinator | IndexExpression | IndexSource;

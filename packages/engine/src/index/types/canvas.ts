@@ -178,19 +178,19 @@ export class CanvasTextCard extends BaseCanvasCard implements Linkbearing, Tagga
     $types: string[] = CanvasTextCard.TYPES;
     $typename: string = "Text card";
     $type: string = "canvas-card";
-    $id: string;
+    declare $id: string;
 
-    $file: string;
-    $links: Link[];
-    $tags: string[];
-    $title: string;
-    $parent?: Indexable;
-    $revision?: number;
-    $infields: Record<string, InlineField>;
-    $frontmatter?: Record<string, FrontmatterEntry>;
+    declare $file: string;
+    declare $links: Link[];
+    declare $tags: string[];
+    declare $title: string;
+    declare $parent?: Indexable;
+    declare $revision?: number;
+    declare $infields: Record<string, InlineField>;
+    declare $frontmatter?: Record<string, FrontmatterEntry>;
 
-    $dimensions: CardDimensions;
-    $sections: MarkdownSection[];
+    declare $dimensions: CardDimensions;
+    declare $sections: MarkdownSection[];
 
     private constructor(init: Partial<CanvasTextCard>) {
         super(init);
@@ -261,7 +261,7 @@ export class CanvasFileCard extends BaseCanvasCard implements Indexable {
     }
 
     readonly $type: string = "file-card";
-    $linkedFile: string;
+    declare $linkedFile: string;
 
     /** @internal */
     public json(): JsonCanvasFileCard {
@@ -290,7 +290,7 @@ export class CanvasWebCard extends BaseCanvasCard implements Indexable {
     readonly $type: string = "web-card";
     $typename: string = "Web card";
 
-    $url: string;
+    declare $url: string;
 
     private constructor(init: Partial<CanvasWebCard>) {
         super(init);

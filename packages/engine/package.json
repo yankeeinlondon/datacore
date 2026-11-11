@@ -1,0 +1,68 @@
+{
+  "name": "@yankeeinlondon/datacore-engine",
+  "version": "0.1.28",
+  "private": true,
+  "description": "Reactive data engine for Obsidian.md.",
+  "main": "build/library/index.js",
+  "types": "build/library/index.d.ts",
+  "files": [
+    "build/library"
+  ],
+  "scripts": {
+    "build": "tsc && tsc --project tsconfig.library.json && api-extractor run --local && node esbuild.config.mjs production all",
+    "build-plugin": "tsc && node esbuild.config.mjs production plugin",
+    "build-library": "tsc --project tsconfig.library.json && api-extractor run --local --verbose && node esbuild.config.mjs production library",
+    "test": "jest",
+    "test-watch": "jest -i --watch --no-cache",
+    "check-format": "prettier --check src",
+    "format": "prettier --write src",
+    "typecheck": "tsc"
+  },
+  "keywords": [
+    "obsidian",
+    "datacore",
+    "dataview",
+    "pkm"
+  ],
+  "author": "Michael Brenan",
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/language": "github:lishid/cm-language#a9c3c7efe17dd1d24395ee2a179fe12dd6ed1e76",
+    "@codemirror/state": "^6.0.1",
+    "@codemirror/view": "^6.0.1",
+    "@microsoft/api-extractor": "^7.52.7",
+    "@types/jest": "^27.0.1",
+    "@types/luxon": "^2.3.2",
+    "@types/node": "^16.7.13",
+    "@types/parsimmon": "^1.10.6",
+    "esbuild": "^0.16.11",
+    "esbuild-plugin-inline-worker": "github:mitschabaude/esbuild-plugin-inline-worker#d1aaffc721a62a3fe33f59f8f69b462c7dd05f45",
+    "jest": "^27.1.0",
+    "obsidian": "^1.6.6",
+    "prettier": "2.3.2",
+    "ts-jest": "^27.0.5",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.3.1",
+    "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "@datastructures-js/queue": "^4.2.3",
+    "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "builtin-modules": "3.3.0",
+    "emoji-regex": "^10.2.1",
+    "flatqueue": "^2.0.3",
+    "localforage": "1.10.0",
+    "luxon": "^2.4.0",
+    "parsimmon": "^1.18.0",
+    "preact": "^10.17.1",
+    "react-select": "^5.8.0",
+    "sorted-btree": "^1.8.1",
+    "sucrase": "3.35.0",
+    "yaml": "^2.3.3"
+  },
+  "peerDependencies": {
+    "preact": "^10.17.1"
+  }
+}

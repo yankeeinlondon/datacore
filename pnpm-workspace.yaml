@@ -1,0 +1,8 @@
+packages:
+  - "packages/*"
+
+# pnpm 10 blocks dependency lifecycle scripts unless allowed here.
+onlyBuiltDependencies:
+  - "@codemirror/language" # git-hosted fork (lishid/cm-language) builds on install
+  - esbuild
+  - esbuild-plugin-inline-worker # git-hosted

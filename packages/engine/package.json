@@ -12,8 +12,8 @@
     "build": "tsc && tsc --project tsconfig.library.json && api-extractor run --local && node esbuild.config.mjs production all",
     "build-plugin": "tsc && node esbuild.config.mjs production plugin",
     "build-library": "tsc --project tsconfig.library.json && api-extractor run --local --verbose && node esbuild.config.mjs production library",
-    "test": "jest",
-    "test-watch": "jest -i --watch --no-cache",
+    "test": "vitest run",
+    "test-watch": "vitest",
     "check-format": "prettier --check src",
     "format": "prettier --write src",
     "typecheck": "tsc"
@@ -31,19 +31,18 @@
     "@codemirror/state": "^6.0.1",
     "@codemirror/view": "^6.0.1",
     "@microsoft/api-extractor": "^7.52.7",
-    "@types/jest": "^27.0.1",
     "@types/luxon": "^2.3.2",
     "@types/node": "^16.7.13",
     "@types/parsimmon": "^1.10.6",
     "esbuild": "^0.16.11",
     "esbuild-plugin-inline-worker": "github:mitschabaude/esbuild-plugin-inline-worker#d1aaffc721a62a3fe33f59f8f69b462c7dd05f45",
-    "jest": "^27.1.0",
+    "jsdom": "31.0.0",
     "obsidian": "^1.6.6",
     "prettier": "2.3.2",
-    "ts-jest": "^27.0.5",
     "ts-node": "^10.9.2",
     "tslib": "^2.3.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vitest": "5.1.0"
   },
   "dependencies": {
     "@datastructures-js/queue": "^4.2.3",

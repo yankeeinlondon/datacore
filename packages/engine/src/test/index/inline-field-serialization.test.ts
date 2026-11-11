@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { Link } from "expression/link";
 import { jsonInlineField } from "index/import/inline-field";
 import { CanvasTextCard } from "index/types/canvas";

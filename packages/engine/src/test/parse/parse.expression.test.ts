@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { BinaryOpExpression, Expressions, LiteralExpression } from "expression/expression";
 import { EXPRESSION, PRIMITIVES } from "expression/parser";
 import { DateTime, Duration } from "luxon";

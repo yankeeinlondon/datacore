@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { expectEvals, parseEval } from "test/common";
 
 test("number()", () => {

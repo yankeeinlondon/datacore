@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 // <-- regexreplace() -->
 
 import { parseEval } from "test/common";

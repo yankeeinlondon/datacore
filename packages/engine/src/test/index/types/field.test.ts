@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { InlineField } from "index/import/inline-field";
 import { Extractors } from "expression/field";
 import { Indexable } from "index/types/indexable";

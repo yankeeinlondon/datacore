@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { Literal } from "expression/literal";
 import { parseEval } from "test/common";
 

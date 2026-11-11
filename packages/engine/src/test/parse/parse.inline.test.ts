@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { PRIMITIVES } from "expression/parser";
 import { Link } from "expression/link";
 import {

@@ -1,24 +1,10 @@
+import { describe, it, expect } from "vitest";
 import { Datastore } from "index/datastore";
 import { GenericFile } from "index/types/files";
 import { Indexable } from "index/types/indexable";
 import { DateTime } from "luxon";
 import { MetadataCache, Vault } from "obsidian";
 import { DEFAULT_SETTINGS } from "settings";
-
-// The `obsidian` package ships types only; the folder index needs these classes at runtime for `instanceof` checks.
-jest.mock("obsidian", () => ({ TFile: class TFile {}, TFolder: class TFolder {} }), { virtual: true });
-
-// Obsidian patches `Array.prototype.contains` at runtime; the datastore relies on it when indexing.
-beforeAll(() => {
-    if (!Array.prototype.contains) {
-        Object.defineProperty(Array.prototype, "contains", {
-            value: function <T>(this: T[], target: T): boolean {
-                return this.includes(target);
-            },
-            configurable: true,
-        });
-    }
-});
 
 /** Construct a datastore with minimal stubs; revision tracking does not touch the vault or metadata cache. */
 function emptyDatastore(): Datastore {

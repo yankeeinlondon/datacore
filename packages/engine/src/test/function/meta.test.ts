@@ -1,3 +1,4 @@
+import { test, expect } from "vitest";
 import { parseEval } from "test/common";
 
 test("Evaluate meta(link).display", () => {

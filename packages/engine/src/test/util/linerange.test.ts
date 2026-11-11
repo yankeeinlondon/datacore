@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { lineRange } from "utils/normalizers";
 
 describe("Line Range", () => {

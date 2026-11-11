@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { Link } from "expression/link";
 import { Literals } from "expression/literal";
 

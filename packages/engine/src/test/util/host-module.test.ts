@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { isHostModule } from "utils/javascript";
 
 describe("isHostModule", () => {

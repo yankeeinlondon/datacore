@@ -1,3 +1,4 @@
+import { expect } from "vitest";
 import { Literal } from "expression/literal";
 import { Evaluator, LinkHandler } from "expression/evaluator";
 import { EXPRESSION } from "expression/parser";

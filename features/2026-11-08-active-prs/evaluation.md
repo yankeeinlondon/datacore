@@ -93,3 +93,29 @@ Run `yarn jest` after each step and tag the result as the fork baseline.
 - **High-frequency UI state must never bump the index revision.** Things like access time and recent files get their own stores and events (from #87).
 - **Module loader backlog:** a framework-agnostic script/module loader for the UI packages, covering ESM import/export, script roots, `__filename`/`__dirname`, builtin requires, a dependency graph, and invalidation on file change (from #84, #150, #181).
 - **Engine backlog:** multi-value inline fields with Dataview semantics (from #157).
+
+## Outcome (2026-11-08)
+
+The merge plan was carried out on branch `pre-fork-upstream`, tagged **`fork-baseline`**. Original authors are credited as commit authors where their patch was applied as-is, and as `Co-authored-by` where it was reworked.
+
+| Commit | Source | Notes |
+|---|---|---|
+| `e39f36d` | #180 | Applied as-is (author aaandreeew) |
+| `8dfdeeb` | #180 follow-up | Revision regression test (fails without the fix) |
+| `11b8091` | #184 | Applied as-is (author ProudBenzene) |
+| `5960dab` | #184 follow-up | Typed `IndexProgress` payload + `on("index-progress")`; yield timer cleared on unload |
+| `9371723` | #122 reworked | Log via `useErrorBoundary` callback; keep stacks in code block failures |
+| `0cff387` | #150 | Applied as-is (author Gudine) |
+| `b4f0468` | #150 follow-up | Reuse `getParentFolder`; docs ("Script Location") |
+| `0b1728d` | #181 reworked | `isHostModule` allowlist (static `builtin-modules` list, mobile-safe; moved to `dependencies`); wrapped errors; tests; docs |
+| `3e65ccb` | #157 (partial) | Canvas card `$infields` serialization + codeblock inline-field link normalization; tests fail without the fix |
+| `97a1da7` | #87 (partial) | `.docusaurus` `.gitignore` typo |
+| `e3b1651` | — | Export `IndexProgress` (`@public`) and refresh `datacore.api.md` |
+
+Differences from the plan:
+- The `is*` type guards from #87 were **not** ported. They belong in `datacore-client` (P1), written against `$types.includes`.
+- No unit test for #150's script context: `ScriptCache` needs a mocked vault/datastore, and it will be covered by the module loader rewrite (spec §11.4).
+
+Verification at `fork-baseline`: 345/345 tests (20 suites, up from 321/17), `tsc --noEmit`, library build + api-extractor, and the production plugin build all pass. A Prettier warning in `src/index/import/canvas.ts` predates this work (it is present on `master`).
+
+Local environment note: Jest 27's reporter crashes because yarn v1 hoists `strip-ansi@7` (ESM) above `string-length`. It was worked around locally by placing `strip-ansi@6` in `node_modules/string-length/node_modules` (not committed). The P0 move to pnpm and Vitest removes the issue.

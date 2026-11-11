@@ -1,0 +1,113 @@
+# P0 — Monorepo Scaffold: Implementation Plan
+
+| | |
+|---|---|
+| **Spec** | [spec.md](./spec.md) §10, §12 (P0) |
+| **Branch** | `p0-monorepo` (from `master` fast-forwarded to `fork-baseline`) |
+| **Goal** | New structure and tooling with **no behaviour change**: the engine package still builds the same single plugin (UI included) as `fork-baseline` |
+| **Out of scope** | Identity changes (plugin id, cache name, globals), contract/client content, any engine refactor: all P1+ |
+
+## Exit criteria
+
+1. `pnpm install` from a clean clone; no yarn artefacts remain.
+2. `pnpm -r build` succeeds. The engine's plugin bundle (`main.js`) is **equivalent to the `fork-baseline` bundle** (identical after stripping esbuild's `// path` comment lines and normalizing `node_modules/.pnpm/...` paths).
+3. `pnpm test`: all **345** tests pass under Vitest (no Jest left).
+4. `pnpm typecheck` (`tsc -b`), `pnpm lint` (oxlint), and `pnpm fmt:check` (oxfmt) are clean.
+5. The `contract`, `client`, `shared`, `view-preact` and `view-vue` scaffolds exist and build/typecheck (empty).
+6. Changesets is initialized for all packages; the docs site builds as a workspace package.
+7. TypeScript and esbuild are upgraded, each in its own verified commit.
+
+## Baseline capture (before step 1)
+
+Build `fork-baseline` with the current toolchain and keep the artefacts outside the repo for comparison:
+
+- `build/plugin/main.js`, `build/plugin/styles.css`, `build/library/index.js`, `datacore.api.md`
+- the test count (345) and test names (`jest --listTests` + per-suite counts)
+
+A small compare script (`scripts/compare-bundle.mjs`, removed at the end of P0) normalizes and diffs bundles.
+
+## Steps
+
+Each step ends green, gets its own commit(s), and is verified before the next one starts.
+
+### 1. pnpm workspace + move the code into `packages/engine`
+
+- Root `package.json` becomes the workspace root: `private`, `packageManager: pnpm@10.x`, `engines.node: ">=22"`, root scripts delegating to packages.
+- `pnpm-workspace.yaml`: `packages/*`, `docs`.
+- `git mv` into `packages/engine/`: `src/`, `esbuild.config.mjs`, `tsconfig*.json`, `api-extractor.json`, `datacore.api.md`, `manifest.json`, `manifest-beta.json`, `versions.json`, `jest.config.js`, `scripts/` (upstream release scripts; superseded by Changesets in P3). `.prettierrc` stays at the root until step 4.
+- `packages/engine/package.json`: `@yankeeinlondon/datacore-engine`, `private`, with upstream's dependencies and scripts.
+- **Keep exact dependency versions**: `pnpm import` from `yarn.lock` to seed `pnpm-lock.yaml`, then delete `yarn.lock`. Check that the git-hosted dependencies (`@codemirror/language` fork, `esbuild-plugin-inline-worker`) resolve.
+- Root `.nvmrc` (`22`).
+- **Verify:** `tsc` passes; Jest still runs 345 tests (Jest is replaced in step 2, so only fix what the move breaks); plugin + library build; bundle equivalence vs baseline; api-extractor report unchanged.
+
+### 2. Jest → Vitest
+
+- Add `vitest`, `jsdom`, `vite-tsconfig-paths` to the engine; `vitest.config.ts` with `environment: "jsdom"`, path resolution via the engine's `baseUrl: "src"`, and `setupFiles`.
+- **Shared Obsidian test setup** (spec §4.2.1): `obsidian` resolved to a shim module (`test/shims/obsidian.ts`: `TFile`, `TFolder`, and whatever else the suites touch) via `resolve.alias`, plus polyfills for `Array.prototype.contains` / `remove`. Remove the per-file `jest.mock` + polyfill in `datastore-revision.test.ts`.
+- Convert tests with a codemod: explicit `import { describe, it, test, expect, … } from "vitest"`, `jest.*` → `vi.*`.
+- Remove `jest`, `ts-jest`, `@types/jest`, `jest.config.js`, and the `jest` block in `tsconfig.json`. This also eliminates the `strip-ansi` hoisting workaround.
+- **Verify:** 345 tests pass, same suite/test names as the baseline listing.
+
+### 3. Scaffold the other packages + TypeScript project references
+
+- `tsconfig.base.json` (shared options). Each package has its own `tsconfig.json` extending it; the root `tsconfig.json` has `references` only; `pnpm typecheck` = `tsc -b`.
+- **`packages/contract`** (`@yankeeinlondon/datacore-contract`, `0.0.0`): `strict`, `src/index.ts` placeholder, tsdown config (ESM + d.ts, `exports` map), api-extractor config, Vitest with one `expectTypeOf` smoke test.
+- **`packages/client`** (`@yankeeinlondon/datacore-client`, `0.0.0`): same setup; depends on `contract` (`workspace:^`), re-exports it.
+- **`packages/shared`** (`@yankeeinlondon/datacore-shared`, private): `strict`, source-only (`exports` → `src/index.ts`), Vitest.
+- **`packages/view-preact`** (`@yankeeinlondon/datacore-view-preact`, private): manifest (`datacore-view-preact`, "Datacore View: Preact"), minimal no-op `Plugin` subclass, esbuild config, depends on `client` + `shared` only.
+- **`packages/view-vue`** (`@yankeeinlondon/datacore-view-vue`, private): manifest (`datacore-view-vue`, "Datacore View: Vue"), README, tsconfig. No build yet.
+- The engine keeps its current (non-`strict`) flags.
+- **Verify:** `pnpm -r build`, `pnpm typecheck`, `pnpm test` all green; engine bundle still equivalent.
+
+### 4. oxlint + oxfmt
+
+- `oxfmt --migrate=prettier` → `.oxfmtrc.json`; delete `.prettierrc` and Prettier. **One commit** reformats the repo with oxfmt; its SHA goes in `.git-blame-ignore-revs`.
+- `.oxlintrc.json`: TypeScript, import, Vitest and oxc plugins; type-aware rules via `oxlint-tsgolint`; `no-restricted-imports`:
+  - view packages may not import `@yankeeinlondon/datacore-engine`;
+  - `shared` may not import `obsidian` at runtime; `class` declarations are banned in `shared` (rule or a custom check).
+- `eslint-plugin-obsidianmd` via `jsPlugins`. **If incompatible** (alpha support), fall back to a minimal `eslint.config.mjs` that runs only the obsidianmd rules, and record that in the spec.
+- Existing engine findings: fix trivial ones; for the rest, set the rule level with a comment linking to a follow-up (no blanket disables).
+- **Verify:** `pnpm lint` and `pnpm fmt:check` clean; tests and builds still green; the engine bundle is equivalent apart from formatting-only source changes (verified via test pass + compare script output review).
+
+### 5. Changesets
+
+- `@changesets/cli`; `.changeset/config.json`: `privatePackages: { version: true, tag: true }`, `ignore: ["docs"]`, `updateInternalDependencies: "patch"`, `access: "public"` for the npm packages.
+- `scripts/sync-plugin-manifests.mjs`: after `changeset version`, copy each plugin package's version into its `manifest.json` and append to `versions.json` (`version → minAppVersion`). The root `version` script = `changeset version && node scripts/sync-plugin-manifests.mjs`.
+- No publishing workflow yet (P3).
+- **Verify:** a dry run (`changeset version` on a throwaway branch with a test changeset) bumps the right packages and syncs manifests; then discard it.
+
+### 6. Docs as a workspace package
+
+- Remove `docs/yarn.lock`; the docs package becomes `@yankeeinlondon/datacore-docs` (private), installed by the root pnpm install.
+- Update `.github/workflows/deploy-docs.yml` and `test-deploy-docs.yml`: pnpm (`pnpm/action-setup`), Node 22, `pnpm --filter @yankeeinlondon/datacore-docs build`.
+- **Verify:** `pnpm --filter @yankeeinlondon/datacore-docs build` succeeds locally.
+
+### 7. Toolchain upgrades (separately)
+
+- **7a TypeScript** → latest 5.x across the workspace. Fix any new errors. Verify: typecheck, tests, builds.
+- **7b esbuild** → current version in the engine (and view-preact). Pay particular attention to `esbuild-plugin-inline-worker`, a git-hosted fork with a `esbuild@latest` peer: confirm the worker still bundles and runs (worker import test + bundle inspection). If the plugin breaks, vendor a small inline-worker plugin into `packages/engine/build/` rather than pin esbuild forever. Verify: tests, bundle sanity (the worker is present), plugin loads in a scratch vault.
+
+### 8. CI
+
+- `.github/workflows/ci.yml`: on push/PR → pnpm install (frozen) → `typecheck`, `lint`, `fmt:check`, `test`, `build`.
+- **Verify:** workflow syntax check locally (`actionlint` if available); first run happens on push.
+
+### 9. Wrap-up
+
+- Remove `scripts/compare-bundle.mjs` (or keep it under `scripts/dev/` if still useful).
+- Update the spec: mark P0 ✅ and record any deviations (e.g. an obsidianmd fallback).
+- Changeset entries are not needed for P0 (nothing user-facing is released).
+
+## Manual check (once, after step 7)
+
+Install the built engine plugin (still id `datacore` in P0) into a scratch vault without upstream Datacore. Confirm it indexes, a `datacorejsx` view renders, and the progress counter shows on startup. A single smoke test confirms "no behaviour change" beyond the automated bundle comparison.
+
+## Risks specific to P0
+
+| Risk | Mitigation |
+|---|---|
+| Git-hosted dependencies misbehave under pnpm | `pnpm import` from `yarn.lock`; verify both resolve in step 1 before going further |
+| Bundle drift hidden by the move | Normalized bundle comparison after steps 1, 3 and 4 |
+| oxlint JS plugin (alpha) can't run obsidianmd | ESLint fallback for those rules only |
+| esbuild upgrade breaks worker inlining | Isolated step 7b; vendor a minimal plugin if needed |
+| Reformat commit makes blame noisy | `.git-blame-ignore-revs` |

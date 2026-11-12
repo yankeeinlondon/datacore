@@ -26,7 +26,7 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
         super(container);
     }
 
-    public async onload() {
+    public onload() {
         this.loaded = true;
 
         // Attempt to parse and evaluate the script to produce either a renderable JSX object or a function.

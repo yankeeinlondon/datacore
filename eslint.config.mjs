@@ -34,16 +34,6 @@ export default [
         rules: TYPED_OBSIDIAN_RULES,
     },
     {
-        // Upstream code with known violations, fixed when these files are reworked in P1/P2 (Engine Room spec,
-        // §4.2). Downgraded per file, not globally, so new code is held to the full rule.
-        files: [
-            "packages/engine/src/api/ui/embed.tsx",
-            "packages/engine/src/index/datacore.ts",
-            "packages/engine/src/ui/javascript.tsx",
-        ],
-        rules: { "obsidianmd/no-misused-promises": "warn" },
-    },
-    {
         files: ["packages/*/manifest.json"],
         language: "json/json",
         plugins: { json, obsidianmd },

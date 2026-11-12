@@ -106,7 +106,9 @@ export function LineSpanEmbed({
     // To allow for the explainer to be clicked on to navigate to the given position.
     const workspace = useContext(APP_CONTEXT)?.workspace;
     const onExplainClick = useCallback(
-        (event: MouseEvent) => workspace?.openLinkText(path, path, event.shiftKey),
+        (event: MouseEvent) => {
+            void workspace?.openLinkText(path, path, event.shiftKey);
+        },
         [path]
     );
 

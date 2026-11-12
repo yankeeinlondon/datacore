@@ -53,7 +53,7 @@ export default class DatacorePlugin extends Plugin {
             id: "datacore-reindex-vault",
             name: "Reindex entire vault",
             callback: async () => {
-                console.log("Datacore: dropping the datastore and reindexing all items.");
+                console.debug("Datacore: dropping the datastore and reindexing all items.");
                 await this.core.reindex();
             },
         });

@@ -375,7 +375,7 @@ export class DatacoreInitializer extends Component {
         this.initialized = this.imported = this.skipped = this.cached = 0;
     }
 
-    async onload() {
+    onload() {
         // Queue BATCH_SIZE elements from the queue to import.
         this.active = true;
 
@@ -487,7 +487,7 @@ export class DatacoreInitializer extends Component {
             await this.core.reload(file);
             return { status: "imported" };
         } catch (ex) {
-            console.log("Datacore: Failed to import file: ", ex);
+            console.warn("Datacore: Failed to import file: ", ex);
             return { status: "skipped" };
         }
     }

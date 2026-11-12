@@ -1,0 +1,16 @@
+{
+  "name": "@yankeeinlondon/datacore-fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Parity vault and the parity-check driver for the Datacore plugins (run against a live Obsidian).",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.ts",
+    "parity": "node parity.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5"
+  }
+}

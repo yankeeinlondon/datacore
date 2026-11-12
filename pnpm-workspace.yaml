@@ -1,6 +1,7 @@
 packages:
   - "packages/*"
   - "docs"
+  - "fixtures"
 
 # pnpm 10 blocks dependency lifecycle scripts unless allowed here.
 onlyBuiltDependencies:

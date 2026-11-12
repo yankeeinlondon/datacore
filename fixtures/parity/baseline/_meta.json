@@ -1,0 +1,19 @@
+{
+  "engine": "0.1.0",
+  "plugins": [
+    "datacore-engine"
+  ],
+  "notes": [
+    "Controls.md",
+    "Errors.md",
+    "Hooks.md",
+    "Languages.md",
+    "Layout.md",
+    "Links and Embeds.md",
+    "Lists.md",
+    "Literals.md",
+    "Queries.md",
+    "Require.md",
+    "Tables.md"
+  ]
+}

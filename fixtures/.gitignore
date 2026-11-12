@@ -1,0 +1,3 @@
+# Only the committed baseline is tracked; other snapshots are local comparisons.
+parity/*
+!parity/baseline/

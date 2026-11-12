@@ -1,0 +1,9 @@
+{
+  "id": "datacore-parity",
+  "name": "Datacore Parity Helper",
+  "version": "0.0.0",
+  "minAppVersion": "1.6.0",
+  "description": "Development only: renders notes off-screen and returns their HTML for the Datacore parity check.",
+  "author": "Ken Snyder",
+  "isDesktopOnly": false
+}

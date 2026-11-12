@@ -11,5 +11,5 @@
     "version": true,
     "tag": true
   },
-  "ignore": ["@yankeeinlondon/datacore-docs"]
+  "ignore": ["@yankeeinlondon/datacore-docs", "@yankeeinlondon/datacore-fixtures"]
 }

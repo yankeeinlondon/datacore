@@ -6,7 +6,7 @@
     "browser": true,
     "es2022": true
   },
-  "ignorePatterns": ["**/build/**", "**/dist/**", "docs/**", "features/**"],
+  "ignorePatterns": ["**/build/**", "**/dist/**", "docs/**", "features/**", "fixtures/vault/**"],
   "rules": {
     "no-console": [
       "warn",
@@ -154,7 +154,15 @@
       }
     },
     {
-      "files": ["**/src/test/**", "**/*.test.ts", "**/*.config.*", "tools/**", "scripts/**", "packages/*/scripts/**"],
+      "files": [
+        "**/src/test/**",
+        "**/*.test.ts",
+        "**/*.config.*",
+        "tools/**",
+        "scripts/**",
+        "packages/*/scripts/**",
+        "fixtures/*.ts"
+      ],
       "rules": {
         "no-console": "off",
         "obsidianmd/no-nodejs-modules": "off",

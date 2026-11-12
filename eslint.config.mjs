@@ -22,7 +22,15 @@ const TYPED_OBSIDIAN_RULES = {
 
 export default [
     {
-        ignores: ["**/build/**", "**/dist/**", "**/node_modules/**", "docs/**", "features/**", "**/src/test/**"],
+        ignores: [
+            "**/build/**",
+            "**/dist/**",
+            "**/node_modules/**",
+            "docs/**",
+            "features/**",
+            "fixtures/vault/**",
+            "**/src/test/**",
+        ],
     },
     {
         files: ["packages/*/src/**/*.{ts,tsx}"],

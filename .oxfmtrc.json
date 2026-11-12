@@ -8,7 +8,17 @@
   "useTabs": false,
   "bracketSpacing": true,
   "sortPackageJson": false,
-  "ignorePatterns": ["docs/**", "features/**", "**/*.md", "**/*.api.md", "pnpm-lock.yaml", "**/build/**", "**/dist/**"],
+  "ignorePatterns": [
+    "docs/**",
+    "fixtures/parity/**",
+    "fixtures/vault/**",
+    "features/**",
+    "**/*.md",
+    "**/*.api.md",
+    "pnpm-lock.yaml",
+    "**/build/**",
+    "**/dist/**"
+  ],
   "overrides": [
     {
       "files": ["**/*.json", "**/*.jsonc", "**/*.yaml", "**/*.yml"],

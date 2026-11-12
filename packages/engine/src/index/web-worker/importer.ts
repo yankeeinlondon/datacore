@@ -72,7 +72,7 @@ export class FileImporter extends Component implements FileImportService {
 
         this.outstanding.set(file.path, promise);
         this.queue.enqueue([file, promise as Deferred<unknown>]);
-        this.schedule();
+        void this.schedule();
         return promise;
     }
 
@@ -160,7 +160,7 @@ export class FileImporter extends Component implements FileImportService {
 
             if (delay <= 1e-10) {
                 worker.availableAt = now;
-                this.schedule();
+                void this.schedule();
             } else {
                 worker.availableAt = now + delay;
 

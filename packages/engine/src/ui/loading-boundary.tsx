@@ -76,7 +76,7 @@ export function ScriptContainer({
         setError(undefined);
 
         // TODO: Avoid multiple concurrent executions of the same script.
-        (async () => {
+        void (async () => {
             try {
                 const result = await executor();
                 setElement(makeRenderableElement(result, sourcePath));

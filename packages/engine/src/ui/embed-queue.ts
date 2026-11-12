@@ -48,7 +48,7 @@ export class EmbedQueue extends Component {
             this.active.set(file.path, read);
 
             // This function is non-blocking and will await on the read promise in the background.
-            this.run(file, read);
+            void this.run(file, read);
         }
     }
 

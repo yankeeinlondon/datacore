@@ -67,7 +67,7 @@ function RawLink({ link, sourcePath: maybeSourcePath }: { link: Link | string; s
     const onClick = useCallback(
         (event: MouseEvent) => {
             const newtab = event.shiftKey;
-            workspace?.openLinkText(parsed.obsidianLink(), sourcePath, newtab);
+            void workspace?.openLinkText(parsed.obsidianLink(), sourcePath, newtab);
         },
         [parsed, sourcePath]
     );
@@ -118,7 +118,7 @@ function RawMarkdown({
 
         container.current.replaceChildren();
 
-        (async () => {
+        void (async () => {
             if (!container.current) return;
             await MarkdownRenderer.render(app, content, container.current, sourcePath, component);
 

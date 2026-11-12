@@ -97,7 +97,7 @@ export class Datacore extends Component {
                 // Handled by the metadata cache.
                 if (INDEXABLE_EXTENSIONS.has(file.extension.toLowerCase())) return;
 
-                this.reload(file);
+                void this.reload(file);
             })
         );
 
@@ -108,7 +108,7 @@ export class Datacore extends Component {
                 // Handled by the metadata cache.
                 if (INDEXABLE_EXTENSIONS.has(file.extension.toLowerCase())) return;
 
-                this.reload(file);
+                void this.reload(file);
             })
         );
 
@@ -123,7 +123,7 @@ export class Datacore extends Component {
             })
         );
 
-        this.index();
+        void this.index();
     }
 
     /** Clears all current state and caches and reindexes the entire vault from scratch. */
@@ -156,7 +156,7 @@ export class Datacore extends Component {
         // TODO: I think this may race with other concurrent operations, so
         // this may need to happen at the start of init and not at the end.
         const currentFiles = this.vault.getFiles().map((file) => file.path);
-        this.persister.synchronize(currentFiles);
+        void this.persister.synchronize(currentFiles);
     }
 
     private async rename(file: TAbstractFile, oldPath: string) {
@@ -208,7 +208,7 @@ export class Datacore extends Component {
             this.storeMarkdown(parsed);
 
             // Write it to the file cache for faster loads in the future.
-            this.persister.storeFile(parsed.$path, parsed.json());
+            void this.persister.storeFile(parsed.$path, parsed.json());
 
             // And finally trigger an update.
             this.trigger("update", this.revision);
@@ -224,7 +224,7 @@ export class Datacore extends Component {
             this.storeCanvas(parsed);
 
             // Write it to the file cache for faster loads in the future.
-            this.persister.storeFile(parsed.$path, parsed.json());
+            void this.persister.storeFile(parsed.$path, parsed.json());
 
             // And finally trigger an update.
             this.trigger("update", this.revision);
@@ -432,7 +432,7 @@ export class DatacoreInitializer extends Component {
             this.current.push(next);
 
             // Run asynchronously to allow for concurrency.
-            (async () => {
+            void (async () => {
                 try {
                     const result = await this.init(next);
                     this.handleResult(next, result);

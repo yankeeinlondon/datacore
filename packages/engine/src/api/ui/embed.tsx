@@ -166,7 +166,7 @@ export function useLineSpan(path: string, start: number, end: number): LineSpanC
         }
 
         // Try to load the file asynchronously.
-        (async () => {
+        void (async () => {
             try {
                 const content = await reader.read(file);
                 update({ type: "loaded", content: lineRange(content, start, end) });

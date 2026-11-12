@@ -95,9 +95,16 @@ importers:
 
   packages/client:
     dependencies:
+      '@types/luxon':
+        specifier: ^2.4.0
+        version: 2.4.0
       '@yankeeinlondon/datacore-contract':
         specifier: workspace:^
         version: link:../contract
+    devDependencies:
+      '@yankeeinlondon/datacore-shared':
+        specifier: workspace:^
+        version: link:../shared
 
   packages/contract:
     dependencies:
@@ -177,6 +184,9 @@ importers:
       '@types/parsimmon':
         specifier: ^1.10.6
         version: 1.10.9
+      '@yankeeinlondon/datacore-client':
+        specifier: workspace:^
+        version: link:../client
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2

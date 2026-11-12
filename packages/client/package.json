@@ -41,6 +41,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@types/luxon": "^2.4.0",
     "@yankeeinlondon/datacore-contract": "workspace:^"
+  },
+  "devDependencies": {
+    "@yankeeinlondon/datacore-shared": "workspace:^"
   }
 }

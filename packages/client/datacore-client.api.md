@@ -4,6 +4,170 @@
 
 ```ts
 
+import { BaseCanvasCard } from '@yankeeinlondon/datacore-contract';
+import { Canvas } from '@yankeeinlondon/datacore-contract';
+import { DataArray } from '@yankeeinlondon/datacore-contract';
+import { DatacoreError } from '@yankeeinlondon/datacore-contract';
+import { DatacoreErrorCode } from '@yankeeinlondon/datacore-contract';
+import { DateTime } from 'luxon';
+import { Duration } from 'luxon';
+import { File as File_2 } from '@yankeeinlondon/datacore-contract';
+import { GroupElement } from '@yankeeinlondon/datacore-contract';
+import { Grouping } from '@yankeeinlondon/datacore-contract';
+import { Indexable } from '@yankeeinlondon/datacore-contract';
+import { Link } from '@yankeeinlondon/datacore-contract';
+import { Literal } from '@yankeeinlondon/datacore-contract';
+import { LiteralType } from '@yankeeinlondon/datacore-contract';
+import { MarkdownBlock } from '@yankeeinlondon/datacore-contract';
+import { MarkdownCodeblock } from '@yankeeinlondon/datacore-contract';
+import { MarkdownDatablock } from '@yankeeinlondon/datacore-contract';
+import { MarkdownListBlock } from '@yankeeinlondon/datacore-contract';
+import { MarkdownListItem } from '@yankeeinlondon/datacore-contract';
+import { MarkdownPage } from '@yankeeinlondon/datacore-contract';
+import { MarkdownSection } from '@yankeeinlondon/datacore-contract';
+import { MarkdownTaskItem } from '@yankeeinlondon/datacore-contract';
+import { ScopedDatacore } from '@yankeeinlondon/datacore-contract';
+
+// @public
+export interface AppLike {
+    // (undocumented)
+    plugins?: {
+        manifests?: Record<string, unknown>;
+        enabledPlugins?: Set<string>;
+    };
+}
+
+// @public
+export interface ComponentLike {
+    // (undocumented)
+    register(callback: () => unknown): void;
+}
+
+// @public
+export type ConsumerLike = (ComponentLike & {
+    manifest: {
+        id: string;
+        name?: string;
+    };
+}) | {
+    id: string;
+    name?: string;
+    component?: ComponentLike;
+};
+
+// @public
+export function datacoreError(code: DatacoreErrorCode, message: string): DatacoreError;
+
+// @public
+export function getDatacore(app: AppLike, options: GetDatacoreOptions): Promise<GetDatacoreResult>;
+
+// @public
+export type GetDatacoreFailure = "not-installed" | "disabled" | "incompatible" | "timeout";
+
+// @public
+export interface GetDatacoreOptions {
+    consumer: ConsumerLike;
+    host?: object;
+    minApi?: string;
+    reconnect?: boolean;
+    timeoutMs?: number;
+}
+
+// @public
+export type GetDatacoreResult = {
+    ok: true;
+    engine: ScopedDatacore;
+} | {
+    ok: false;
+    reason: GetDatacoreFailure;
+    message: string;
+};
+
+// @public
+export function hasIndexType(value: unknown, type: string): value is Indexable;
+
+// @public
+export const isBlock: (value: unknown) => value is MarkdownBlock;
+
+// @public
+export const isCanvas: (value: unknown) => value is Canvas;
+
+// @public
+export const isCanvasCard: (value: unknown) => value is BaseCanvasCard;
+
+// @public
+export const isCodeblock: (value: unknown) => value is MarkdownCodeblock;
+
+// @public
+export function isDataArray(value: unknown): value is DataArray<unknown>;
+
+// @public
+export const isDatablock: (value: unknown) => value is MarkdownDatablock;
+
+// @public
+export function isDatacoreError(value: unknown): value is DatacoreError;
+
+// @public
+export function isDateTime(value: unknown): value is DateTime;
+
+// @public
+export function isDuration(value: unknown): value is Duration;
+
+// @public
+export const isFile: (value: unknown) => value is Indexable & File_2;
+
+// @public
+export function isGroupElement<T>(entry: unknown): entry is GroupElement<T>;
+
+// @public
+export function isGrouping<T>(grouping: Grouping<T>): grouping is GroupElement<T>[];
+
+// @public
+export function isIndexable(value: unknown): value is Indexable;
+
+// @public
+export function isLink(value: unknown): value is Link;
+
+// @public
+export const isListBlock: (value: unknown) => value is MarkdownListBlock;
+
+// @public
+export const isListItem: (value: unknown) => value is MarkdownListItem;
+
+// @public
+export const isMarkdownPage: (value: unknown) => value is MarkdownPage;
+
+// @public
+export const isSection: (value: unknown) => value is MarkdownSection;
+
+// @public
+export const isTask: (value: unknown) => value is MarkdownTaskItem;
+
+// @public
+export function isTruthy(value: Literal): boolean;
+
+// @public
+export function parseVersion(text: string): Version | undefined;
+
+// @public
+export function satisfiesApi(apiVersion: string, minApi: string): boolean;
+
+// @public
+export function tryGetDatacore(options: GetDatacoreOptions): ScopedDatacore | undefined;
+
+// @public
+export function typeOf(value: unknown): LiteralType | undefined;
+
+// @public
+export interface Version {
+    // (undocumented)
+    major: number;
+    // (undocumented)
+    minor: number;
+    // (undocumented)
+    patch: number;
+}
+
 
 export * from "@yankeeinlondon/datacore-contract";
 

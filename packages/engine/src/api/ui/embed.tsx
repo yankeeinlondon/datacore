@@ -13,6 +13,7 @@ import {
 } from "../../ui/markdown";
 import { Link } from "expression/link";
 import { getFileTitle, lineRange } from "utils/normalizers";
+import type { EmbedContext, EmbedCreator, FileEmbed, TFile } from "obsidian";
 
 import "./embed.css";
 
@@ -49,8 +50,8 @@ export function Embed({
 
         container.current.replaceChildren();
 
-        const creator = app.embedRegistry.getEmbedCreator(linkedFile);
-        let embedComponent = new creator(
+        const embedComponent = createEmbed(
+            app.embedRegistry.getEmbedCreator(linkedFile),
             {
                 linktext: link.path,
                 sourcePath: sourcePath,
@@ -177,4 +178,20 @@ export function useLineSpan(path: string, start: number, end: number): LineSpanC
     }, [path, start, end]);
 
     return state;
+}
+
+/**
+ * Instantiate an embed from Obsidian's (private) embed creator, which is a class in older versions and an arrow-function
+ * factory in Obsidian 1.15+ (calling `new` on it throws "creator is not a constructor"). Arrow functions have no
+ * `prototype`; classes do.
+ */
+export function createEmbed(creator: EmbedCreator, context: EmbedContext, file: TFile, subpath?: string): FileEmbed {
+    if (creator.prototype === undefined) {
+        return (creator as (context: EmbedContext, file: TFile, subpath?: string) => FileEmbed)(context, file, subpath);
+    }
+    return new (creator as new (context: EmbedContext, file: TFile, subpath?: string) => FileEmbed)(
+        context,
+        file,
+        subpath
+    );
 }

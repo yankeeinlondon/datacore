@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Datacore View: Preact. Preact views and dc/dct/dcx/dctx script blocks on top of datacore-engine.",
+  "releaseRepo": "yankeeinlondon/datacore-view-preact",
   "license": "MIT",
   "type": "module",
   "scripts": {

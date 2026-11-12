@@ -46,6 +46,10 @@ for (const entry of fs.readdirSync(packagesDir, { withFileTypes: true })) {
     if (!isPrerelease) manifestTargets.push(manifestPath);
     const betaPath = path.join(packageDir, "manifest-beta.json");
     if (fs.existsSync(betaPath)) manifestTargets.push(betaPath);
+    else if (isPrerelease) {
+        // A prerelease with nowhere to record it would ship a manifest that disagrees with the package version.
+        problems.push(`${path.relative(root, packageDir)}: prerelease ${version} needs a manifest-beta.json`);
+    }
 
     for (const target of manifestTargets) {
         const manifest = readJson(target);
@@ -84,4 +88,8 @@ if (checkOnly) {
     console.log("Plugin manifests are in sync.");
 } else {
     console.log(changes.length > 0 ? changes.join("\n") : "Plugin manifests already in sync.");
+    if (problems.length > 0) {
+        console.error("Could not sync:\n  " + problems.join("\n  "));
+        process.exit(1);
+    }
 }

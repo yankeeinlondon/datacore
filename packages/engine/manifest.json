@@ -3,7 +3,7 @@
   "name": "Datacore Engine",
   "version": "0.1.0",
   "minAppVersion": "1.4.11",
-  "description": "Shared query engine for your vault: indexes notes and canvases and answers queries for Datacore views and other plugins.",
+  "description": "Index your notes, canvases and their metadata into a fast, shared query engine that Datacore views and other plugins can query.",
   "author": "Ken Snyder",
   "authorUrl": "https://github.com/yankeeinlondon",
   "isDesktopOnly": false

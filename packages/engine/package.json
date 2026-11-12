@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Datacore Engine: the shared, headless query engine plugin for Obsidian.",
+  "releaseRepo": "yankeeinlondon/datacore-engine",
   "scripts": {
     "build": "node esbuild.config.mjs production",
     "dev": "node esbuild.config.mjs",

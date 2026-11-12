@@ -1,0 +1,71 @@
+# Publish an Obsidian plugin to its release repo (yankeeinlondon/datacore-engine, yankeeinlondon/datacore-view-preact).
+#
+# Runs scripts/release-plugin.mjs, the same script used locally (`node scripts/release-plugin.mjs <plugin>`), which is
+# the primary release path; this workflow is a convenience.
+#
+# REQUIRED SECRET: RELEASE_TOKEN. The default GITHUB_TOKEN can only write to this repository, but the script pushes to
+# and creates releases in the separate release repos. Create a fine-grained personal access token with access to both
+# release repos and "Contents: Read and write" permission (a classic token needs the `repo` scope), then add it under
+# Settings → Secrets and variables → Actions as RELEASE_TOKEN.
+name: Release plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Plugin package to release
+        required: true
+        type: choice
+        options:
+          - engine
+          - view-preact
+      dry_run:
+        description: Dry run (build and prepare, but do not push or create the release)
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-plugin-${{ inputs.plugin }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release ${{ inputs.plugin }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for the release token
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_TOKEN" ]; then
+            echo "::error::The RELEASE_TOKEN secret is not set; see the comment at the top of release-plugins.yml."
+            exit 1
+          fi
+
+      - name: Configure git and gh for the release repos
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          gh auth setup-git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: node scripts/release-plugin.mjs "${{ inputs.plugin }}" ${{ inputs.dry_run && '--dry-run' || '' }}

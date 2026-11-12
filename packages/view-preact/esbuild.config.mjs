@@ -49,7 +49,9 @@ const options = {
     ],
 };
 
-fs.copyFileSync("manifest.json", `${outdir}/manifest.json`);
+// manifest-beta.json tracks every version (stable and prerelease) while manifest.json tracks stable ones only, so the
+// built manifest always carries the package version.
+fs.copyFileSync("manifest-beta.json", `${outdir}/manifest.json`);
 
 if (production) {
     const result = await esbuild.build({ ...options, metafile: true });

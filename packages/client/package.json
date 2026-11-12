@@ -1,0 +1,36 @@
+{
+  "name": "@yankeeinlondon/datacore-client",
+  "version": "0.0.0",
+  "description": "Client for datacore-engine: locate the shared engine from any Obsidian plugin, with typed access to its API.",
+  "license": "MIT",
+  "author": "Ken Snyder <ken@ken.net>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yankeeinlondon/datacore.git",
+    "directory": "packages/client"
+  },
+  "keywords": ["obsidian", "datacore", "datacore-engine"],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@yankeeinlondon/datacore-contract": "workspace:^"
+  }
+}

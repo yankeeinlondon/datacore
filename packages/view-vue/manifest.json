@@ -1,0 +1,10 @@
+{
+  "id": "datacore-view-vue",
+  "name": "Datacore View: Vue",
+  "version": "0.0.0",
+  "minAppVersion": "1.4.11",
+  "description": "Vue views powered by Datacore Engine.",
+  "author": "Ken Snyder",
+  "authorUrl": "https://github.com/yankeeinlondon",
+  "isDesktopOnly": false
+}

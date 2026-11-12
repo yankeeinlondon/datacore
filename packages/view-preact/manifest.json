@@ -1,0 +1,10 @@
+{
+  "id": "datacore-view-preact",
+  "name": "Datacore View: Preact",
+  "version": "0.0.0",
+  "minAppVersion": "1.4.11",
+  "description": "Preact views and JavaScript/TypeScript view blocks (dc, dct, dcx, dctx) powered by Datacore Engine.",
+  "author": "Ken Snyder",
+  "authorUrl": "https://github.com/yankeeinlondon",
+  "isDesktopOnly": false
+}

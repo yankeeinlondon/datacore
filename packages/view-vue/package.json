@@ -1,0 +1,12 @@
+{
+  "name": "@yankeeinlondon/datacore-view-vue",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Datacore View: Vue. Vue views on top of datacore-engine (scaffold; see features/2026-11-08-frontend).",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@yankeeinlondon/datacore-client": "workspace:^",
+    "@yankeeinlondon/datacore-shared": "workspace:^"
+  }
+}

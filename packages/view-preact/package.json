@@ -1,0 +1,21 @@
+{
+  "name": "@yankeeinlondon/datacore-view-preact",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Datacore View: Preact. Preact views and dc/dct/dcx/dctx script blocks on top of datacore-engine.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@yankeeinlondon/datacore-client": "workspace:^",
+    "@yankeeinlondon/datacore-shared": "workspace:^"
+  },
+  "devDependencies": {
+    "esbuild": "0.16.17",
+    "obsidian": "^1.6.6"
+  }
+}

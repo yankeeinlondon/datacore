@@ -1,0 +1,33 @@
+{
+  "name": "@yankeeinlondon/datacore-contract",
+  "version": "0.0.0",
+  "description": "The datacore-engine API contract: interfaces, data shapes, registry protocol, and protocol constants.",
+  "license": "MIT",
+  "author": "Ken Snyder <ken@ken.net>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yankeeinlondon/datacore.git",
+    "directory": "packages/contract"
+  },
+  "keywords": ["obsidian", "datacore", "datacore-engine"],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

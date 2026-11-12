@@ -11,6 +11,7 @@ import { DatacoreError } from '@yankeeinlondon/datacore-contract';
 import { DatacoreErrorCode } from '@yankeeinlondon/datacore-contract';
 import { DataObject } from '@yankeeinlondon/datacore-contract';
 import { DateTime } from 'luxon';
+import { Disposable } from '@yankeeinlondon/datacore-contract';
 import { Duration } from 'luxon';
 import { File as File_2 } from '@yankeeinlondon/datacore-contract';
 import { GroupElement } from '@yankeeinlondon/datacore-contract';
@@ -30,13 +31,7 @@ import { MarkdownTaskItem } from '@yankeeinlondon/datacore-contract';
 import { ScopedDatacore } from '@yankeeinlondon/datacore-contract';
 
 // @public
-export interface AppLike {
-    // (undocumented)
-    plugins?: {
-        manifests?: Record<string, unknown>;
-        enabledPlugins?: Set<string>;
-    };
-}
+export type AppLike = object;
 
 // @public
 export function compare(first: Literal | undefined, second: Literal | undefined, linkNormalizer?: (link: string) => string): number;
@@ -63,6 +58,11 @@ export type ConsumerLike = (ComponentLike & {
 export function datacoreError(code: DatacoreErrorCode, message: string): DatacoreError;
 
 // @public
+export interface DatacoreHandle extends ScopedDatacore {
+    onReconnected(callback: () => void): Disposable;
+}
+
+// @public
 export const DEFAULT_LITERAL_STRING_SETTINGS: Readonly<LiteralStringSettings>;
 
 // @public
@@ -86,7 +86,7 @@ export interface GetDatacoreOptions {
 // @public
 export type GetDatacoreResult = {
     ok: true;
-    engine: ScopedDatacore;
+    engine: DatacoreHandle;
 } | {
     ok: false;
     reason: GetDatacoreFailure;
@@ -191,7 +191,7 @@ export function satisfiesApi(apiVersion: string, minApi: string): boolean;
 export function sliceGrouping<T>(elements: Grouping<T>, start: number, end: number): Grouping<T>;
 
 // @public
-export function tryGetDatacore(options: GetDatacoreOptions): ScopedDatacore | undefined;
+export function tryGetDatacore(options: GetDatacoreOptions): DatacoreHandle | undefined;
 
 // @public
 export function typeOf(value: unknown): LiteralType | undefined;

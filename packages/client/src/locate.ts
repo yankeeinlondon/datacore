@@ -13,12 +13,16 @@ import { getOrCreateRegistry, onProviderEvent, whenProviderActive } from "@yanke
 import { datacoreError } from "./errors";
 import { satisfiesApi } from "./version";
 
-/** The part of Obsidian's `App` the client reads: installed and enabled plugins. */
-export interface AppLike {
-    plugins?: {
-        manifests?: Record<string, unknown>;
-        enabledPlugins?: Set<string>;
-    };
+/**
+ * Obsidian's `App`. Typed as any object because the part the client reads, `app.plugins` (installed and enabled
+ * plugins), is not in Obsidian's public typings; a stricter type would reject `this.app`.
+ */
+export type AppLike = object;
+
+/** The private `app.plugins` registry: installed manifests and enabled plugin ids. */
+interface PluginRegistryLike {
+    manifests?: Record<string, unknown>;
+    enabledPlugins?: Set<string>;
 }
 
 /** Something that runs cleanup when it unloads (an Obsidian `Component` or `Plugin`). */
@@ -45,12 +49,21 @@ export interface GetDatacoreOptions {
     host?: object;
 }
 
+/**
+ * The engine handle `getDatacore()` returns: a `ScopedDatacore` that survives engine reloads. While the engine is
+ * unloaded it is `revoked` (calls throw); when the engine comes back it reconnects and replays your subscriptions.
+ */
+export interface DatacoreHandle extends ScopedDatacore {
+    /** Called after the handle reconnects to a reloaded engine (subscriptions are already replayed). */
+    onReconnected(callback: () => void): Disposable;
+}
+
 /** Why the engine could not be obtained. */
 export type GetDatacoreFailure = "not-installed" | "disabled" | "incompatible" | "timeout";
 
 /** The outcome of `getDatacore()`. */
 export type GetDatacoreResult =
-    | { ok: true; engine: ScopedDatacore }
+    | { ok: true; engine: DatacoreHandle }
     | { ok: false; reason: GetDatacoreFailure; message: string };
 
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -68,7 +81,7 @@ function consumerComponent(consumer: ConsumerLike): ComponentLike | undefined {
 
 /** Fail fast when Obsidian already knows the engine plugin is missing or disabled. */
 function installationProblem(app: AppLike): { reason: GetDatacoreFailure; message: string } | undefined {
-    const plugins = app.plugins;
+    const plugins = (app as { plugins?: PluginRegistryLike }).plugins;
     if (!plugins?.manifests) return undefined;
     if (!(ENGINE_PLUGIN_ID in plugins.manifests)) {
         return { reason: "not-installed", message: `The '${ENGINE_PLUGIN_ID}' plugin is not installed.` };
@@ -103,10 +116,11 @@ function reconnectingHandle(
     initial: EngineProvider,
     info: ConsumerInfo,
     options: Pick<GetDatacoreOptions, "minApi" | "reconnect">
-): { handle: ScopedDatacore; dispose: () => void } {
+): { handle: DatacoreHandle; dispose: () => void } {
     const registry = getOrCreateRegistry(host);
     const replayables = new Set<Replayable>();
     const revokedListeners = new Set<() => void>();
+    const reconnectedListeners = new Set<() => void>();
     let provider: EngineProvider | undefined = initial;
     let inner: ScopedDatacore | undefined = initial.connect(info);
 
@@ -120,6 +134,7 @@ function reconnectingHandle(
             ]!;
             replayable.current = method.apply(inner, replayable.args);
         }
+        for (const listener of Array.from(reconnectedListeners)) listener();
     };
 
     const stopListening = onProviderEvent(registry, (event) => {
@@ -138,11 +153,15 @@ function reconnectingHandle(
         return inner;
     };
 
-    const extras: Partial<Record<keyof ScopedDatacore, unknown>> = {
+    const extras: Partial<Record<keyof DatacoreHandle, unknown>> = {
         consumer: info,
         onRevoked: (callback: () => void): Disposable => {
             revokedListeners.add(callback);
             return { dispose: () => revokedListeners.delete(callback) };
+        },
+        onReconnected: (callback: () => void): Disposable => {
+            reconnectedListeners.add(callback);
+            return { dispose: () => reconnectedListeners.delete(callback) };
         },
         disposeAll: () => {
             for (const replayable of Array.from(replayables)) {
@@ -152,7 +171,7 @@ function reconnectingHandle(
         },
     };
 
-    const handle = new Proxy({} as ScopedDatacore, {
+    const handle = new Proxy({} as DatacoreHandle, {
         get(_target, property) {
             if (property === "revoked") return inner === undefined;
             if (property in extras) return extras[property as keyof typeof extras];
@@ -186,12 +205,13 @@ function reconnectingHandle(
             (extras.disposeAll as () => void)();
             stopListening();
             revokedListeners.clear();
+            reconnectedListeners.clear();
         },
     };
 }
 
 /** Wrap a provider for a consumer, tying cleanup to the consumer's unload. */
-function connectConsumer(host: object, provider: EngineProvider, options: GetDatacoreOptions): ScopedDatacore {
+function connectConsumer(host: object, provider: EngineProvider, options: GetDatacoreOptions): DatacoreHandle {
     const { handle, dispose } = reconnectingHandle(host, provider, consumerInfo(options.consumer), options);
     consumerComponent(options.consumer)?.register(dispose);
     return handle;
@@ -240,7 +260,7 @@ export function getDatacore(app: AppLike, options: GetDatacoreOptions): Promise<
 }
 
 /** Get the engine synchronously if it is already active and compatible; otherwise `undefined`. */
-export function tryGetDatacore(options: GetDatacoreOptions): ScopedDatacore | undefined {
+export function tryGetDatacore(options: GetDatacoreOptions): DatacoreHandle | undefined {
     const host = options.host ?? window;
     const active = getOrCreateRegistry(host).active;
     if (!active || compatibility(active, options.minApi)) return undefined;

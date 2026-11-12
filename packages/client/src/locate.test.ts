@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ConsumerInfo, Disposable, EngineProvider, ScopedDatacore } from "@yankeeinlondon/datacore-contract";
 import { getOrCreateRegistry, registerProvider, unregisterProvider } from "@yankeeinlondon/datacore-shared";
-import { getDatacore, tryGetDatacore, type AppLike, type ComponentLike } from "./locate";
+import { getDatacore, tryGetDatacore, type AppLike, type ComponentLike, type DatacoreHandle } from "./locate";
 
 /** A stand-in engine: records connections and live subscriptions. */
 class FakeEngine {
@@ -81,6 +81,17 @@ describe("getDatacore", () => {
         await expect(pending).resolves.toMatchObject({ ok: true });
     });
 
+    it("accepts Obsidian's App, whose public typings do not declare plugins", async () => {
+        class ObsidianLikeApp {
+            vault = {};
+            workspace = {};
+        }
+        registerProvider(getOrCreateRegistry(host), new FakeEngine("engine").provider);
+
+        const result = await getDatacore(new ObsidianLikeApp(), { consumer, host });
+        expect(result.ok).toBe(true);
+    });
+
     it("fails fast when the engine is not installed or disabled", async () => {
         await expect(getDatacore({ plugins: { manifests: {} } }, { consumer, host })).resolves.toMatchObject({
             ok: false,
@@ -111,7 +122,7 @@ describe("getDatacore", () => {
 });
 
 describe("handle lifecycle", () => {
-    async function connected(engine: FakeEngine, reconnect?: boolean): Promise<ScopedDatacore> {
+    async function connected(engine: FakeEngine, reconnect?: boolean): Promise<DatacoreHandle> {
         registerProvider(getOrCreateRegistry(host), engine.provider);
         const result = await getDatacore(installed, { consumer, host, reconnect });
         if (!result.ok) throw new Error(result.message);
@@ -135,6 +146,24 @@ describe("handle lifecycle", () => {
         expect(engine.revoked).toBe(false);
         expect(engine.query("@page")).toEqual(["second:@page"]);
         expect([...second.subscriptions]).toEqual(["@page"]);
+    });
+
+    it("notifies after reconnecting, once subscriptions are replayed", async () => {
+        const first = new FakeEngine("first");
+        const engine = await connected(first);
+        engine.subscribe("@page", () => {});
+        const seen: string[][] = [];
+        const listener = engine.onReconnected(() => seen.push([...second.subscriptions]));
+
+        unregisterProvider(getOrCreateRegistry(host), first.provider);
+        const second = new FakeEngine("second");
+        registerProvider(getOrCreateRegistry(host), second.provider);
+        expect(seen).toEqual([["@page"]]);
+
+        listener.dispose();
+        unregisterProvider(getOrCreateRegistry(host), second.provider);
+        registerProvider(getOrCreateRegistry(host), new FakeEngine("third").provider);
+        expect(seen).toHaveLength(1);
     });
 
     it("stays revoked when reconnect is off", async () => {

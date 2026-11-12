@@ -185,7 +185,7 @@ function ListGroup<T>({
 
 /** A header of a grouped set of list items. */
 function ListGroupHeader<T>({
-    level,
+    level: _level,
     value,
     config,
 }: {
@@ -399,7 +399,7 @@ function ensureChildrenFunc<T>(childProp: undefined | null | string | string[] |
         return defaultChildren;
     } else if (childProp === null) {
         // No-op function.
-        return (element: T) => [];
+        return (_element: T) => [];
     } else if (Literals.isString(childProp)) {
         return (element: T) => fetchProps(element, [childProp]);
     } else if (Literals.isArray(childProp)) {

@@ -251,7 +251,7 @@ export class DatacoreLocalApi {
     }
 
     /** Use the current path. Automatically updates the view if the path changes (though that would be weird). */
-    public useCurrentPath(settings?: { debounce?: number }): string {
+    public useCurrentPath(_settings?: { debounce?: number }): string {
         return this.path;
     }
 

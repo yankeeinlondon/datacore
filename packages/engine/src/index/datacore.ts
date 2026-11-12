@@ -423,7 +423,7 @@ export class DatacoreInitializer extends Component {
                 try {
                     const result = await this.init(next);
                     this.handleResult(next, result);
-                } catch (error) {
+                } catch (_error) {
                     this.handleResult(next, { status: "skipped" });
                 }
             })();

@@ -100,7 +100,7 @@ export const PRIMITIVES = P.createLanguage<PrimitivesLanguage>({
     tag: (_) =>
         P.seqMap(
             P.string("#"),
-            P.alt(P.regexp(/[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~\[\]\\\s]/).desc("text")).many(),
+            P.alt(P.regexp(/[^\u2000-\u206F\u2E00-\u2E7F'!"#$%&()*+,.:;<=>?@^`{|}~[\]\\\s]/).desc("text")).many(),
             (start, rest) => start + rest.join("")
         ).desc("tag"),
 
@@ -114,7 +114,7 @@ export const PRIMITIVES = P.createLanguage<PrimitivesLanguage>({
 
     // An Obsidian link of the form [[<link>]].
     link: (_) =>
-        P.regexp(/\[\[([^\[\]]*?)\]\]/u, 1)
+        P.regexp(/\[\[([^[\]]*?)\]\]/u, 1)
             .map((linkInner) => Link.parseInner(linkInner))
             .desc("file link"),
 
@@ -193,7 +193,7 @@ export const PRIMITIVES = P.createLanguage<PrimitivesLanguage>({
                         dt.setZone("UTC" + pm + hr, { keepLocalTime: true })
                     ),
                     P.seqMap(P.string("Z"), () => dt.setZone("utc", { keepLocalTime: true })),
-                    P.seqMap(P.string("["), P.regexp(/[0-9A-Za-z+-\/]+/u), P.string("]"), (_a, zone, _b) =>
+                    P.seqMap(P.string("["), P.regexp(/[0-9A-Za-z+-/]+/u), P.string("]"), (_a, zone, _b) =>
                         dt.setZone(zone, { keepLocalTime: true })
                     )
                 )
@@ -463,7 +463,7 @@ export const EXPRESSION = P.createLanguage<ExpressionLanguage>({
             }
         ),
 
-    dotPostfix: (q) =>
+    dotPostfix: (_q) =>
         P.string(".")
             .then(PRIMITIVES.identifier)
             .map((expr) => ({ type: "dot", expr })),
@@ -587,12 +587,12 @@ export const QUERY = P.createLanguage<QueryLanguage>({
                 value: ident,
             })
         ),
-    queryQuotedExpression: (q) =>
+    queryQuotedExpression: (_q) =>
         createFunction(P.regexp(/expr/i).desc("expr"), EXPRESSION.expression).map(([_, expr]) => ({
             type: "expression",
             expression: expr,
         })),
-    queryRawExpression: (q) => EXPRESSION.binaryCompare.map((expr) => ({ type: "expression", expression: expr })),
+    queryRawExpression: (_q) => EXPRESSION.binaryCompare.map((expr) => ({ type: "expression", expression: expr })),
 
     queryParens: (q) => q.query.trim(P.optWhitespace).wrap(P.string("("), P.string(")")),
     queryNegate: (q) =>
@@ -635,7 +635,7 @@ export const QUERY = P.createLanguage<QueryLanguage>({
 
 /** Return a new parser which executes the underlying parser and returns it's raw string representation. */
 export function captureRaw<T>(base: P.Parser<T>): P.Parser<[T, string]> {
-    return P.custom((success, failure) => {
+    return P.custom((_success, _failure) => {
         return (input, i) => {
             let result = base._(input, i);
             if (!result.status) return result as unknown as P.FailureReply;

@@ -35,7 +35,7 @@ export function Button(
 
 /** @public A simple textbox which accepts text. */
 export function Textbox(props: React.ComponentProps<"input"> & { className?: string }) {
-    const { className, children, ...forwardingProps } = props;
+    const { className, children: _children, ...forwardingProps } = props;
     return (
         <input type={props.type ?? "text"} className={combineClasses("dc-textbox", className)} {...forwardingProps} />
     );

@@ -169,7 +169,7 @@ class DataArrayImpl<T> implements DataArray<T> {
     ]);
 
     private static ARRAY_PROXY: ProxyHandler<DataArrayImpl<unknown>> = {
-        get: function (target, prop, reciever) {
+        get: function (target, prop, _reciever) {
             if (typeof prop === "symbol") return (target as unknown as Record<symbol, unknown>)[prop];
             else if (typeof prop === "number") return target.values[prop];
             else if (prop === "constructor") return target.values.constructor;

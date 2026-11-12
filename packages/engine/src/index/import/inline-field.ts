@@ -238,7 +238,7 @@ const FULL_LINE_KEY_PART: P.Parser<string> = P.alt(
 
 const FULL_LINE_KEY_PARSER: P.Parser<string> = P.regexp(/[^0-9\w\p{Letter}]*/u)
     .then(FULL_LINE_KEY_PART)
-    .skip(P.regexp(/[_\*~`]*/u));
+    .skip(P.regexp(/[_*~`]*/u));
 
 /** Attempt to extract a full-line field (Key:: Value consuming the entire content line). */
 export function extractFullLineField(text: string): LocalInlineField | undefined {

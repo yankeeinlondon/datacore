@@ -108,7 +108,7 @@ function RawMarkdown({
     useEffect(() => {
         if (!container.current) return;
 
-        container.current.replaceChildren(...[]);
+        container.current.replaceChildren();
 
         (async () => {
             if (!container.current) return;

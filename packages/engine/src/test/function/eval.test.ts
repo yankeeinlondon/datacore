@@ -98,7 +98,7 @@ test("Evaluate simple object resolution", () => {
 test("Evaluate simple link resolution", () => {
     let object = { inner: { final: 6 } };
     let context = new Evaluator(
-        { resolve: (path) => object, normalize: (path) => path, exists: (path) => false },
+        { resolve: (_path) => object, normalize: (path) => path, exists: (_path) => false },
         DEFAULT_SETTINGS
     ).set("link", Link.file("test", false));
     expect(context.tryEvaluate(Expressions.indexVariable("link.inner"))).toEqual(object.inner);

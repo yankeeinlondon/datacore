@@ -22,10 +22,10 @@ export interface FieldIndex {
 export class EverythingFieldIndex implements FieldIndex {
     public constructor(public all: () => Set<string>) {}
 
-    public add(id: string, value: Literal): void {}
-    public delete(id: string, value: Literal): void {}
+    public add(_id: string, _value: Literal): void {}
+    public delete(_id: string, _value: Literal): void {}
 
-    public equals(value: Literal): Set<string> | undefined {
+    public equals(_value: Literal): Set<string> | undefined {
         return undefined;
     }
 }
@@ -37,8 +37,8 @@ export class IdFieldIndex implements FieldIndex {
         public lookup: (id: string) => boolean
     ) {}
 
-    public add(id: string, value: Literal): void {}
-    public delete(id: string, value: Literal): void {}
+    public add(_id: string, _value: Literal): void {}
+    public delete(_id: string, _value: Literal): void {}
 
     public equals(value: Literal): Set<string> | undefined {
         if (!Literals.isString(value)) return undefined;
@@ -61,12 +61,12 @@ export class SetFieldIndex implements FieldIndex {
     }
 
     /** Add an (object, value) pairing to the collection. */
-    public add(id: string, value: Literal): void {
+    public add(id: string, _value: Literal): void {
         this.present.add(id);
     }
 
     /** Delete an (object, value) pairing from the collection. */
-    public delete(id: string, value: Literal): void {
+    public delete(id: string, _value: Literal): void {
         this.present.delete(id);
     }
 
@@ -76,7 +76,7 @@ export class SetFieldIndex implements FieldIndex {
     }
 
     /** Return all pages with a value exactly equal to the given value. */
-    public equals(value: Literal): Set<string> | undefined {
+    public equals(_value: Literal): Set<string> | undefined {
         return undefined;
     }
 }

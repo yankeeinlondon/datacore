@@ -173,7 +173,7 @@ export function useStableCallback<T>(callback: T, deps: unknown[]): T {
     ) as T;
 }
 
-const NO_OP_UPDATE = (x: unknown) => {};
+const NO_OP_UPDATE = (_x: unknown) => {};
 
 /** Use state that will default to an external controlled value if set; otherwise, will track an internal value.  */
 export function useControlledState<T>(

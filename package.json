@@ -18,7 +18,8 @@
     "release:version": "changeset version && node scripts/sync-plugin-manifests.mjs && pnpm install --lockfile-only",
     "manifests:check": "node scripts/sync-plugin-manifests.mjs --check",
     "docs:build": "pnpm --filter @yankeeinlondon/datacore-docs build",
-    "docs:start": "pnpm --filter @yankeeinlondon/datacore-docs start"
+    "docs:start": "pnpm --filter @yankeeinlondon/datacore-docs start",
+    "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm --loglevel=info test && pnpm manifests:check"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",

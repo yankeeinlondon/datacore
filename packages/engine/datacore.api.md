@@ -500,7 +500,7 @@ export class DatacoreLocalApi {
     useCurrentFile<T extends MarkdownPage = MarkdownPage>(settings?: {
         debounce?: number;
     }): T;
-    useCurrentPath(settings?: {
+    useCurrentPath(_settings?: {
         debounce?: number;
     }): string;
     useEffect: typeof hooks.useEffect;
@@ -1563,7 +1563,7 @@ export class Success<T, E> {
     // (undocumented)
     map<U>(f: (a: T) => U): Result<U, E>;
     // (undocumented)
-    mapErr<U>(f: (e: E) => U): Result<T, U>;
+    mapErr<U>(_f: (e: E) => U): Result<T, U>;
     // (undocumented)
     orElse(_value: T): T;
     // (undocumented)

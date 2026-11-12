@@ -14,7 +14,7 @@ export class Success<T, E> {
         return f(this.value);
     }
 
-    public mapErr<U>(f: (e: E) => U): Result<T, U> {
+    public mapErr<U>(_f: (e: E) => U): Result<T, U> {
         return this.castErr();
     }
 

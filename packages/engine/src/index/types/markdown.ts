@@ -25,7 +25,7 @@ import {
     JsonMarkdownListBlock,
     JsonMarkdownListItem,
     JsonMarkdownTaskItem,
-    JsonMarkdownDatablock as JsonMarkdownDatablock,
+    JsonMarkdownDatablock,
     JsonMarkdownCodeblock,
     JsonFrontmatterEntry,
 } from "./json/markdown";
@@ -661,9 +661,9 @@ export class MarkdownListItem implements Indexable, Linkbearing, Taggable, Field
         return (
             this.$text
                 // Remove any valid block ID, keeping preceding whitespace.
-                .replace(/(\s)\^[a-zA-Z0-9\-]+$/u, "$1")
+                .replace(/(\s)\^[a-zA-Z0-9-]+$/u, "$1")
                 // Keep everything before the first inline field, or everything if there isn't one.
-                .split(/[\[\(][^:\(\[]+::\s*.*?[\]\)]/u)[0]
+                .split(/[[\(][^:(\[]+::\s*.*?[\])]/u)[0]
                 // Trim whitespace.
                 .trim()
         );

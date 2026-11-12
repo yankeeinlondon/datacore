@@ -18,9 +18,9 @@ export function parseEval(text: string): Literal {
 /** Create a trivial link handler which never resolves links. */
 export function simpleLinkHandler(): LinkHandler {
     return {
-        resolve: (path) => null,
+        resolve: (_path) => null,
         normalize: (path) => path,
-        exists: (path) => true,
+        exists: (_path) => true,
     };
 }
 

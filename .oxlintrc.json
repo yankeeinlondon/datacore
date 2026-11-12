@@ -43,7 +43,16 @@
     "obsidianmd/no-tfile-tfolder-cast": "warn",
     "obsidianmd/no-static-styles-assignment": "error",
     "obsidianmd/prefer-get-language": "warn",
-    "obsidianmd/regex-lookbehind": "error"
+    "obsidianmd/regex-lookbehind": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_"
+      }
+    ]
   },
   "overrides": [
     {

@@ -196,7 +196,7 @@ export function VanillaRowGroup<T>({
  * @hidden
  */
 export function TableGroupHeader<T>({
-    level,
+    level: _level,
     value,
     width,
     config,

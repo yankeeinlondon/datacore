@@ -232,7 +232,7 @@ export namespace DefaultFunctions {
     export const embed: FunctionImpl = new FunctionBuilder("embed")
         .add1("link", (l) => l.toEmbed())
         .vectorize(1, [0])
-        .add2("link", "boolean", (l, e, c) => (e ? l.toEmbed() : l.fromEmbed()))
+        .add2("link", "boolean", (l, e, _c) => (e ? l.toEmbed() : l.fromEmbed()))
         .add1("null", () => null)
         .add2("null", "*", () => null)
         .add2("*", "null", () => null)
@@ -545,7 +545,7 @@ export namespace DefaultFunctions {
             try {
                 let reg = new RegExp(pat, "g");
                 return field.replace(reg, rep);
-            } catch (ex) {
+            } catch (_ex) {
                 throw Error(`Invalid regexp '${pat}' in regexreplace`);
             }
         })

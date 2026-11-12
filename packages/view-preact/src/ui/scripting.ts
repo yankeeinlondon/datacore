@@ -5,21 +5,23 @@ import builtinModules from "builtin-modules/static";
 
 export type ScriptLanguage = "js" | "ts" | "jsx" | "tsx";
 
+/**
+ * JSX options for script blocks. `production` matters: in development mode sucrase adds `__self`/`__source` props to
+ * every element, and Preact renders them as DOM attributes.
+ */
+const JSX_OPTIONS = { jsxPragma: "h", jsxFragmentPragma: "Fragment", production: true } as const;
+
 /** Converts a raw script in the given language to plain javascript.  */
 export function transpile(script: string, language: ScriptLanguage): string {
     switch (language) {
         case "js":
             return script;
         case "jsx":
-            return transform(script, { transforms: ["jsx"], jsxPragma: "h", jsxFragmentPragma: "Fragment" }).code;
+            return transform(script, { transforms: ["jsx"], ...JSX_OPTIONS }).code;
         case "ts":
             return transform(script, { transforms: ["typescript"] }).code;
         case "tsx":
-            return transform(script, {
-                transforms: ["typescript", "jsx"],
-                jsxPragma: "h",
-                jsxFragmentPragma: "Fragment",
-            }).code;
+            return transform(script, { transforms: ["typescript", "jsx"], ...JSX_OPTIONS }).code;
     }
 }
 

@@ -194,7 +194,8 @@ function RawLit({
     if (depth >= settings.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
 
     if (value === null || value === undefined) {
-        return <Markdown inline={inline} content={settings.nullAs} sourcePath={sourcePath} />;
+        // Plain text, not markdown: a placeholder like "-" would otherwise render as an empty bullet list.
+        return <Fragment>{settings.nullAs}</Fragment>;
     } else if (typeof value === "string") {
         return <Markdown inline={inline} content={value} sourcePath={sourcePath} />;
     } else if (typeof value === "number") {

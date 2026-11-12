@@ -62,14 +62,14 @@ export function Embed({
                 displayMode: true,
             },
             linkedFile,
-            link.subpath
+            embedSubpath(link)
         );
 
         component.addChild(embedComponent);
         embedComponent.loadFile(linkedFile);
 
         return () => component.removeChild(embedComponent);
-    }, [container.current, linkedFile, link.subpath]);
+    }, [container.current, linkedFile, link.type, link.subpath]);
 
     if (!linkedFile) {
         return <ErrorMessage message={`Could not find a page at linked location: ${link.path}`} />;
@@ -178,6 +178,22 @@ export function useLineSpan(path: string, start: number, end: number): LineSpanC
     }, [path, start, end]);
 
     return state;
+}
+
+/**
+ * The subpath to hand Obsidian's embed API for a link: `#Header` for a header link, `#^block` for a block link, and
+ * nothing for a file link. A link's own `subpath` has no prefix, and without one the embed shows the whole file.
+ */
+export function embedSubpath(link: Pick<Link, "type" | "subpath">): string | undefined {
+    if (link.subpath === undefined || link.subpath === "") return undefined;
+    switch (link.type) {
+        case "header":
+            return "#" + link.subpath;
+        case "block":
+            return "#^" + link.subpath;
+        case "file":
+            return undefined;
+    }
 }
 
 /**

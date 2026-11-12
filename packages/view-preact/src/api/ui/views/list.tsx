@@ -54,7 +54,8 @@ export interface ListViewProps<T> {
 
     /**
      * Property name, list of property names, or function to be applied to obtain children for a given entry.
-     * Defaults to the `$children` and `children` props.
+     * Defaults to a list item's or task's child items (`$elements`), and to the `$children` and `children` props for
+     * anything else.
      *
      * If null, child extraction is disabled and no children will be fetched. If undefined, uses the default.
      */
@@ -410,10 +411,11 @@ function ensureChildrenFunc<T>(childProp: undefined | null | string | string[] |
 }
 
 /**
- * Default function for fetching the children of an element; assumes the relevant fields
- * are `$children` and `children`.
+ * Default function for fetching the children of an element: the child items (`$elements`) of a list item or task, and
+ * the `$children` and `children` fields of anything else.
  */
 function defaultChildren<T>(element: T): T[] {
+    if (isListItem(element)) return [...element.$elements] as T[];
     return fetchProps(element, ["$children", "children"]);
 }
 

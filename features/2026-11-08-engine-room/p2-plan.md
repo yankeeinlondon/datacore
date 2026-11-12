@@ -43,30 +43,29 @@ Engine lint: 23 warnings. 5 (`script-cache.ts` ×4, `local-api.tsx` ×1) move wi
    view-preact), checked by script.
 7. **Lifecycle:** both load orders work; disabling and re-enabling the engine recovers the views (a "Datacore Engine
    is not enabled" notice while it is off); everything runs alongside upstream Datacore.
-8. **`enableJs`** is resolved per the decision below. No setting exists that nothing reads.
+8. **`enableJs`** is gone (decision 2). No setting exists that nothing reads.
 9. **No global `Array.isArray` patch.**
 10. **Lint:** engine at 0 warnings with `--deny-warnings`; view-preact at 0 with `--deny-warnings`.
 
-## Decisions to confirm before starting
+## Decisions taken before starting (2026-11-11)
 
-1. **Where the value helpers live.** *Recommended:* implement them in `shared` (pure functions; luxon and `Link` used
-   only through guards and instance methods). The client re-exports them as public API (it already bundles `shared`),
-   and the engine's `Literals`/`Groupings` namespaces become thin re-exports, so the engine and every consumer sort
-   and stringify identically. *Alternative:* implement them in the client and keep the engine's own copy. That gives
-   two implementations, which can drift.
-2. **`enableJs`.** Every `dc*` block is a script, and the default is `false`, so enforcing the setting as it stands
-   would switch every view off. *Recommended:* **drop it.** Installing and enabling `datacore-view-preact` is the
-   opt-in to running scripts, and Obsidian already asks users to trust plugins. The view plugin then has no settings
-   tab at all (spec §8.2 allows this). *Alternative:* keep it in view-preact, default `true`, enforced. When it is
-   off, blocks render a notice instead of running.
-3. **`Array.isArray` patch.** *Recommended:* **remove it.** Keep `DataArray` interop explicit: engine internals and the
-   helpers use `isArray(x) || isDataArray(x)`, and `dc.array()`/`.array()` convert. This is a documented breaking change
-   for scripts that relied on `Array.isArray(dataArray) === true`. *Alternative:* keep it, but install it only from
-   view-preact for script contexts. This is not recommended, because it is still a vault-wide global.
-4. **Link inference contract gap.** *Recommended:* add `inferLink(linkpath: string, display?: string): Link` to
-   `DatacoreQueryApi`, matching `Link.infer` + `splitOnUnescapedPipe` semantics (contract **minor** bump). This is
-   also useful to third parties. *Alternative:* the views build `[[…]]` text and call `parseLink`. That breaks on
-   paths containing `]]` or `|`.
+1. **Value helpers live in `shared`** (pure functions; luxon and `Link` used only through guards and instance methods).
+   The client re-exports them as public API (it already bundles `shared`), and the engine's `Literals`/`Groupings`
+   namespaces become thin re-exports, so the engine and every consumer sort and stringify identically. One
+   implementation, no drift.
+2. **`enableJs` is dropped.** It came from Dataview's `enableDataviewJs` safety gate (run scripts only on opt-in).
+   Upstream added it in 2023 but never read it, and added and then removed its toggle on the same day in 2024. In
+   Datacore every view is a script, so a default-off gate disables the whole plugin. Enabling `datacore-view-preact`
+   is the opt-in to running scripts. The view plugin has no settings tab (spec §8.2 allows this).
+3. **The `Array.isArray` patch is removed.** It made `DataArray`s pass `Array.isArray` so `Literals.isArray` (and with
+   it `typeOf`, `compare`, `toString`, rendering) and engine paths treated them as arrays. But it changes a global for
+   every plugin in the vault, and it only reaches code that hasn't already cached `Array.isArray`: in our own bundle,
+   Preact caches it (`isArray = Array.isArray`) before the patch runs. Interop becomes explicit:
+   `isArray(x) || isDataArray(x)` in the helpers and engine paths, with `dc.array()`/`.array()` for conversion.
+   *Breaking (documented):* `Array.isArray(dataArray)` in scripts now returns `false`.
+4. **`inferLink(linkpath: string, display?: string): Link`** is added to `DatacoreQueryApi`, matching `Link.infer` +
+   `splitOnUnescapedPipe` semantics (contract **minor** bump). It avoids building `[[…]]` text for `parseLink`, which
+   breaks on paths containing `]]` or `|`.
 
 ## Rules for code moving into `shared`
 
@@ -164,18 +163,17 @@ Each step is gated on `pnpm check && pnpm build` and committed separately. Steps
   already-converted, and no-op files. Then convert the parity vault and confirm the snapshots are unchanged apart from
   the language class.
 
-### 8. `enableJs`
+### 8. Remove `enableJs`
 
-- Per decision 2. Recommended path: remove `enableJs` from the engine's `Settings`, `ENGINE_KEYS`, and the migration
-  (a stale key in `data.json` is ignored and dropped on next save), with a settings-migration test. Alternative: move
-  it to view-preact with default `true`, enforce it in the codeblock processor, and add a single toggle (or command).
+- Per decision 2: remove `enableJs` from the engine's `Settings`, `DEFAULT_SETTINGS`, `ENGINE_KEYS`, and the
+  migration. A stale key in `data.json` is ignored and dropped on next save; covered by a settings-migration test.
 
 ### 9. Engine cleanup: `Array.isArray`, lint to zero
 
-- **`Array.isArray` patch (decision 3):** audit every `Array.isArray` in the engine for places that relied on the patch
+- **Remove the `Array.isArray` patch (decision 3):** audit every `Array.isArray` in the engine for places that relied on the patch
   to accept `DataArray` (e.g. `data-array.ts` flatten/expand, the evaluator's list handling, `Literals.isArray`,
   `Coerce`). Switch those to `isArray || isDataArray`, add tests that pass `DataArray`s through each path, then delete
-  the patch. The parity script must stay identical.
+  the patch. The parity script must stay identical. Document the change for scripts.
 - **Lint, 18 remaining:**
   - template-literal/stringification (11): format values explicitly (`String()`, `JSON.stringify`, or
     `Literals.toString` where it is a user-facing value).

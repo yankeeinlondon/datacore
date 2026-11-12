@@ -43,7 +43,7 @@ afterEach(() => {
 });
 
 async function connect(): Promise<ScopedDatacore> {
-    const result = await getDatacore(installed, { consumer, host, minApi: "0.0.0", timeoutMs: 1000 });
+    const result = await getDatacore(installed, { consumer, host, minApi: "1.0", timeoutMs: 1000 });
     if (!result.ok) throw new Error(`${result.reason}: ${result.message}`);
     return result.engine;
 }

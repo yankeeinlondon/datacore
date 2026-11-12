@@ -3,3 +3,15 @@
     color: var(--text-muted);
     font-style: italic;
 }
+
+/* "Convert datacore code blocks to dc": the list of notes to convert. */
+.datacore-convert-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    margin-bottom: var(--size-4-4);
+    font-size: var(--font-ui-small);
+}
+
+.datacore-convert-count {
+    color: var(--text-muted);
+}

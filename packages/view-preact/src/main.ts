@@ -3,6 +3,7 @@ import { MarkdownPreviewRenderer, Plugin } from "obsidian";
 import { PreactViewApi } from "./api/api";
 import { DatacoreBlock } from "./block";
 import { EngineConnection } from "./connection";
+import { CONVERT_COMMAND_NAME, startConversion } from "./migrate/modal";
 import { EmbedQueue } from "./ui/embed-queue";
 import type { ScriptLanguage } from "./ui/scripting";
 
@@ -87,6 +88,12 @@ export default class DatacoreViewPreactPlugin extends Plugin {
         }
 
         this.register(this.registerCodeblockHighlighting());
+
+        this.addCommand({
+            id: "convert-datacore-code-blocks",
+            name: CONVERT_COMMAND_NAME,
+            callback: () => void startConversion(this.app),
+        });
     }
 
     /** One view API per engine handle (the handle survives engine reloads, so in practice one per plugin load). */

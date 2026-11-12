@@ -77,4 +77,14 @@ describe("cross-bundle identity", () => {
         expect(DataArray.isDataArray(array)).toBe(true);
         expect(DataArray.isDataArray([1, 2, 3])).toBe(false);
     });
+
+    // A DataArray answers any unknown property with a (truthy) DataArray of its elements' values, so a truthiness check
+    // like luxon's `DateTime.isDateTime` mistakes it for a date (it rendered as `time.toLocal is not a function`).
+    it("does not mistake data arrays for dates or durations", () => {
+        const array = DataArray.wrap([3, 1, 2]);
+
+        expect(Literals.isDate(array)).toBe(false);
+        expect(Literals.isDuration(array)).toBe(false);
+        expect(Literals.typeOf(array)).toBe("array");
+    });
 });

@@ -349,13 +349,18 @@ export namespace Literals {
 
     /** Determine if the value is a date. */
     export function isDate(val: unknown): val is DateTime {
-        // luxon's own check works across separately bundled copies of luxon.
-        return DateTime.isDateTime(val);
+        // luxon's marker works across separately bundled copies of luxon. It must be strictly `true`: luxon's own
+        // `DateTime.isDateTime` only checks truthiness, and a DataArray answers any property with a (truthy) DataArray.
+        return hasTrueMarker(val, "isLuxonDateTime");
     }
 
     /** Determine if the value is a duration. */
     export function isDuration(val: unknown): val is Duration {
-        return Duration.isDuration(val);
+        return hasTrueMarker(val, "isLuxonDuration");
+    }
+
+    function hasTrueMarker(val: unknown, marker: string): boolean {
+        return typeof val === "object" && val !== null && (val as Record<string, unknown>)[marker] === true;
     }
 
     /** Determine if the value is null or undefined. */

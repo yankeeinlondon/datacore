@@ -24,6 +24,13 @@ pnpm add @yankeeinlondon/datacore-client
 # or: npm install @yankeeinlondon/datacore-client
 ```
 
+Also on [JSR](https://jsr.io/@yankeeinlondon/datacore-client), as TypeScript source with the same API:
+
+```sh
+npx jsr add @yankeeinlondon/datacore-client
+# or: deno add jsr:@yankeeinlondon/datacore-client
+```
+
 The package ships ESM and CommonJS builds with type declarations for both. Obsidian plugins are bundled (esbuild,
 Rollup, Vite), which pick the right build automatically. TypeScript resolves it with `moduleResolution` set to
 `bundler`, `node16`/`nodenext`, or the classic `node` setting used by the Obsidian sample plugin. The engine is only

@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 Want to just see something on your screen? Follow this (hopefully simple) guide to get something you can put your eyeballs on.
@@ -9,24 +9,18 @@ know Javascript, the plugin may not be ready for you!
 
 ## Installation
 
-Install Datacore from the Obsidian community plugins viewer, then enable it in your community plugins view. Datacore will then be
-immediately available, though it may take some time to index your vault in the background before all results are visible.
-
-> **Note: Beta Version**
->
-> You can also install the beta version of the plugin directly from source, though we only recommend doing this if you "know what you
-> are doing" and want some feature in the beta branch.
-> 
-> To install beta plugins, install the Obsidian BRAT plugin and add datacore to it using the plugin URL of `https://github.com/blacksmithgu/datacore`.
+Install and enable **Datacore Engine** and **Datacore View: Preact** (see [Installation](installation.md) for the BRAT
+steps). The engine indexes your vault in the background; views work straight away, though results may be incomplete
+until the first index finishes.
 
 ## The Most Trivial of Views
 
-To immediately get something on the screen, add a datacore code block to any page of your choice. Here's a starter one which just live-updates to
+To immediately get something on the screen, add a `dcx` code block (JSX) to any page of your choice. Here's a starter one which just live-updates to
 show how many markdown pages you have in your vault:
 
 ~~~
 ```dcx
-// All datacore views should return a React component; in practice, this is going to be
+// All datacore views should return a React component.
 return function View() {
     const pages = dc.useQuery("@page").length;
 

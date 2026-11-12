@@ -46,6 +46,22 @@ return function View() {
 }
 ```
 
+## Data Arrays Are Not Arrays
+
+A `DataArray` is not a JavaScript array, and `Array.isArray` returns `false` for it:
+
+```js
+const da = dc.array([1, 2, 3]);
+
+Array.isArray(da);          // false
+Array.isArray(da.array());  // true
+```
+
+Upstream Datacore patched the global `Array.isArray` to return `true` for data arrays. Datacore Engine does not change
+globals, so code that relied on the patch needs to convert explicitly: call `.array()` to get a plain array, or
+`dc.array(x)` to get a `DataArray` from either kind (`dc.array` returns a `DataArray` unchanged). Views still render a
+`DataArray` used as JSX children or as a value, as before. See [Migrating from Datacore](../migrating.md#arrayisarray-and-dataarray).
+
 ## Indexing and Swizzling
 
 Data arrays support regular indexing just like normal arrays (like `array[0]`), but importantly, they also support

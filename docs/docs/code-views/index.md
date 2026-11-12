@@ -5,13 +5,25 @@ sidebar_position: 400
 ---
 
 Datacore supports Javascript, JSX, Typescript, and TSX. To add code to a page, use an embedded
-codeblock with the language `dc`, `dcx`, `dct`, or `dctx` respectively. These blocks are rendered by the
-**Datacore View: Preact** plugin, which needs **Datacore Engine**. (Upstream Datacore used `datacorejs`, `datacorejsx`,
-`datacorets`, and `datacoretsx`; the command "Convert datacore code blocks to dc" migrates existing notes.)
-The engine API is also available to scripts, Templater/QuickAdd, and the developer console as the global
-`window.dc`. Plugins should use `getDatacore()` from `@yankeeinlondon/datacore-client` instead.
+codeblock with the language `dc`, `dcx`, `dct`, or `dctx` respectively:
 
-## DatacoreJS Codeblocks
+| Language | Script type |
+|---|---|
+| `dc` | JavaScript |
+| `dct` | TypeScript |
+| `dcx` | JSX |
+| `dctx` | TSX |
+
+These blocks are rendered by the **Datacore View: Preact** plugin, which needs **Datacore Engine** (see
+[Installation](../installation.md)). Upstream Datacore used `datacorejs`, `datacorets`, `datacorejsx`, and
+`datacoretsx`; this plugin does not render those. The command "Convert datacore code blocks to dc" rewrites existing
+notes; see [Migrating from Datacore](../migrating.md#converting-your-notes).
+
+The engine API is also available to Templater/QuickAdd scripts and the developer console as the global `window.dc`.
+Plugins should use `getDatacore()` from `@yankeeinlondon/datacore-client` instead; see
+[For plugin authors](../plugin-authors/index.md).
+
+## Datacore Codeblocks
 
 Datacore javascript codeblocks execute JS scripts to produce embedded tables, lists, and so on. These
 views can be fully interactive with buttons, time-base elements, and custom CSS. They use `preact`
@@ -26,8 +38,11 @@ return function View() {
 ~~~
 
 Codeblocks should be annotated with `dcx` to use JSX, and they should return a React Component
-(the `return function View()` in the example), which will be rendered. Codeblocks have access to the `dc` global variable,
-which provides a very rich API for querying state via React Hooks.
+(the `return function View()` in the example), which will be rendered. Codeblocks have access to a `dc` variable,
+which provides a very rich API for querying state via React Hooks (see the [Codeblock API](local-api.md)).
+
+Most examples on this site show only the code that goes inside the block. Put JSX examples in a `dcx` block (or
+`dctx` for TypeScript), and plain JavaScript in a `dc` block.
 
 > **Note: React Components**
 > 
@@ -197,6 +212,11 @@ function ListItem({ text }) {
 return { ListItem };
 ```
 ~~~
+
+The snippet uses a plain `jsx` block, so Obsidian shows it as code instead of trying to render it as a view.
+`dc.require` loads blocks in `js`/`javascript`, `ts`/`typescript`, `jsx`, `tsx`, and the `dc`, `dct`, `dcx`, `dctx`
+languages. It also still loads upstream's `datacorejs`, `datacorets`, `datacorejsx`, and `datacoretsx` blocks, so shared
+modules keep working while you migrate.
 
 Then, from another script elsewhere:
 

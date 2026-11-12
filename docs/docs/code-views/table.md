@@ -109,7 +109,7 @@ You can add paging to any table using the `paging` prop, which accepts several o
 // Explicitly disable paging.
 <dc.Table paging={false} ... />
 
-// Enable paging, with the page size equal to your default page size in the Datacore settings.
+// Enable paging, with the page size equal to your default page size in the Datacore Engine settings.
 <dc.Table paging={true} ... />
 
 // Enable paging with the specific page size.
@@ -117,7 +117,7 @@ You can add paging to any table using the `paging` prop, which accepts several o
 ```
 
 If `paging` is not specified, it defaults to whatever your default paging configuration is in
-the Datacore settings.
+the **Display** section of the Datacore Engine settings tab.
 
 ### Scroll on Page (`scrollOnPaging`)
 

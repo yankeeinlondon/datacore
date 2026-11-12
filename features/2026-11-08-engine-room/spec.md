@@ -68,7 +68,7 @@ The engine core is already mostly render-free:
 | `api/local-api.tsx` | Mixes query methods, Preact hooks, and components; exposes `core` (internals) and `app` | Split: path-scoped query methods → contract (`local(path)`); hooks/components → `view-preact` |
 | `api/script-cache.ts` | Script loading (`dc.require`) imports Preact `h`/`Fragment` | Moves to `view-preact`; later the shared module loader (§11.4) |
 | `ui/hooks.tsx` | Reaches into `datacore.datastore.revision` and `datacore.on("update")` | Rebuilt on the contract's `revision` and `subscribe` |
-| `settings.ts` | Mixes engine settings (importer threads/utilization, inline fields, list items) with presentation settings (paging, render depth, formats) and `enableJs` | `EngineSettings` = indexing + **display defaults** (one tab, owned by the engine); only plugin-specific options (e.g. `enableJs`) stay with a view plugin (§8.2) |
+| `settings.ts` | Mixes engine settings (importer threads/utilization, inline fields, list items) with presentation settings (paging, render depth, formats) and `enableJs` | `EngineSettings` = indexing + **display defaults** (one tab, owned by the engine); only plugin-specific options stay with a view plugin (§8.2). `enableJs` was never read upstream and is removed in P2 |
 | `main.ts` | Registers codeblocks, CodeMirror modes, `window.datacore`, settings tab | Split between the engine plugin and `view-preact` |
 | `LoadingProgress` (`ui/loading-boundary.tsx`) | Reads `datacore.initializer.progress()` for its initial render (events carry the payload since #184) | Contract `status()` supplies the initial progress |
 | UI imports of `Literals.*` (8 files) | Runtime helpers with `instanceof` checks | Identity-safe replacements in the **client** (D7) |
@@ -422,7 +422,7 @@ Today's UI, ported to consume `datacore-client` (+ `shared`) only:
 
 - Codeblock processors and CodeMirror modes for `dc` / `dct` / `dcx` / `dctx` (§9.3).
 - The script-facing local API: wraps `ScopedDatacore.local(path)` and adds hooks (`useQuery`, `useFullQuery`, `useFile`, `useCurrentFile`, `useIndexUpdates`, `useInterning`, Preact hooks), components (`Table`, `List`, `Card`, `Callout`, `Stack`, `Group`, `Literal`, `Markdown`, `Link`, `LinkEmbed`, `SpanEmbed`, `Icon`, `Button`, `Textbox`, `Checkbox`, `Slider`, `Switch`, `VanillaSelect`, `embed`), and `dc.require` (script cache, with `__filename`/`__dirname` and host modules).
-- Settings: only `enableJs` ("Enable JavaScript views"); all presentation defaults come from the engine via `dc.settings.display` (§8.2).
+- Settings: none, so no settings tab. `enableJs` is removed: in Datacore every view is a script, so enabling this plugin is the opt-in to running scripts (P2 decision 2). Presentation defaults come from the engine via `dc.settings.display` (§8.2).
 - Identity: plugin id `datacore-view-preact`, display name "Datacore View: Preact", release repo `yankeeinlondon/datacore-view-preact`.
 
 ### 9.2 Parity requirements

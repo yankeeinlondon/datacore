@@ -41,6 +41,16 @@ describe("migrateSettings", () => {
         expect(settings.display.pageSize).toBe(DEFAULT_DISPLAY_SETTINGS.pageSize);
     });
 
+    it("drops the removed enableJs setting and other unknown keys", () => {
+        const settings = migrateSettings({ enableJs: true, indexListItems: false, somethingElse: 1 });
+        expect(settings).not.toHaveProperty("enableJs");
+        expect(settings).not.toHaveProperty("somethingElse");
+        expect(settings.indexListItems).toBe(false);
+        // What the plugin saves: the stale key does not survive a round trip.
+        expect(JSON.parse(JSON.stringify(settings))).not.toHaveProperty("enableJs");
+        expect(Object.keys(settings).sort()).toEqual(Object.keys(DEFAULT_SETTINGS).sort());
+    });
+
     it("never shares the default display object", () => {
         const settings = migrateSettings({});
         expect(settings.display).not.toBe(DEFAULT_SETTINGS.display);

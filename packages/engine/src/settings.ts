@@ -23,9 +23,6 @@ export interface Settings {
 
     /** Presentation defaults shared by all views; also used when the engine stringifies values in expressions. */
     display: DisplaySettings;
-
-    /** Are JavaScript views enabled? View-specific: moves to datacore-view-preact in P2. */
-    enableJs: boolean;
 }
 
 /** Default display settings. */
@@ -46,7 +43,6 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze<Settings>({
     indexInlineFields: true,
     indexListItems: true,
     display: DEFAULT_DISPLAY_SETTINGS,
-    enableJs: false,
 });
 
 /** Upstream Datacore's flat setting keys for display options, mapped to their `display` equivalents. */
@@ -66,7 +62,6 @@ const ENGINE_KEYS: readonly (keyof Settings)[] = [
     "importerUtilization",
     "indexInlineFields",
     "indexListItems",
-    "enableJs",
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -75,7 +70,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * Build settings from saved plugin data, filling in defaults. Accepts both the current shape and upstream Datacore's
- * flat `data.json` keys (e.g. `defaultDateFormat`), so settings carry over when migrating.
+ * flat `data.json` keys (e.g. `defaultDateFormat`), so settings carry over when migrating. Unknown keys (such as
+ * the removed `enableJs`) are dropped, and disappear from `data.json` on the next save.
  */
 export function migrateSettings(saved: unknown): Settings {
     const settings: Settings = { ...DEFAULT_SETTINGS, display: { ...DEFAULT_DISPLAY_SETTINGS } };

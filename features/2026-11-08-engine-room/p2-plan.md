@@ -319,4 +319,28 @@ it keeps scroll and cursor). Verified in the app by reading the CM6 parse tree: 
 disabled, keyword tokens after enabling it, and the cursor unchanged. P1 never hit this because the engine was enabled
 at startup, before the layout loaded.
 
-Remaining: steps 9–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).
+### Step 9 ✅ (2026-11-12): `Array.isArray`, lint, diagnostics
+
+- **Patch removed** (`ddde2d2`). Engine: `Coerce.array` and `DataArray.expand` accept DataArrays explicitly
+  (`Literals` and the shared helpers already did); a new interop test covers them. **Correction to decision 3:**
+  Preact *did* see the patch. In P2, view-preact's Preact flattened DataArray children, and the baseline depends on
+  it (`Lit` lists, `{dc.array(xs).map(...)}`). Without the patch, Preact took a DataArray for a vnode and crashed on
+  unmount (`__R is not a function`). view-preact now installs an `options.vnode` hook on its own Preact that turns
+  DataArray children into plain arrays. `Lit`, `makeRenderableElement`, and the Table/List `groupings` also check
+  explicitly. The parity baseline's `Array.isArray(dc.array)` row is now `false` (the documented breaking change);
+  everything else is identical, in both load orders. The old patch also outlived an engine reload (it was never
+  reverted), so checking the change in the app needed a fresh Obsidian session.
+- **`ScopedDatacore.release()`** (`07f5fc4`, contract minor): the engine kept every scoped handle until it unloaded,
+  so each consumer reload leaked one, and the engine could not list its real consumers. The client releases its
+  handle when its consumer unloads (feature-checked for older engines). Verified: view-preact is listed once while
+  enabled and not at all while disabled.
+- **Lint 18 → 0, `--deny-warnings` for every package** (`c10b5a0`): `describeValue` for messages; `LinkHandler`
+  members are function-typed properties, which exposed `resolve`'s too-narrow annotation. **Upstream bug fixed:**
+  `YamlConversion.yaml` converted its sibling `literal` function, so it always returned `null` (used only by the
+  unwired field-write helpers).
+- **Settings tab** is now declarative: `getSettingDefinitions()` (Obsidian 1.13+ renders and searches it; the
+  typings we build against, 1.8.7, lack the API, so the types are local), and `display()` renders the same
+  definitions on older versions. New **Diagnostics** group: index status and connected plugins.
+- Parity identical to the (updated) baseline. Tests: contract 7, shared 51, client 25, view-preact 64, engine 369.
+
+Remaining: step 10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

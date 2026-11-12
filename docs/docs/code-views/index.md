@@ -6,7 +6,8 @@ sidebar_position: 400
 
 Datacore supports Javascript, JSX, Typescript, and TSX. To add code to a page, use an embedded
 codeblock with the language `datacorejs`, `datacorejsx`, `datacorets`, or `datacoretsx` respectively.
-Datacore also has a plugin API available via the global `window.datacore`.
+The engine API is also available to scripts, Templater/QuickAdd, and the developer console as the global
+`window.dc`. Plugins should use `getDatacore()` from `@yankeeinlondon/datacore-client` instead.
 
 ## DatacoreJS Codeblocks
 

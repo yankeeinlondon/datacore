@@ -1,4 +1,5 @@
 import { DatacoreApi } from "api/api";
+import { EngineHost } from "api/engine-host";
 import { Datacore } from "index/datacore";
 import { DateTime } from "luxon";
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
@@ -64,8 +65,14 @@ export default class DatacorePlugin extends Plugin {
         // Initialize as soon as the workspace is ready.
         this.app.workspace.onLayoutReady(async () => this.core.initialize());
 
-        // Make the API globally accessible from any context.
-        window.datacore = this.api;
+        // Publish the engine to other plugins (shared registry) and to scripts (`window.dc`).
+        const host = new EngineHost(this.core, {
+            host: window,
+            pluginId: this.manifest.id,
+            engineVersion: this.manifest.version,
+        });
+        host.start();
+        this.register(() => host.stop());
     }
 
     /** Register codeblock highlighting and return a closure which unregisters. */

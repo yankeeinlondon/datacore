@@ -122,6 +122,9 @@ importers:
       '@yankeeinlondon/datacore-contract':
         specifier: workspace:^
         version: link:../contract
+      '@yankeeinlondon/datacore-shared':
+        specifier: workspace:^
+        version: link:../shared
       builtin-modules:
         specifier: 3.3.0
         version: 3.3.0

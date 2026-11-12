@@ -50,9 +50,9 @@ declare module "obsidian" {
     }
 }
 
-/** Provides the 'datacore' global for other plugins to use. */
+/** The engine API global for scripts and the console (installed by EngineHost; see the client for consumer typings). */
 declare global {
     interface Window {
-        datacore?: DatacoreApi;
+        dc?: import("@yankeeinlondon/datacore-contract").DatacoreApi;
     }
 }

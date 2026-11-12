@@ -31,7 +31,8 @@
       "react": ["./node_modules/preact/compat"],
       "react-dom": ["./node_modules/preact/compat"]
     },
-    "customConditions": ["source"]
+    "customConditions": ["source"],
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }

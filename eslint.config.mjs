@@ -23,6 +23,7 @@ const TYPED_OBSIDIAN_RULES = {
 export default [
     {
         ignores: [
+            ".claude/**",
             "**/build/**",
             "**/dist/**",
             "**/node_modules/**",

@@ -9,6 +9,7 @@
   "bracketSpacing": true,
   "sortPackageJson": false,
   "ignorePatterns": [
+    ".claude/**",
     "docs/**",
     "fixtures/parity/**",
     "fixtures/vault/**",

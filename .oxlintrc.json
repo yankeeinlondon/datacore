@@ -6,7 +6,7 @@
     "browser": true,
     "es2022": true
   },
-  "ignorePatterns": ["**/build/**", "**/dist/**", "docs/**", "features/**", "fixtures/vault/**"],
+  "ignorePatterns": [".claude/**", "**/build/**", "**/dist/**", "docs/**", "features/**", "fixtures/vault/**"],
   "rules": {
     "no-console": [
       "warn",

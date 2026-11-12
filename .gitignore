@@ -21,5 +21,8 @@ docs/root/api/**/*.*
 .docusaurus/
 .claudine/tmp/
 
+# Agent worktrees.
+.claude/worktrees/
+
 # api-extractor scratch output
 packages/*/temp/

@@ -1,3 +1,4 @@
+import { Literals } from "expression/literal";
 import { Link } from "expression/link";
 import { Datastore } from "index/datastore";
 import { Result } from "./result";
@@ -132,7 +133,7 @@ export class ScriptCache {
 
     /** Normalize a path or link to a textual path. */
     private pathkey(path: string | Link): string {
-        if (path instanceof Link) return path.obsidianLink();
+        if (Literals.isLink(path)) return path.obsidianLink();
         else return path;
     }
 

@@ -18,7 +18,7 @@ import { DataArray } from "./data-array";
 import * as luxon from "luxon";
 import * as preact from "preact";
 import { Expression } from "expression/expression";
-import { Literal } from "expression/literal";
+import { Literal, Literals } from "expression/literal";
 import { Variables } from "expression/evaluator";
 
 /**
@@ -59,7 +59,7 @@ export class DatacoreApi {
     /** Load a markdown file by full path or link. */
     public page<T extends MarkdownPage = MarkdownPage>(path: string | Link): T | undefined;
     public page(path: string | Link): MarkdownPage | undefined {
-        const realPath = path instanceof Link ? path.path : path;
+        const realPath = Literals.isLink(path) ? path.path : path;
 
         return this.core.datastore.load(realPath) as MarkdownPage | undefined;
     }
@@ -98,7 +98,7 @@ export class DatacoreApi {
 
     /** Resolve a local or absolute path or link to an absolute path. */
     public resolvePath(path: string | Link, sourcePath?: string): string {
-        const rawpath = path instanceof Link ? path.path : path;
+        const rawpath = Literals.isLink(path) ? path.path : path;
         if (rawpath.startsWith("/")) return rawpath.substring(1);
 
         const absolute = this.core.metadataCache.getFirstLinkpathDest(rawpath, sourcePath ?? "");

@@ -48,7 +48,7 @@ export namespace Coerce {
 
     /** Coerces dates and strings into dates. */
     export function date(value: Literal): DateTime | undefined {
-        if (value instanceof DateTime) return value;
+        if (Literals.isDate(value)) return value;
         else if (typeof value === "string") {
             const parsed = PRIMITIVES.datePlus.parse(value);
             if (parsed.status) return parsed.value;
@@ -58,7 +58,7 @@ export namespace Coerce {
 
     /** Coerces durations and strings into durations. */
     export function duration(value: Literal): Duration | undefined {
-        if (value instanceof Duration) return value;
+        if (Literals.isDuration(value)) return value;
         else if (typeof value === "string") {
             const parsed = PRIMITIVES.duration.parse(value);
             if (parsed.status) return parsed.value;
@@ -68,7 +68,7 @@ export namespace Coerce {
 
     /** Coerces links and strings into links. */
     export function link(value: Literal): Link | undefined {
-        if (value instanceof Link) return value;
+        if (Literals.isLink(value)) return value;
         else if (typeof value === "string") {
             const parsed = PRIMITIVES.embedLink.parse(value);
             if (parsed.status) return parsed.value;

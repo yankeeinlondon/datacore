@@ -1,6 +1,7 @@
 /**
  * @module expressions
  */
+import { BRAND_KEYS } from "@yankeeinlondon/datacore-contract";
 import { DateTime, Duration } from "luxon";
 import { Link } from "expression/link";
 import { renderMinimalDate, renderMinimalDuration } from "utils/normalizers";
@@ -85,6 +86,8 @@ export interface LiteralWrapper<T extends LiteralType> {
 /**
  * @hidden
  *  Utility library for handling literal values. */
+const LINK_BRAND = Symbol.for(BRAND_KEYS.link);
+
 export namespace Literals {
     /** Settings used when formatting literal values to text. */
     export interface ToStringSettings {
@@ -346,12 +349,13 @@ export namespace Literals {
 
     /** Determine if the value is a date. */
     export function isDate(val: unknown): val is DateTime {
-        return val instanceof DateTime;
+        // luxon's own check works across separately bundled copies of luxon.
+        return DateTime.isDateTime(val);
     }
 
     /** Determine if the value is a duration. */
     export function isDuration(val: unknown): val is Duration {
-        return val instanceof Duration;
+        return Duration.isDuration(val);
     }
 
     /** Determine if the value is null or undefined. */
@@ -371,7 +375,8 @@ export namespace Literals {
 
     /** Determine if the value is a link. */
     export function isLink(val: unknown): val is Link {
-        return val instanceof Link;
+        // Brand check: links created by another bundle's copy of the engine are still links.
+        return typeof val === "object" && val !== null && (val as Record<symbol, unknown>)[LINK_BRAND] === true;
     }
 
     /** Checks if the given value is an object (and not any other datacore-recognized object-like type). */

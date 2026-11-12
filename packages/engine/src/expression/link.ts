@@ -1,3 +1,4 @@
+import { BRAND_KEYS } from "@yankeeinlondon/datacore-contract";
 import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { getFileTitle, normalizeHeaderForLink } from "utils/normalizers";
 
@@ -178,6 +179,9 @@ export class Link implements Contract.Link {
 }
 
 /** @hidden Serialized form of a link. */
+// Identify engine links across plugin bundles by brand rather than by class (see the contract's BRAND_KEYS).
+Object.defineProperty(Link.prototype, Symbol.for(BRAND_KEYS.link), { value: true });
+
 export interface JsonLink {
     /** The file path this link points to. */
     path: string;

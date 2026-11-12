@@ -1,4 +1,5 @@
 /** @module api */
+import { BRAND_KEYS } from "@yankeeinlondon/datacore-contract";
 import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { GroupElement, Groupings, Literal, Literals } from "expression/literal";
 
@@ -437,7 +438,7 @@ class DataArrayImpl<T> implements DataArray<T>, Contract.DataArray<T> {
 
             if (value === undefined || value === null) continue;
             if (Array.isArray(value)) value.forEach((v) => queue.push(v));
-            else if (value instanceof DataArrayImpl) value.forEach((v) => queue.push(v));
+            else if (DataArray.isDataArray(value)) value.forEach((v) => queue.push(v));
             else queue.push(value);
 
             result.push(next);
@@ -466,6 +467,10 @@ class DataArrayImpl<T> implements DataArray<T>, Contract.DataArray<T> {
 }
 
 /** @public Provides utility functions for generating data arrays. */
+const DATA_ARRAY_BRAND = Symbol.for(BRAND_KEYS.dataArray);
+// Identify engine data arrays across plugin bundles by brand rather than by class.
+Object.defineProperty(DataArrayImpl.prototype, DATA_ARRAY_BRAND, { value: true });
+
 export namespace DataArray {
     /** Create a new datacore data array. */
     export function wrap<T>(raw: T[] | DataArray<T>): DataArray<T> {
@@ -484,7 +489,7 @@ export namespace DataArray {
 
     /** Return true if the given object is a data array. */
     export function isDataArray(obj: unknown): obj is DataArray<unknown> {
-        return obj instanceof DataArrayImpl;
+        return typeof obj === "object" && obj !== null && (obj as Record<symbol, unknown>)[DATA_ARRAY_BRAND] === true;
     }
 
     /** Default comparator used for data arrays. */

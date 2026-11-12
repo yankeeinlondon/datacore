@@ -17,6 +17,8 @@
     "changeset": "changeset",
     "release:version": "changeset version && node scripts/sync-plugin-manifests.mjs && pnpm install --lockfile-only",
     "manifests:check": "node scripts/sync-plugin-manifests.mjs --check",
+    "jsr:stage": "node scripts/stage-jsr.mjs",
+    "jsr:dry-run": "node scripts/stage-jsr.mjs && cd ./build/jsr && npx --yes jsr@0.14.3 publish --dry-run --allow-dirty",
     "docs:build": "pnpm --filter @yankeeinlondon/datacore-docs build",
     "docs:start": "pnpm --filter @yankeeinlondon/datacore-docs start",
     "check": "pnpm fmt:check && pnpm lint && pnpm typecheck && pnpm --loglevel=info test && pnpm manifests:check"

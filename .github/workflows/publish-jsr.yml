@@ -1,0 +1,65 @@
+# Publish @yankeeinlondon/datacore-contract and @yankeeinlondon/datacore-client to JSR (jsr.io).
+#
+# Manual only. Authenticates with GitHub OIDC (no token secret), which requires linking this repository
+# (yankeeinlondon/datacore) in each JSR package's settings: jsr.io/@yankeeinlondon/<package>/settings, "GitHub Repository".
+#
+# The packages are staged into build/jsr/ (scripts/stage-jsr.mjs) because the client bundles the private
+# datacore-shared sources. Versions come from each package.json; a version already on JSR is skipped, so the
+# contract is published before the client and re-running is safe.
+name: Publish to JSR
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Which package to publish
+        type: choice
+        options:
+          - all
+          - contract
+          - client
+        default: all
+      dry-run:
+        description: Dry run only (validate, do not publish)
+        type: boolean
+        default: true
+
+concurrency:
+  group: publish-jsr
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish ${{ inputs.package }} to JSR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC token for JSR
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Stage packages
+        run: pnpm jsr:stage
+
+      - name: Publish
+        env:
+          PACKAGE: ${{ inputs.package }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          if [ "$PACKAGE" = "all" ]; then dir=build/jsr; else dir="build/jsr/$PACKAGE"; fi
+          flags=""
+          if [ "$DRY_RUN" = "true" ]; then flags="--dry-run"; fi
+          cd "./$dir"
+          npx --yes jsr@0.14.3 publish $flags

@@ -28,6 +28,20 @@ split its branded types. See the client's README for the full guide.
 Depend on the contract directly only if you are **implementing** the engine side of the protocol, or you need the types
 without any runtime code.
 
+## Install
+
+```sh
+pnpm add @yankeeinlondon/datacore-contract
+# or: npm install @yankeeinlondon/datacore-contract
+```
+
+Also on [JSR](https://jsr.io/@yankeeinlondon/datacore-contract), as TypeScript source with the same API:
+
+```sh
+npx jsr add @yankeeinlondon/datacore-contract
+# or: deno add jsr:@yankeeinlondon/datacore-contract
+```
+
 ## What is in it
 
 - **The engine API**: `DatacoreApi` (queries, expressions, links, subscriptions, events, status), `ScopedDatacore`

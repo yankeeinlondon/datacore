@@ -24,5 +24,9 @@ docs/root/api/**/*.*
 # Agent worktrees.
 .claude/worktrees/
 
+# Example plugin build output (node_modules/ is covered above; the npm lockfile is committed).
+examples/*/main.js
+!examples/**/package-lock.json
+
 # api-extractor scratch output
 packages/*/temp/

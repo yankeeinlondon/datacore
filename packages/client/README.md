@@ -17,6 +17,8 @@ the small client your plugin bundles to find that engine and talk to it with ful
 Your users need the **Datacore Engine** plugin (id `datacore-engine`) installed and enabled. The engine does all the
 indexing; this client adds a few kilobytes to your bundle.
 
+For a complete plugin built against this package from npm, see the [example consumer plugin](https://github.com/yankeeinlondon/datacore/tree/master/examples/consumer-plugin).
+
 ## Install
 
 ```sh

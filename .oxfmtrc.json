@@ -11,6 +11,7 @@
   "ignorePatterns": [
     ".claude/**",
     "docs/**",
+    "examples/**",
     "fixtures/parity/**",
     "fixtures/vault/**",
     "features/**",

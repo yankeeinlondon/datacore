@@ -28,6 +28,7 @@ export default [
             "**/dist/**",
             "**/node_modules/**",
             "docs/**",
+            "examples/**",
             "features/**",
             "fixtures/vault/**",
             "**/src/test/**",

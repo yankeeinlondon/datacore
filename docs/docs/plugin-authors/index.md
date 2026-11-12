@@ -8,6 +8,8 @@ Any Obsidian plugin can use Datacore's index, query language, and live updates t
 that does so shares one engine per vault: one index, one cache, one set of worker threads. Your plugin does not bundle
 the engine; it finds the running `datacore-engine` plugin at runtime through a small client library.
 
+For a complete, buildable plugin that does all of this, see the [example consumer plugin](https://github.com/yankeeinlondon/datacore/tree/master/examples/consumer-plugin).
+
 Your users need Datacore Engine installed and enabled (see [Installation](../installation.md)). They do not need
 Datacore View: Preact unless they also write views in their notes.
 

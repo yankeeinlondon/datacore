@@ -1,0 +1,9 @@
+{
+  "id": "datacore-example-consumer",
+  "name": "Datacore Example Consumer",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.11",
+  "description": "Reference example: counts pages through the shared Datacore Engine.",
+  "author": "Ken Snyder",
+  "isDesktopOnly": false
+}

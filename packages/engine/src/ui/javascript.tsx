@@ -1,11 +1,11 @@
 import { ErrorMessage, SimpleErrorBoundary, CURRENT_FILE_CONTEXT, DatacoreContextProvider } from "ui/markdown";
-import { App, MarkdownRenderChild } from "obsidian";
+import { MarkdownRenderChild } from "obsidian";
 import { DatacoreLocalApi } from "api/local-api";
 import { h, render, Fragment, VNode } from "preact";
 import { unmountComponentAtNode } from "preact/compat";
 import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
 import { LoadingBoundary, ScriptContainer } from "./loading-boundary";
-import { Datacore } from "index/datacore";
+import type { ViewServices } from "./services";
 import { Literal } from "expression/literal";
 import { getParentFolder } from "utils/normalizers";
 
@@ -44,15 +44,20 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
 
             this.renderScript(renderer);
 
+            const engine = this.api.api.services.engine;
+
             // If the path ever changes, update the context provider and re-render.
-            this.registerEvent(
-                this.api.core.on("rename", (newPath, oldPath) => {
-                    if (oldPath === this.path) {
-                        this.path = this.api.path = newPath;
-                        this.renderScript(renderer);
-                    }
-                })
-            );
+            const renames = engine.on("rename", (newPath, oldPath) => {
+                if (oldPath === this.path) {
+                    this.path = this.api.path = newPath;
+                    this.renderScript(renderer);
+                }
+            });
+            this.register(() => renames.dispose());
+
+            // Re-render with the new values when the shared display settings change.
+            const displayChanges = engine.on("display-settings", () => this.renderScript(renderer));
+            this.register(() => displayChanges.dispose());
         } catch (ex) {
             console.error("Datacore: failed to render the code block.", ex);
             render(
@@ -71,12 +76,13 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
             <DatacoreContextProvider
                 app={this.api.app}
                 component={this}
-                datacore={this.api.core}
-                settings={this.api.core.settings}
+                engine={this.api.api.services.engine}
+                reader={this.api.api.services.reader}
+                settings={this.api.api.services.engine.settings.display}
             >
                 <CURRENT_FILE_CONTEXT.Provider value={this.path}>
                     <SimpleErrorBoundary message="The datacore script failed to execute.">
-                        <LoadingBoundary datacore={this.api.core}>
+                        <LoadingBoundary engine={this.api.api.services.engine}>
                             <ScriptContainer executor={renderer} sourcePath={this.path} />
                         </LoadingBoundary>
                     </SimpleErrorBoundary>
@@ -95,8 +101,7 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
 /** A trivial wrapper which allows a react component to live for the duration of a `MarkdownRenderChild`. */
 export class ReactRenderer extends MarkdownRenderChild {
     public constructor(
-        public app: App,
-        public datacore: Datacore,
+        public services: ViewServices,
         public container: HTMLElement,
         public sourcePath: string,
         public element: VNode
@@ -108,27 +113,31 @@ export class ReactRenderer extends MarkdownRenderChild {
         this.renderElement();
 
         // If the path ever changes, update the context provider and re-render.
-        this.registerEvent(
-            this.datacore.on("rename", (newPath, oldPath) => {
-                if (oldPath === this.sourcePath) {
-                    this.sourcePath = newPath;
-                    this.renderElement();
-                }
-            })
-        );
+        const renames = this.services.engine.on("rename", (newPath, oldPath) => {
+            if (oldPath === this.sourcePath) {
+                this.sourcePath = newPath;
+                this.renderElement();
+            }
+        });
+        this.register(() => renames.dispose());
+
+        // Re-render with the new values when the shared display settings change.
+        const displayChanges = this.services.engine.on("display-settings", () => this.renderElement());
+        this.register(() => displayChanges.dispose());
     }
 
     /** Render the given element. */
     private renderElement(): void {
         render(
             <DatacoreContextProvider
-                app={this.app}
+                app={this.services.app}
                 component={this}
-                datacore={this.datacore}
-                settings={this.datacore.settings}
+                engine={this.services.engine}
+                reader={this.services.reader}
+                settings={this.services.engine.settings.display}
             >
                 <CURRENT_FILE_CONTEXT.Provider value={this.sourcePath}>
-                    <LoadingBoundary datacore={this.datacore}>{this.element}</LoadingBoundary>
+                    <LoadingBoundary engine={this.services.engine}>{this.element}</LoadingBoundary>
                 </CURRENT_FILE_CONTEXT.Provider>
             </DatacoreContextProvider>,
             this.container

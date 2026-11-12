@@ -4,14 +4,17 @@
 import { App, Component, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { DatacoreJSRenderer } from "ui/javascript";
 import { DatacoreLocalApi } from "./local-api";
-import { QueryApi } from "./query-api";
+import type { ViewServices } from "ui/services";
 import * as preact from "preact";
 
 /**
- * Exterally visible API for datacore.
+ * The views' entry point: renders datacore code blocks and creates the script-facing `dc` API. It reaches the engine
+ * only through the contract API in its services (Engine Room spec D9).
  * @public
  */
-export class DatacoreApi extends QueryApi {
+export class DatacoreViewApi {
+    public constructor(public readonly services: ViewServices) {}
+
     /** Get access to preact functions. */
     get preact(): typeof preact {
         return preact;
@@ -19,7 +22,7 @@ export class DatacoreApi extends QueryApi {
 
     /** Central Obsidian app object. */
     get app(): App {
-        return this.core.app;
+        return this.services.app;
     }
 
     ///////////////

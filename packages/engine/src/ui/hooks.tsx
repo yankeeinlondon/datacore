@@ -1,43 +1,35 @@
 /** @module ui */
-import { Datacore } from "index/datacore";
-import { debounce } from "obsidian";
-import { IndexQuery } from "index/types/index-query";
-import { Indexable } from "index/types/indexable";
+import type { DatacoreApi, Indexable, IndexQuery, Result, SearchResult } from "@yankeeinlondon/datacore-contract";
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { SearchResult } from "index/datastore";
 import { DataObject, Literal, Literals } from "expression/literal";
-import { Result } from "api/result";
 import { CURRENT_FILE_CONTEXT } from "./markdown";
 import { isValidElement } from "preact";
 import { ReactNode } from "preact/compat";
 import { Lit } from "ui/markdown";
 
 /** Hook that updates the view whenever the revision updates, returning the newest revision.  */
-export function useIndexUpdates(datacore: Datacore, settings?: { debounce?: number }): number {
-    const [revision, setRevision] = useState(datacore.datastore.revision);
-    const debouncedRevision = useMemo(() => {
-        if (settings?.debounce && settings.debounce == 0) return setRevision;
-        else return debounce(setRevision, settings?.debounce ?? 500);
-    }, [setRevision, settings?.debounce]);
+export function useIndexUpdates(engine: DatacoreApi, settings?: { debounce?: number }): number {
+    const [revision, setRevision] = useState(engine.revision);
 
+    // The engine debounces (default 500 ms; 0 updates immediately).
     useEffect(() => {
-        const ref = datacore.on("update", debouncedRevision);
-        return () => datacore.offref(ref);
-    }, []);
+        const subscription = engine.onRevision(setRevision, { debounce: settings?.debounce });
+        return () => subscription.dispose();
+    }, [engine, settings?.debounce]);
 
     return revision;
 }
 
 /** A hook which updates whenever file metadata for a specific file updates. */
 export function useFileMetadata(
-    datacore: Datacore,
+    engine: DatacoreApi,
     path: string,
     settings?: { debounce?: number }
 ): Indexable | undefined {
-    const indexRevision = useIndexUpdates(datacore, settings);
+    const indexRevision = useIndexUpdates(engine, settings);
 
     // TODO: I think load returns consistent objects so it should be okay.
-    return useMemo(() => datacore.datastore.load(path), [indexRevision, path]);
+    return useMemo(() => engine.load(path), [indexRevision, path]);
 }
 
 /** Settings which control how automatic query reloading should work. */
@@ -51,81 +43,70 @@ export interface UseQuerySettings {
 
 /** Perform a live, synchronous query which updates its results whenever the backing query would change. */
 export function tryUseFullQuery(
-    datacore: Datacore,
+    engine: DatacoreApi,
     query: IndexQuery,
     settings?: UseQuerySettings
 ): Result<SearchResult<Indexable>, string> {
     // Track index updates with customizable debouncing.
-    const indexRevision = useIndexUpdates(datacore, settings);
+    const indexRevision = useIndexUpdates(engine, settings);
 
     // We "intern" the query, meaning we reuse the oldest version if it is semantically equal but just a different object.
     const internedQuery = useInterning(query, (first, second) =>
         Literals.equals(first as unknown as DataObject, second as unknown as DataObject)
     );
+
     // Intern the output as well so react diffing "just works" with the result of useQuery.
     const internedResult = useRef<Result<SearchResult<Indexable>, string> | undefined>(undefined);
 
     // On every index revision update, re-run the query and check if it produced meaningfully new values.
     return useMemo(() => {
-        const newResult = datacore.datastore.search(query);
+        const newResult = engine.tryFullQuery(query);
 
         // Set failure if the new request is a failure.
-        if (!newResult.successful) {
-            internedResult.current = Result.failure(newResult.error);
-            return internedResult.current;
-        }
+        if (!newResult.successful) return (internedResult.current = newResult);
 
-        // If there is no current interned state, update it and return.
-        if (internedResult.current === undefined) {
-            internedResult.current = Result.success(newResult.value);
-            return internedResult.current;
-        }
-
-        // At this point, the new request is is successful and the old result is defined. If the old result was an error, update it.
+        // If there is no current interned state (or it was a failure), update it and return.
         const oldResult = internedResult.current;
-        if (!oldResult.successful) {
-            internedResult.current = Result.success(newResult.value);
-            return internedResult.current;
-        }
+        if (oldResult === undefined || !oldResult.successful) return (internedResult.current = newResult);
 
         // Both are successful, check if they are different.
         if (
             oldResult.value.revision != newResult.value.revision ||
             !sameObjects(oldResult.value.results, newResult.value.results)
         ) {
-            return (internedResult.current = Result.success(newResult.value));
+            return (internedResult.current = newResult);
         }
 
         // Same revision and same objects, this is the same query result, so return the old object.
-        return internedResult.current;
+        return oldResult;
     }, [internedQuery, indexRevision]);
 }
 
 /** Perform a live, synchronous query which updates its results whenever the backing query would change.  */
 export function useFullQuery(
-    datacore: Datacore,
+    engine: DatacoreApi,
     query: IndexQuery,
     settings?: UseQuerySettings
 ): SearchResult<Indexable> {
-    return tryUseFullQuery(datacore, query, settings).orElseThrow((e) => "Failed to search: " + e);
+    return tryUseFullQuery(engine, query, settings).orElseThrow((e) => "Failed to search: " + e);
 }
 
 /** Simpler version of useFullQuery which just directly returns results.  */
 export function tryUseQuery(
-    datacore: Datacore,
+    engine: DatacoreApi,
     query: IndexQuery,
     settings?: UseQuerySettings
 ): Result<Indexable[], string> {
-    return tryUseFullQuery(datacore, query, settings).map((result) => result.results);
+    return tryUseFullQuery(engine, query, settings).map((result) => result.results);
 }
 
 /** Simpler version of useFullQuery which just directly returns results.  */
-export function useQuery(datacore: Datacore, query: IndexQuery, settings?: UseQuerySettings): Indexable[] {
-    return useFullQuery(datacore, query, settings).results;
+export function useQuery(engine: DatacoreApi, query: IndexQuery, settings?: UseQuerySettings): Indexable[] {
+    return useFullQuery(engine, query, settings).results;
 }
 
 /** Determines if the two sets of objects are the same. Only uses revision comparison for performance. */
-function sameObjects(old: Indexable[], incoming: Indexable[]) {
+function sameObjects(old: readonly Indexable[], incoming: readonly Indexable[]) {
     if (old.length != incoming.length) return false;
 
     const olds: Record<string, number> = {};

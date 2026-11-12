@@ -4,8 +4,8 @@
 import { App, MarkdownRenderer } from "obsidian";
 import { Component } from "obsidian";
 import { Link, Literal, Literals } from "expression/literal";
-import { Datacore } from "index/datacore";
-import { Settings } from "settings";
+import type { DatacoreApi, DisplaySettings } from "@yankeeinlondon/datacore-contract";
+import type { EmbedQueue } from "./embed-queue";
 import { currentLocale, renderMinimalDate, renderMinimalDuration } from "utils/normalizers";
 import { extractImageDimensions, isImageEmbed } from "utils/media";
 
@@ -18,8 +18,12 @@ import "./errors.css";
 
 export const COMPONENT_CONTEXT = createContext<Component>(undefined!);
 export const APP_CONTEXT = createContext<App>(undefined!);
-export const DATACORE_CONTEXT = createContext<Datacore>(undefined!);
-export const SETTINGS_CONTEXT = createContext<Settings>(undefined!);
+/** The engine, through the public contract API only. */
+export const ENGINE_CONTEXT = createContext<DatacoreApi>(undefined!);
+/** Throttled file reader for embeds. */
+export const READER_CONTEXT = createContext<EmbedQueue>(undefined!);
+/** Shared display settings (owned by the engine). */
+export const SETTINGS_CONTEXT = createContext<DisplaySettings>(undefined!);
 export const CURRENT_FILE_CONTEXT = createContext<string>("");
 
 /**
@@ -30,20 +34,24 @@ export function DatacoreContextProvider({
     children,
     app,
     component,
-    datacore,
+    engine,
+    reader,
     settings,
 }: PropsWithChildren<{
     app: App;
     component: Component;
-    datacore: Datacore;
-    settings: Settings;
+    engine: DatacoreApi;
+    reader: EmbedQueue;
+    settings: DisplaySettings;
 }>) {
     return (
         <COMPONENT_CONTEXT.Provider value={component}>
             <APP_CONTEXT.Provider value={app}>
-                <DATACORE_CONTEXT.Provider value={datacore}>
-                    <SETTINGS_CONTEXT.Provider value={settings}>{children}</SETTINGS_CONTEXT.Provider>
-                </DATACORE_CONTEXT.Provider>
+                <ENGINE_CONTEXT.Provider value={engine}>
+                    <READER_CONTEXT.Provider value={reader}>
+                        <SETTINGS_CONTEXT.Provider value={settings}>{children}</SETTINGS_CONTEXT.Provider>
+                    </READER_CONTEXT.Provider>
+                </ENGINE_CONTEXT.Provider>
             </APP_CONTEXT.Provider>
         </COMPONENT_CONTEXT.Provider>
     );
@@ -172,10 +180,10 @@ function RawLit({
     const sourcePath = maybeSourcePath ?? defaultPath;
 
     // Short-circuit if beyond the maximum render depth.
-    if (depth >= settings.display.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
+    if (depth >= settings.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
 
     if (Literals.isNull(value) || value === undefined) {
-        return <Markdown inline={inline} content={settings.display.nullAs} sourcePath={sourcePath} />;
+        return <Markdown inline={inline} content={settings.nullAs} sourcePath={sourcePath} />;
     } else if (Literals.isString(value)) {
         return <Markdown inline={inline} content={value} sourcePath={sourcePath} />;
     } else if (Literals.isNumber(value)) {
@@ -185,12 +193,7 @@ function RawLit({
     } else if (Literals.isDate(value)) {
         return (
             <Fragment>
-                {renderMinimalDate(
-                    value,
-                    settings.display.dateFormat,
-                    settings.display.dateTimeFormat,
-                    currentLocale()
-                )}
+                {renderMinimalDate(value, settings.dateFormat, settings.dateTimeFormat, currentLocale())}
             </Fragment>
         );
     } else if (Literals.isDuration(value)) {

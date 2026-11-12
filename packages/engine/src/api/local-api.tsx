@@ -1,32 +1,37 @@
 /**
  * @module api
  */
-import { DatacoreApi } from "api/api";
-import { Link } from "expression/link";
-import { Datacore } from "index/datacore";
-import { SearchResult } from "index/datastore";
-import { IndexQuery } from "index/types/index-query";
-import { Indexable } from "index/types/indexable";
-import { MarkdownPage } from "index/types/markdown";
+import type {
+    Coerce,
+    DataArray,
+    DatacoreApi,
+    DatacoreLocalQueryApi,
+    Expression,
+    Indexable,
+    IndexQuery,
+    Link,
+    Literal,
+    MarkdownPage,
+    Result,
+    SearchResult,
+} from "@yankeeinlondon/datacore-contract";
+import { DatacoreViewApi } from "api/api";
+import { Link as EngineLink } from "expression/link";
+import { Literals } from "expression/literal";
 import { App } from "obsidian";
 import { useFileMetadata, useFullQuery, useIndexUpdates, useInterning, useQuery } from "ui/hooks";
-import * as luxon from "luxon";
+import type * as luxon from "luxon";
 import * as preact from "preact";
 import * as hooks from "preact/hooks";
-import { Result } from "./result";
 import { Group, Stack } from "./ui/layout";
 import { Embed, LineSpanEmbed } from "api/ui/embed";
 import { CURRENT_FILE_CONTEXT, ErrorMessage, Lit, Markdown, ObsidianLink } from "ui/markdown";
 import { CSSProperties } from "preact/compat";
-import { Literal, Literals } from "expression/literal";
 import { Button, Checkbox, Icon, Slider, Switch, Textbox, VanillaSelect } from "./ui/basics";
 import { TableView } from "./ui/views/table";
 import { Callout } from "./ui/views/callout";
-import { DataArray } from "./data-array";
-import { Coerce } from "./coerce";
 import { ScriptCache } from "./script-cache";
 import { isHostModule } from "utils/javascript";
-import { Expression } from "expression/expression";
 import { Card } from "./ui/views/cards";
 import { ListView } from "./ui/views/list";
 
@@ -35,14 +40,24 @@ import { ListView } from "./ui/views/list";
  * @public
  */
 export class DatacoreLocalApi {
-    /** @internal The cache of all currently loaded scripts in this context. */
-    private scriptCache: ScriptCache;
+    /** The engine (contract API only). */
+    private readonly engine: DatacoreApi;
+    /** The engine's query API scoped to this script's file. */
+    private readonly local: DatacoreLocalQueryApi;
+    /** Loads other scripts for `dc.require`. */
+    private readonly scriptCache: ScriptCache;
 
     public constructor(
-        public api: DatacoreApi,
+        public api: DatacoreViewApi,
         public path: string
     ) {
-        this.scriptCache = new ScriptCache(this.core.datastore);
+        this.engine = api.services.engine;
+        this.local = this.engine.local(path);
+        this.scriptCache = new ScriptCache({
+            resolveLink: (link) => this.engine.resolveLink(link),
+            vault: api.services.app.vault,
+        });
+        this.coerce = this.engine.coerce;
     }
 
     /** The current file path for the local API. */
@@ -51,14 +66,13 @@ export class DatacoreLocalApi {
     }
 
     /** The full markdown file metadata for the current file. */
-    public currentFile<T extends MarkdownPage = MarkdownPage>(): T;
-    public currentFile(): MarkdownPage {
-        return this.api.page(this.path)!;
+    public currentFile<T extends MarkdownPage = MarkdownPage>(): T {
+        return this.local.currentFile<T>()!;
     }
 
-    /** Get acess to luxon functions. */
+    /** Get access to luxon functions (the engine's copy, so values match engine values). */
     get luxon(): typeof luxon {
-        return luxon;
+        return this.engine.luxon;
     }
 
     /** Get access to preact functions. */
@@ -68,12 +82,7 @@ export class DatacoreLocalApi {
 
     /** Central Obsidian app object. */
     get app(): App {
-        return this.core.app;
-    }
-
-    /** The internal plugin central datastructure. */
-    get core(): Datacore {
-        return this.api.core;
+        return this.api.services.app;
     }
 
     //////////////////////////////
@@ -117,93 +126,98 @@ export class DatacoreLocalApi {
     ///////////////////////
 
     /** Utilities for coercing types into one specific type for easier programming. */
-    public coerce = Coerce;
+    public coerce: Coerce;
 
     /** Resolve a local or absolute path or link to an absolute path. */
     public resolvePath(path: string | Link, sourcePath?: string): string {
-        return this.api.resolvePath(path, sourcePath ?? this.path);
+        return this.local.resolvePath(path, sourcePath);
+    }
+
+    /** Resolve a link (or link text) to the indexed object it points to (file, section, or block). */
+    public resolveLink(link: string | Link, sourcePath?: string): Indexable | undefined {
+        return this.local.resolveLink(link, sourcePath);
     }
 
     /** Try to parse the given query, returning a monadic success/failure result. */
     public tryParseQuery(query: string | IndexQuery): Result<IndexQuery, string> {
-        return this.api.tryParseQuery(query);
+        return this.local.tryParseQuery(query);
     }
 
     /** Try to parse the given query, throwing an error if it is invalid. */
     public parseQuery(query: string | IndexQuery): IndexQuery {
-        return this.tryParseQuery(query).orElseThrow((e) => "Failed to parse query: " + e);
+        return this.local.parseQuery(query);
     }
 
     /** Create a file link pointing to the given path. */
     public fileLink(path: string): Link {
-        return Link.file(path);
+        return this.local.fileLink(path);
     }
 
     /** Create a link to a header with the given name. */
     public headerLink(path: string, header: string): Link {
-        return Link.header(path, header);
+        return this.local.headerLink(path, header);
     }
 
     /** Create a link to a block with the given path and block ID. */
     public blockLink(path: string, block: string): Link {
-        return Link.block(path, block);
+        return this.local.blockLink(path, block);
     }
 
     /** Try to parse the given link, throwing an error if it is invalid. */
     public parseLink(linktext: string): Link {
-        return this.api.parseLink(linktext);
+        return this.local.parseLink(linktext);
     }
 
     /** Try to parse a link, returning a monadic success/failure result. */
     public tryParseLink(linktext: string): Result<Link, string> {
-        return this.api.tryParseLink(linktext);
+        return this.local.tryParseLink(linktext);
     }
 
     /** Create a data array from a regular array. */
     public array<T>(input: T[] | DataArray<T>): DataArray<T> {
-        return DataArray.wrap(input);
+        return this.local.array(input);
     }
 
-    /** Evaluate an expression and return it's evaluated value. */
+    /** Evaluate an expression and return its evaluated value, throwing an exception on failure. */
     public evaluate(
         expression: string | Expression,
         variables?: Record<string, Literal>,
         sourcePath?: string
     ): Literal {
-        return this.api.evaluate(expression, variables, sourcePath ?? this.path);
+        return this.local.evaluate(expression, variables, sourcePath);
     }
 
-    /** Evaluate an expression and return it's evaluated value, throwing an exception on failure. */
+    /** Evaluate an expression and return its evaluated value. */
     public tryEvaluate(
         expression: string | Expression,
         variables?: Record<string, Literal>,
         sourcePath?: string
     ): Result<Literal, string> {
-        return this.api.tryEvaluate(expression, variables, sourcePath ?? this.path);
+        return this.local.tryEvaluate(expression, variables, sourcePath);
+    }
+
+    /////////////
+    // Queries //
+    /////////////
+
+    /** Execute a textual or typed index query, returning all results. */
+    public query<T extends Indexable = Indexable>(query: string | IndexQuery): T[] {
+        return this.local.query<T>(query);
     }
 
     /** Execute a textual or typed index query, returning all results. */
-    public query<T extends Indexable = Indexable>(query: string | IndexQuery): T[];
-    public query(query: string | IndexQuery): Indexable[] {
-        return this.api.query(query);
-    }
-
-    /** Execute a textual or typed index query, returning all results. */
-    public tryQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<T[], string>;
-    public tryQuery(query: string | IndexQuery): Result<Indexable[], string> {
-        return this.api.tryQuery(query);
+    public tryQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<T[], string> {
+        return this.local.tryQuery<T>(query);
     }
 
     /** Execute a textual or typed index query, returning results plus performance metadata. */
-    public fullquery<T extends Indexable = Indexable>(query: string | IndexQuery): SearchResult<T>;
-    public fullquery(query: string | IndexQuery): SearchResult<Indexable> {
-        return this.api.fullquery(query);
+    public fullquery<T extends Indexable = Indexable>(query: string | IndexQuery): SearchResult<T> {
+        return this.local.fullquery<T>(query);
     }
 
     /** Execute a textual or typed index query, returning results plus performance metadata. */
-    public tryFullQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<SearchResult<T>, string>;
-    public tryFullQuery(query: string | IndexQuery): Result<SearchResult<Indexable>, string> {
-        return this.api.tryFullQuery(query);
+    public tryFullQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<SearchResult<T>, string> {
+        return this.local.tryFullQuery<T>(query);
     }
 
     /////////////
@@ -211,28 +225,16 @@ export class DatacoreLocalApi {
     /////////////
 
     // Export the common preact hooks for people to use via `dc.`:
-    /** See the preact or react 'useState' hook. */
     public useState = hooks.useState;
-    /** See the preact or react 'useCallback' hook. */
     public useCallback = hooks.useCallback;
-    /** Se the preact or react 'useReducer' hook. */
     public useReducer = hooks.useReducer;
-    /** See the preact or react 'useMemo' hook. */
     public useMemo = hooks.useMemo;
-    /** See the preact or react 'useEffect' hook. */
     public useEffect = hooks.useEffect;
-    /** See the preact or react 'createContext' function. */
     public createContext = preact.createContext;
-    /** See the preact or react 'useContext' function. */
     public useContext = hooks.useContext;
-    /** See the preact or react 'useRef' function. */
     public useRef = hooks.useRef;
-    /**
-     * Calls a function to obtain a value; returns the same exact _instance_ of that value as long
-     * as calls to the function return an equivalent value. Interning is a useful performance concept
-     * for reducing the total number of unique objects in memory and for making better use of
-     * React's reference-equality-based caching.
-     */
+
+    /** Memoize the input automatically and process it using a DataArray; returns a vanilla array back. */
     public useInterning = useInterning;
 
     /** Memoize the input automatically and process it using a DataArray; returns a vanilla array back. */
@@ -241,13 +243,12 @@ export class DatacoreLocalApi {
         process: (data: DataArray<T>) => DataArray<U>,
         deps?: unknown[]
     ): U[] {
-        return hooks.useMemo(() => process(DataArray.wrap(input)).array(), [input, ...(deps ?? [])]);
+        return hooks.useMemo(() => process(this.engine.array(input)).array(), [input, ...(deps ?? [])]);
     }
 
     /** Use the file metadata for the current file. Automatically updates the view when the current file metadata changes. */
-    public useCurrentFile<T extends MarkdownPage = MarkdownPage>(settings?: { debounce?: number }): T;
-    public useCurrentFile(settings?: { debounce?: number }): MarkdownPage {
-        return useFileMetadata(this.core, this.path, settings) as MarkdownPage;
+    public useCurrentFile<T extends MarkdownPage = MarkdownPage>(settings?: { debounce?: number }): T {
+        return useFileMetadata(this.engine, this.path, settings) as T;
     }
 
     /** Use the current path. Automatically updates the view if the path changes (though that would be weird). */
@@ -256,14 +257,13 @@ export class DatacoreLocalApi {
     }
 
     /** Use the file metadata for a specific file. Automatically updates the view when the file changes. */
-    public useFile<T extends Indexable = Indexable>(path: string, settings?: { debounce?: number }): T | undefined;
-    public useFile(path: string, settings?: { debounce?: number }): Indexable | undefined {
-        return useFileMetadata(this.core, path, settings);
+    public useFile<T extends Indexable = Indexable>(path: string, settings?: { debounce?: number }): T | undefined {
+        return useFileMetadata(this.engine, path, settings) as T | undefined;
     }
 
     /** Automatically refresh the view whenever the index updates; returns the latest index revision ID. */
     public useIndexUpdates(settings?: { debounce?: number }): number {
-        return useIndexUpdates(this.core, settings);
+        return useIndexUpdates(this.engine, settings);
     }
 
     /**
@@ -273,16 +273,17 @@ export class DatacoreLocalApi {
     public useFullQuery<T extends Indexable = Indexable>(
         query: string | IndexQuery,
         settings?: { debounce?: number }
-    ): SearchResult<T>;
-    public useFullQuery(query: string | IndexQuery, settings?: { debounce?: number }): SearchResult<Indexable> {
-        return useFullQuery(this.core, this.parseQuery(query), settings);
+    ): SearchResult<T> {
+        return useFullQuery(this.engine, this.parseQuery(query), settings) as SearchResult<T>;
     }
 
     /** Run a query, automatically re-running it whenever the vault changes. */
-    public useQuery<T extends Indexable = Indexable>(query: string | IndexQuery, settings?: { debounce?: number }): T[];
-    public useQuery(query: string | IndexQuery, settings?: { debounce?: number }): Indexable[] {
+    public useQuery<T extends Indexable = Indexable>(
+        query: string | IndexQuery,
+        settings?: { debounce?: number }
+    ): T[] {
         // Hooks need to be called in a consistent order, so we don't nest the `useQuery` call in the DataArray.wrap _just_ in case.
-        return useQuery(this.core, this.parseQuery(query), settings);
+        return useQuery(this.engine, this.parseQuery(query), settings) as T[];
     }
 
     /////////////////////
@@ -339,7 +340,7 @@ export class DatacoreLocalApi {
         inline?: boolean;
         sourcePath?: string;
     }) => {
-        const realLink = hooks.useMemo(() => (typeof link === "string" ? Link.file(link) : link), [link]);
+        const realLink = hooks.useMemo(() => (typeof link === "string" ? EngineLink.file(link) : link), [link]);
         const implicitSourcePath = hooks.useContext(CURRENT_FILE_CONTEXT);
         return (
             <Embed

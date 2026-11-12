@@ -10,7 +10,6 @@ import { Settings } from "settings";
 import { MarkdownListBlock, MarkdownListItem, MarkdownPage } from "./types/markdown";
 import { GenericFile } from "./types/files";
 import { DateTime } from "luxon";
-import { EmbedQueue } from "./embed-queue";
 import { JsonMarkdownPage } from "./types/json/markdown";
 import { Canvas, CanvasTextCard } from "./types/canvas";
 
@@ -38,8 +37,6 @@ export class Datacore extends Component {
     datastore: Datastore;
     /** @internal Asynchronous multi-threaded file importer with throttling. */
     importer: FileImportService;
-    /** @internal Queue of asynchronous read requests; ensures we limit the maximum number of concurrent file loads. */
-    reads: EmbedQueue;
     /** @internal Local-storage backed cache of metadata objects. */
     persister: FileCache;
     /** @internal Only set when datacore is in the midst of initialization; tracks current progress. */
@@ -76,9 +73,6 @@ export class Datacore extends Component {
             this.addChild(workerImporter);
             this.importer = workerImporter;
         }
-
-        // TODO (blacksmithgu): Add a new setting for embed queue concurrency.
-        this.addChild((this.reads = new EmbedQueue(app.vault, () => 8)));
     }
 
     /** Obtain the current index revision, for determining if anything has changed. */
@@ -181,14 +175,6 @@ export class Datacore extends Component {
         // TODO: For correctness, probably have to either fix links in all linked files OR
         // just stop normalizing links in the store. We can traverse the links index to do so
         // but it is fairly painful.
-    }
-
-    /**
-     * Read a file from the Obsidian cache efficiently, limiting the number of concurrent request and debouncing
-     * multiple requests for the same file.
-     */
-    public async read(file: TFile): Promise<string> {
-        return this.reads.read(file);
     }
 
     /** Queue a file for reloading; this is done asynchronously in the background and may take a few seconds. */

@@ -41,11 +41,7 @@ describe("EngineApi: queries", () => {
         expect(result.successful).toBe(false);
 
         expect(() => api.query("@page and (")).toThrow(DatacoreError);
-        try {
-            api.query("@page and (");
-        } catch (error) {
-            expect((error as DatacoreError).code).toBe("invalid-query");
-        }
+        expect(() => api.query("@page and (")).toThrowError(expect.objectContaining({ code: "invalid-query" }));
         expect(() => api.evaluate("1 +")).toThrowError(expect.objectContaining({ code: "evaluation-failed" }));
     });
 

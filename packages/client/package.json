@@ -45,6 +45,7 @@
     "@yankeeinlondon/datacore-contract": "workspace:^"
   },
   "devDependencies": {
-    "@yankeeinlondon/datacore-shared": "workspace:^"
+    "@yankeeinlondon/datacore-shared": "workspace:^",
+    "jsdom": "31.0.0"
   }
 }

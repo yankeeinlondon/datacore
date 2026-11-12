@@ -1,6 +1,7 @@
-import { DatacoreApi } from "api/api";
+import { DatacoreViewApi } from "api/api";
 import { EngineHost } from "api/engine-host";
 import { Datacore } from "index/datacore";
+import { EmbedQueue } from "ui/embed-queue";
 import { DateTime } from "luxon";
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
@@ -14,7 +15,7 @@ export default class DatacorePlugin extends Plugin {
     /** Central internal state. */
     public core: Datacore;
     /** Externally visible API for querying. */
-    public api: DatacoreApi;
+    public api: DatacoreViewApi;
 
     async onload() {
         this.settings = migrateSettings(await this.loadData());
@@ -22,7 +23,19 @@ export default class DatacorePlugin extends Plugin {
 
         // Initialize the core API for usage in all views and downstream apps.
         this.addChild((this.core = new Datacore(this.app, this.manifest.version, this.settings)));
-        this.api = new DatacoreApi(this.core);
+
+        // Publish the engine to other plugins (shared registry) and to scripts (`window.dc`).
+        const host = new EngineHost(this.core, {
+            host: window,
+            pluginId: this.manifest.id,
+            engineVersion: this.manifest.version,
+        });
+        host.start();
+        this.register(() => host.stop());
+
+        // The views reach the engine only through the contract API (as datacore-view-preact will in P2).
+        const reader = this.addChild(new EmbedQueue(this.app.vault, () => 8));
+        this.api = new DatacoreViewApi({ engine: host.api, app: this.app, reader });
 
         // Primary visual elements (DatacoreJS and Datacore blocks).
         this.registerMarkdownCodeBlockProcessor(
@@ -65,15 +78,6 @@ export default class DatacorePlugin extends Plugin {
 
         // Initialize as soon as the workspace is ready.
         this.app.workspace.onLayoutReady(async () => this.core.initialize());
-
-        // Publish the engine to other plugins (shared registry) and to scripts (`window.dc`).
-        const host = new EngineHost(this.core, {
-            host: window,
-            pluginId: this.manifest.id,
-            engineVersion: this.manifest.version,
-        });
-        host.start();
-        this.register(() => host.stop());
     }
 
     /** Register codeblock highlighting and return a closure which unregisters. */

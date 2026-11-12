@@ -208,11 +208,11 @@ export function useDatacorePaging({
 }): Paging {
     const settings = useContext(SETTINGS_CONTEXT);
 
-    const pageSize = typeof paging === "number" ? paging : settings.display.pageSize;
+    const pageSize = typeof paging === "number" ? paging : settings.pageSize;
     const pagingEnabled = typeof paging === "number" || paging === true;
     const shouldScroll =
         (typeof scrollOnPageChange === "number" && scrollOnPageChange >= pageSize) ||
-        !!(scrollOnPageChange ?? settings.display.scrollOnPageChange);
+        !!(scrollOnPageChange ?? settings.scrollOnPageChange);
 
     const [page, totalPages, rawSetPage] = usePaging({ initialPage, pageSize, elements });
 

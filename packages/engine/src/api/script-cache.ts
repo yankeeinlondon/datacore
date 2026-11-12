@@ -1,12 +1,12 @@
 import { Literals } from "expression/literal";
 import { Link } from "expression/link";
-import { Datastore } from "index/datastore";
+import type { Indexable } from "@yankeeinlondon/datacore-contract";
 import { Result } from "./result";
 import { MarkdownCodeblock, MarkdownSection } from "index/types/markdown";
 import { Deferred, deferred } from "utils/deferred";
 import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
 import { getParentFolder, lineRange } from "utils/normalizers";
-import { TFile } from "obsidian";
+import { TFile, Vault } from "obsidian";
 import { Fragment, h } from "preact";
 
 /** A script that is currently being loaded. */
@@ -32,6 +32,14 @@ export interface LoadedScript {
 export type DatacoreScript = LoadingScript | LoadedScript;
 
 /** A simple caching script loader that can load any DAG of script dependencies. */
+/** Where scripts come from: link resolution (engine) and file contents (vault). */
+export interface ScriptSources {
+    /** Resolve a link to the indexed object (file, section, or codeblock) holding a script. */
+    resolveLink(link: string | Link): Indexable | undefined;
+    /** The vault, for reading script files. */
+    vault: Vault;
+}
+
 export class ScriptCache {
     /** All of the tags we recognize for scripts. */
     private static SCRIPT_LANGUAGES: Record<string, ScriptLanguage> = {
@@ -58,7 +66,7 @@ export class ScriptCache {
     /** Caches scripts by fully qualified path. */
     public scripts: Map<string, DatacoreScript> = new Map<string, DatacoreScript>();
 
-    public constructor(private store: Datastore) {}
+    public constructor(private store: ScriptSources) {}
 
     /** Load the given script at the given path, recursively loading any subscripts as well.  */
     public async load(path: string | Link, context: Record<string, unknown>): Promise<Result<unknown, string>> {

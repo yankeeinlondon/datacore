@@ -7,7 +7,7 @@ import {
     APP_CONTEXT,
     COMPONENT_CONTEXT,
     CURRENT_FILE_CONTEXT,
-    DATACORE_CONTEXT,
+    READER_CONTEXT,
     ErrorMessage,
     Markdown,
 } from "../../ui/markdown";
@@ -146,7 +146,7 @@ export type LineSpanContent =
  */
 export function useLineSpan(path: string, start: number, end: number): LineSpanContent {
     const app = useContext(APP_CONTEXT);
-    const datacore = useContext(DATACORE_CONTEXT);
+    const reader = useContext(READER_CONTEXT);
 
     const [state, update] = useReducer<LineSpanContent, LineSpanContent>(
         (state, event) => {
@@ -168,7 +168,7 @@ export function useLineSpan(path: string, start: number, end: number): LineSpanC
         // Try to load the file asynchronously.
         (async () => {
             try {
-                const content = await datacore.read(file);
+                const content = await reader.read(file);
                 update({ type: "loaded", content: lineRange(content, start, end) });
             } catch (error) {
                 update({ type: "error", message: error instanceof Error ? error.message : String(error) });

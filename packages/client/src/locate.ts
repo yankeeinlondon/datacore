@@ -223,12 +223,12 @@ export function getDatacore(app: AppLike, options: GetDatacoreOptions): Promise<
 
     return new Promise((resolve) => {
         const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-        let timer: ReturnType<typeof setTimeout> | undefined;
+        let timer: number | undefined;
         const cancel = whenProviderActive(registry, (provider) => {
-            if (timer !== undefined) clearTimeout(timer);
+            if (timer !== undefined) window.clearTimeout(timer);
             resolve(settle(provider));
         });
-        timer = setTimeout(() => {
+        timer = window.setTimeout(() => {
             cancel();
             resolve({
                 ok: false,

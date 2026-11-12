@@ -55,7 +55,8 @@ describe("client ↔ engine", () => {
         const dc = await pending;
 
         const books = dc.query("@page and #book");
-        expect(books.map((page) => page.$file).sort()).toEqual(["Books/Dune.md", "Books/Foundation.md"]);
+        const paths = books.map((page) => page.$file ?? "").sort((a, b) => a.localeCompare(b));
+        expect(paths).toEqual(["Books/Dune.md", "Books/Foundation.md"]);
         expect(books.every(isMarkdownPage)).toBe(true);
     });
 

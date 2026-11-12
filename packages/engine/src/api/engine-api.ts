@@ -211,7 +211,7 @@ export class EngineApi extends QueryApi implements Contract.DatacoreApi {
 
     /** Dispose every subscription and listener created through this API (called when the engine unloads). */
     public disposeAll(): void {
-        for (const disposable of [...this.disposables]) disposable.dispose();
+        for (const disposable of Array.from(this.disposables)) disposable.dispose();
         this.core.offref(this.progressRef);
     }
 

@@ -31,6 +31,8 @@ async function foreignDataArray(): Promise<typeof DataArray> {
 function foreignDateTime(iso: string): DateTime {
     const original = DateTime.fromISO(iso, { zone: "utc" });
     const prototypeCopy = Object.create(Object.prototype, Object.getOwnPropertyDescriptors(DateTime.prototype));
+    // Copying own fields onto an unrelated prototype is the point: it simulates another bundle's luxon.
+    // oxlint-disable-next-line typescript/no-misused-spread
     return Object.setPrototypeOf({ ...original }, prototypeCopy) as DateTime;
 }
 

@@ -1,6 +1,5 @@
-import { Datacore, IndexProgress } from "index/datacore";
+import type { DatacoreApi, Disposable, IndexProgress } from "@yankeeinlondon/datacore-contract";
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "preact/compat";
-import { EventRef } from "obsidian";
 import { Literal } from "expression/literal";
 import { FunctionComponent, JSX, VNode, createElement, isValidElement } from "preact";
 import { ErrorMessage, Lit } from "./markdown";
@@ -8,12 +7,12 @@ import { ErrorMessage, Lit } from "./markdown";
 import "./errors.css";
 
 /** Simple view which shows datacore's current loading progress when it is still indexing on startup. */
-function LoadingProgress({ datacore }: { datacore: Datacore }) {
-    const eventRef = useRef<EventRef>();
+function LoadingProgress({ engine }: { engine: DatacoreApi }) {
+    const subscription = useRef<Disposable>();
     const attach = useCallback(
         (element: HTMLParagraphElement | null) => {
-            if (eventRef.current) datacore.offref(eventRef.current);
-            eventRef.current = undefined;
+            subscription.current?.dispose();
+            subscription.current = undefined;
 
             if (!element) return;
 
@@ -21,18 +20,18 @@ function LoadingProgress({ datacore }: { datacore: Datacore }) {
                 element.textContent = `${initialized} / ${total}`;
             };
 
-            render(datacore.initializer?.progress() ?? { initialized: 0, total: 0 });
-            eventRef.current = datacore.on("index-progress", render);
+            render(engine.status().progress);
+            subscription.current = engine.on("index-progress", render);
         },
-        [datacore]
+        [engine]
     );
 
     return <p ref={attach} />;
 }
 
 /** Loading boundary which shows a loading screen while Datacore is initializing. */
-export function LoadingBoundary({ children, datacore }: PropsWithChildren<{ datacore: Datacore }>) {
-    const [initialized, setInitialized] = useState(datacore.initialized);
+export function LoadingBoundary({ children, engine }: PropsWithChildren<{ engine: DatacoreApi }>) {
+    const [initialized, setInitialized] = useState(engine.initialized);
 
     // Syncs the boundary with datacore's initialization state.
     // TODO: Add an event to datacore which indicates when a reindex happens (i.e., initialized
@@ -40,9 +39,9 @@ export function LoadingBoundary({ children, datacore }: PropsWithChildren<{ data
     useEffect(() => {
         if (initialized) return;
 
-        const ref = datacore.on("initialized", () => setInitialized(true));
-        return () => datacore.offref(ref);
-    }, [initialized, datacore]);
+        const listener = engine.on("initialized", () => setInitialized(true));
+        return () => listener.dispose();
+    }, [initialized, engine]);
 
     if (initialized) {
         return <>{children}</>;
@@ -51,7 +50,7 @@ export function LoadingBoundary({ children, datacore }: PropsWithChildren<{ data
             <div className="datacore-loading-boundary">
                 <h4 className="datacore-loading-title">Datacore is getting ready...</h4>
                 <div className="datacore-loading-content">
-                    <LoadingProgress datacore={datacore} />
+                    <LoadingProgress engine={engine} />
                 </div>
             </div>
         );

@@ -8,5 +8,8 @@
  * @packageDocumentation
  */
 
+export * from "./deferred";
+export * from "./media";
 export * from "./registry";
+export * from "./text";
 export * from "./values/index";

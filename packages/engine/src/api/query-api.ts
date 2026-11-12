@@ -130,6 +130,11 @@ export class QueryApi implements Contract.DatacoreQueryApi {
         return Result.success(parsed.value);
     }
 
+    /** Build a link from bare link text (`Note#Header|Display`, no brackets). */
+    public inferLink(linktext: string): Link {
+        return Link.parseInner(linktext);
+    }
+
     /** Create a data array from a regular array. */
     public array<T>(input: T[] | DataArray<T>): DataArray<T> {
         return DataArray.wrap(input);

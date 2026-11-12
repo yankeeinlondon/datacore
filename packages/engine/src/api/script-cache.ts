@@ -3,7 +3,7 @@ import { Link } from "expression/link";
 import type { Indexable } from "@yankeeinlondon/datacore-contract";
 import { Result } from "./result";
 import { MarkdownCodeblock, MarkdownSection } from "index/types/markdown";
-import { Deferred, deferred } from "utils/deferred";
+import { Deferred, deferred } from "@yankeeinlondon/datacore-shared";
 import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
 import { getParentFolder, lineRange } from "utils/normalizers";
 import { TFile, Vault } from "obsidian";

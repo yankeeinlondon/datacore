@@ -229,6 +229,7 @@ export interface DatacoreQueryApi {
     fileLink(path: string): Link;
     fullquery<T extends Indexable = Indexable>(query: string | IndexQuery): SearchResult<T>;
     headerLink(path: string, header: string): Link;
+    inferLink(linktext: string): Link;
     readonly luxon: luxon_2;
     page<T extends MarkdownPage = MarkdownPage>(path: string | Link): T | undefined;
     parseLink(linktext: string): Link;

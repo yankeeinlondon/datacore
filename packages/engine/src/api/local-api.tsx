@@ -173,6 +173,11 @@ export class DatacoreLocalApi {
         return this.local.tryParseLink(linktext);
     }
 
+    /** Build a link from bare link text, without brackets: `Note`, `Note#Header`, `Note#^block`, optional `|Display`. */
+    public inferLink(linktext: string): Link {
+        return this.local.inferLink(linktext);
+    }
+
     /** Create a data array from a regular array. */
     public array<T>(input: T[] | DataArray<T>): DataArray<T> {
         return this.local.array(input);

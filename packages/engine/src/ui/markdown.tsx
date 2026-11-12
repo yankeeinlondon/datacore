@@ -7,7 +7,7 @@ import { Link, Literal, Literals } from "expression/literal";
 import type { DatacoreApi, DisplaySettings } from "@yankeeinlondon/datacore-contract";
 import type { EmbedQueue } from "./embed-queue";
 import { currentLocale, renderMinimalDate, renderMinimalDuration } from "utils/normalizers";
-import { extractImageDimensions, isImageEmbed } from "utils/media";
+import { extractImageDimensions, isImageEmbed } from "@yankeeinlondon/datacore-shared";
 
 import { createContext, Fragment, render } from "preact";
 import { useContext, useMemo, useCallback, useRef, useEffect, useErrorBoundary } from "preact/hooks";

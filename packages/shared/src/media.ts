@@ -1,4 +1,5 @@
-import { Link } from "expression/link";
+/** Image embeds: detecting them and reading their `WxH` display size. */
+import type { Link } from "@yankeeinlondon/datacore-contract";
 
 export const IMAGE_EXTENSIONS = Object.freeze(
     new Set([
@@ -25,7 +26,7 @@ export const IMAGE_EXTENSIONS = Object.freeze(
 export function isImageEmbed(link: Link): boolean {
     if (!link.path.includes(".")) return false;
 
-    let extension = link.path.substring(link.path.lastIndexOf("."));
+    const extension = link.path.substring(link.path.lastIndexOf("."));
     return link.type == "file" && link.embed && IMAGE_EXTENSIONS.has(extension);
 }
 
@@ -33,11 +34,11 @@ export function isImageEmbed(link: Link): boolean {
 export function extractImageDimensions(link: Link): [number, number] | [number] | undefined {
     if (!link.display) return undefined;
 
-    let match = /^(\d+)x(\d+)$/iu.exec(link.display);
-    if (match) return [parseInt(match[1]), parseInt(match[2])];
+    const both = /^(\d+)x(\d+)$/iu.exec(link.display);
+    if (both?.[1] && both[2]) return [parseInt(both[1]), parseInt(both[2])];
 
-    let match2 = /^(\d+)/.exec(link.display);
-    if (match2) return [parseInt(match2[1])];
+    const width = /^(\d+)/.exec(link.display);
+    if (width?.[1]) return [parseInt(width[1])];
 
     // No match.
     return undefined;

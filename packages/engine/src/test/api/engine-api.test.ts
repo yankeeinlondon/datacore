@@ -53,6 +53,30 @@ describe("EngineApi: queries", () => {
         expect(api.resolveLink("Missing.md")).toBeUndefined();
     });
 
+    it("infers links from bare link text", () => {
+        const file = api.inferLink("Books/Dune.md");
+        expect([file.type, file.path, file.subpath, file.display]).toEqual([
+            "file",
+            "Books/Dune.md",
+            undefined,
+            undefined,
+        ]);
+
+        const header = api.inferLink("Books/Dune.md#Review|the review");
+        expect([header.type, header.path, header.subpath, header.display]).toEqual([
+            "header",
+            "Books/Dune.md",
+            "Review",
+            "the review",
+        ]);
+
+        const block = api.inferLink("Books/Dune.md#^quote");
+        expect([block.type, block.subpath]).toEqual(["block", "quote"]);
+
+        expect(api.inferLink("A \\| B.md").path).toBe("A | B.md");
+        expect(api.inferLink("Books/Dune.md").equals(api.fileLink("Books/Dune.md"))).toBe(true);
+    });
+
     it("scopes evaluation to a source file with local()", () => {
         const local = api.local("Books/Dune.md");
         expect(local.currentPath()).toBe("Books/Dune.md");

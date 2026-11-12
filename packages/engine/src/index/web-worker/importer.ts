@@ -4,7 +4,7 @@
 import ImportWorker from "index/web-worker/importer.worker";
 import { Component, FileManager, MetadataCache, TFile, Vault } from "obsidian";
 import { CanvasImport, MarkdownImport } from "index/web-worker/message";
-import { Deferred, deferred } from "utils/deferred";
+import { Deferred, deferred } from "@yankeeinlondon/datacore-shared";
 
 import { Queue } from "@datastructures-js/queue";
 

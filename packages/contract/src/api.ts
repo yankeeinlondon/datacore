@@ -104,6 +104,12 @@ export interface DatacoreQueryApi {
     parseLink(linktext: string): Link;
     /** Parse link text, returning a failure instead of throwing. */
     tryParseLink(linktext: string): Result<Link, string>;
+    /**
+     * Build a link from bare link text, without brackets: `Note`, `Note#Header`, or `Note#^block`, optionally followed
+     * by `|Display`. An escaped `\|` is not a separator; it becomes a literal `|`. Never throws, and does not resolve
+     * the path (use `resolvePath`/`resolveLink` for that).
+     */
+    inferLink(linktext: string): Link;
 
     /** The engine's copy of luxon (create dates/durations with this so they match engine values). */
     readonly luxon: typeof import("luxon");

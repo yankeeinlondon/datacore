@@ -1,5 +1,5 @@
 import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
-import { deferred, Deferred } from "utils/deferred";
+import { deferred, Deferred } from "@yankeeinlondon/datacore-shared";
 import { Datastore, Substorer } from "index/datastore";
 import { FileCache, INDEX_SCHEMA_VERSION, LocalStorageCache } from "index/persister";
 import { Indexable, INDEXABLE_EXTENSIONS } from "index/types/indexable";

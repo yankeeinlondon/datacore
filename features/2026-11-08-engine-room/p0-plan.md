@@ -177,8 +177,15 @@ full CI sequence (`pnpm install --frozen-lockfile`, `fmt:check`, `lint`, `typech
   never takes effect.
 - **`console.log` calls** in `main.ts`/`datacore.ts` (Obsidian guidelines allow warn/error/debug only).
 
-### Manual check
+### Manual check ✅ (2026-11-11)
 
-Still to do (needs Obsidian): install the built engine plugin into a scratch vault **without** upstream Datacore
-(`packages/engine/scripts/install-built <vault>`, plugin id still `datacore` in P0). Confirm it indexes, a
-`datacorejsx` view renders, and the startup progress counter shows.
+Built engine plugin (`id: datacore`, 0.1.29) installed in a scratch vault (`Test Vault`, 300 generated fixture notes +
+2 notes, no upstream Datacore):
+
+- A `datacorejsx` table over `@page and #book` rendered all 300 rows (30 pages × 10), with frontmatter and inline-field
+  values matching the fixtures.
+- Queries over inline fields and tasks returned the expected `100 books done · 450 open tasks`.
+- Live updates: removing `#book` from a fixture note updated the table.
+- `datacorejsx` syntax highlighting works; no errors in the developer console.
+- Reindex emitted 10 `index-progress` events (`32/302 … 288/302 302/302`): one every 32 files plus the terminal
+  event, as designed (#184 + typed `IndexProgress`).

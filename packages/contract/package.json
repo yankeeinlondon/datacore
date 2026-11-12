@@ -17,7 +17,11 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "files": [
     "dist"
@@ -32,8 +36,11 @@
     }
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && api-extractor run --local",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@types/luxon": "^2.4.0"
   }
 }

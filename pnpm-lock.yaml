@@ -19,6 +19,9 @@ importers:
       '@eslint/json':
         specifier: 2.1.1
         version: 2.1.1
+      '@microsoft/api-extractor':
+        specifier: 7.52.8
+        version: 7.52.8(@types/node@22.20.5)
       eslint:
         specifier: 10.13.0
         version: 10.13.0(jiti@1.21.7)
@@ -43,6 +46,9 @@ importers:
       typescript-eslint:
         specifier: 8.72.2
         version: 8.72.2(eslint@10.13.0(jiti@1.21.7))(typescript@5.9.3)
+      vite:
+        specifier: 8.3.8
+        version: 8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1)
       vitest:
         specifier: 5.1.0
         version: 5.1.0(@types/node@22.20.5)(jsdom@31.0.0)(vite@8.3.8(@types/node@22.20.5)(esbuild@0.28.2)(jiti@1.21.7)(terser@5.51.2)(yaml@2.9.1))
@@ -93,7 +99,11 @@ importers:
         specifier: workspace:^
         version: link:../contract
 
-  packages/contract: {}
+  packages/contract:
+    dependencies:
+      '@types/luxon':
+        specifier: ^2.4.0
+        version: 2.4.0
 
   packages/engine:
     dependencies:
@@ -6182,11 +6192,6 @@ packages:
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
 
-  resolve@1.22.10:
-    resolution: {integrity: sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==}
-    engines: {node: '>= 0.4'}
-    hasBin: true
-
   resolve@1.22.14:
     resolution: {integrity: sha512-1ZjYvR9sbkiwC5+9QHetqW5HmA2pHRMaoupD01t2HlYnV/vydC2zPwLixhsMieSWVZt0JJRg5LVIk0Ow1D/TrA==}
     engines: {node: '>= 0.4'}
@@ -9714,7 +9719,7 @@ snapshots:
       '@rushstack/ts-command-line': 5.0.1(@types/node@22.20.5)
       lodash: 4.17.21
       minimatch: 3.0.8
-      resolve: 1.22.10
+      resolve: 1.22.14
       semver: 7.5.4
       source-map: 0.6.1
       typescript: 5.8.2
@@ -9733,7 +9738,7 @@ snapshots:
       '@microsoft/tsdoc': 0.15.1
       ajv: 8.12.0
       jju: 1.4.0
-      resolve: 1.22.10
+      resolve: 1.22.14
 
   '@microsoft/tsdoc@0.15.1': {}
 
@@ -10031,14 +10036,14 @@ snapshots:
       fs-extra: 11.3.0
       import-lazy: 4.0.0
       jju: 1.4.0
-      resolve: 1.22.10
+      resolve: 1.22.14
       semver: 7.5.4
     optionalDependencies:
       '@types/node': 22.20.5
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
-      resolve: 1.22.10
+      resolve: 1.22.14
       strip-json-comments: 3.1.1
 
   '@rushstack/terminal@0.15.3(@types/node@22.20.5)':
@@ -10861,7 +10866,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.27.6
       cosmiconfig: 7.1.0
-      resolve: 1.22.10
+      resolve: 1.22.14
 
   babel-plugin-polyfill-corejs2@0.4.17(@babel/core@7.29.13):
     dependencies:
@@ -11732,7 +11737,7 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
 
   es-shim-unscopables@1.1.0:
     dependencies:
@@ -12333,7 +12338,7 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       math-intrinsics: 1.1.0
 
   get-own-enumerable-property-symbols@3.0.2: {}
@@ -12780,7 +12785,7 @@ snapshots:
   internal-slot@1.1.0:
     dependencies:
       es-errors: 1.3.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       side-channel: 1.1.1
 
   interpret@1.4.0: {}
@@ -12927,7 +12932,7 @@ snapshots:
       call-bound: 1.0.4
       gopd: 1.2.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
 
   is-regexp@1.0.0: {}
 
@@ -14689,7 +14694,7 @@ snapshots:
 
   rechoir@0.6.2:
     dependencies:
-      resolve: 1.22.10
+      resolve: 1.22.14
 
   recma-build-jsx@1.0.0:
     dependencies:
@@ -14877,12 +14882,6 @@ snapshots:
   resolve-pathname@3.0.0: {}
 
   resolve-pkg-maps@1.0.0: {}
-
-  resolve@1.22.10:
-    dependencies:
-      is-core-module: 2.16.1
-      path-parse: 1.0.7
-      supports-preserve-symlinks-flag: 1.0.0
 
   resolve@1.22.14:
     dependencies:

@@ -20,3 +20,6 @@ docs/root/api/**/*.*
 !docs/root/api/index.md
 .docusaurus/
 .claudine/tmp/
+
+# api-extractor scratch output
+packages/*/temp/

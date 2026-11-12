@@ -11,8 +11,16 @@
  * @packageDocumentation
  */
 
-/** Key for the shared engine registry on the main window: `window[Symbol.for(ENGINE_REGISTRY_KEY)]`. */
-export const ENGINE_REGISTRY_KEY = "datacore-engine.registry" as const;
-
-/** Obsidian plugin id of the engine host plugin. Part of the contract: it never changes. */
-export const ENGINE_PLUGIN_ID = "datacore-engine" as const;
+export * from "./api";
+export * from "./coerce";
+export * from "./constants";
+export * from "./data-array";
+export * from "./errors";
+export * from "./expression";
+export * from "./fields";
+export * from "./indexables";
+export * from "./query";
+export * from "./registry";
+export * from "./result";
+export * from "./settings";
+export * from "./values";

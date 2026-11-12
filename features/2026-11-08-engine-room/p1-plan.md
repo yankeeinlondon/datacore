@@ -218,9 +218,25 @@ manifests) and `pnpm build` (including api-extractor reports) pass. Tests: contr
 - **IndexedDB scope across vaults** (spec §14.1) is still unverified in Obsidian; the cache name is vault-scoped
   either way.
 
-### Manual check
+### Manual check ✅ (2026-11-11)
 
-Pending (needs Obsidian): install the P1 build (`packages/engine/scripts/install-built <vault>`, now
-`.obsidian/plugins/datacore-engine/`) in the scratch vault, remove the old `datacore` plugin folder from P0, and
-confirm: the views render as in P0, `window.dc` works in the console, the settings tab shows the Display and Indexing
-sections (changing the page size re-renders tables), and the startup progress counter appears.
+Run against the running app with `obsidian-cli` (`eval`/`dev:errors`) in the scratch vault (`Test Vault`, 300 fixture
+notes + 2 notes). The P0 `datacore` plugin was disabled (its folder is still present), and `datacore-engine` 0.1.0
+(installed with `install-built`) was enabled.
+
+- **Views render as in P0:** `Datacore Check.md` shows the books table (10 rows per page, 30 pages) and
+  `100 books done · 450 open tasks`.
+- **Live updates:** removing `#book` from `Fixtures/Book 001.md` dropped it from the table (revision 303 → 304,
+  299 books). Restoring the tag brought it back (300 books; re-indexed objects sort last in an unsorted query, as before).
+- **`window.dc`:** `dc.query("@page and #book").length` = 300; the status and task counts match the fixtures.
+- **Settings tab:** shows the **Display** (pagination, default page size, scroll on page change, empty values, date
+  formats, recursive render depth) and **Indexing** (inline fields, importer threads, utilization) sections. Changing
+  *Default page size* in the tab (50 → 100 → 25 → 50) re-rendered a `paging={true}` table at each size with no reload,
+  and the value persisted to `data.json` under `display`.
+- **Progress:** the *reindex vault* command emitted 10 `index-progress` events (`32/303 … 288/303, 303/303`), then
+  `initialized`. Reloading the plugin with a view open showed the loading boundary (`Datacore is getting ready...
+  32 / 303 … 288 / 303`) before the table rendered.
+- `dev:errors`: no errors throughout.
+
+Observation: after switching plugins without restarting the app, `window.datacore` still held the P0 plugin's
+`DatacoreApi`. Upstream's `onunload` never deletes the global; the engine does not set it. An app reload clears it.

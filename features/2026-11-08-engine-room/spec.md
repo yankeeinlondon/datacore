@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Approved; **P0 complete**, **P1 complete** (v0.5, 2026-11-11), **P2 planned**. See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11), [p2-plan.md](./p2-plan.md) |
-| **Date** | 2026-11-08 (updated 2026-11-11) |
+| **Status** | Approved; **P0 complete**, **P1 complete** (v0.5, 2026-11-11), **P2 complete** (2026-11-12). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11), [p2-plan.md](./p2-plan.md#outcome-2026-11-12) |
+| **Date** | 2026-11-08 (updated 2026-11-12) |
 | **Owner** | Ken Snyder |
 | **Product** | **datacore-engine** ("Datacore Engine") |
 | **Monorepo** | `yankeeinlondon/datacore` (hard fork of `blacksmithgu/datacore` @ v0.1.28) |
@@ -100,7 +100,7 @@ Users may have upstream Datacore (`datacore`) installed alongside these plugins.
 | Codeblock languages | `datacorejs`, `datacorejsx`, `datacorets`, `datacoretsx` | `dc`, `dcx`, `dct`, `dctx` (§9.3) |
 | Registry | — | `window[Symbol.for("datacore-engine.registry")]` |
 
-Still to verify (P1/P2): whether Obsidian's IndexedDB is shared across vaults (the cache name is vault-scoped either way), and what Obsidian does on duplicate codeblock-language registration (now only relevant for defensive coding).
+Still to verify: whether Obsidian's IndexedDB is shared across vaults (the cache name is vault-scoped either way). Duplicate code block language registration was resolved in P2 (§14.2).
 
 ## 5. Decisions
 
@@ -329,7 +329,10 @@ interface DatacoreApi {
 /** Returned by getDatacore when a consumer Component is given. */
 interface ScopedDatacore extends DatacoreApi {
   readonly consumer: ConsumerInfo;
+  readonly revoked: boolean;
   onRevoked(cb: () => void): Disposable;
+  disposeAll(): void;
+  release(): void;      // P2: disconnect; the client calls it when the consumer unloads
 }
 ```
 
@@ -340,7 +343,7 @@ Explicitly **not** in the contract: `core`, `datastore`, `persister`, `importer`
 - `subscribe` calls `cb` once with the initial results, then again **only when the result set changes** (compared by `$id` + `$revision`), debounced (default 500 ms, matching today's hooks; `debounce: 0` = immediate).
 - v1 implementation: re-run the query on each index revision and diff. Smarter incremental invalidation can come later behind the same API.
 - Results are **immutable snapshots**. Consumers must not mutate them; views must not deep-proxy them (Vue uses `shallowRef`/`markRaw`).
-- Every `Disposable` created through a `ScopedDatacore` is disposed automatically when the consumer's `Component` unloads or when the handle is revoked.
+- Every `Disposable` created through a `ScopedDatacore` is disposed automatically when the consumer's `Component` unloads (the client then calls `release()`, which also removes the handle from the engine's consumer list) or when the handle is revoked.
 - **Revision rule (contract guarantee).** `revision` increases monotonically. Every object stored in revision *N* carries `$revision === N`, and immediately after a store, `revision === N`. Deletes, `touch()` and `clear()` bump the revision without stamping any object. Established by upstream #180 and pinned by `datastore-revision.test.ts`, which becomes a contract test.
 - **Index progress.** During the initial index, the engine emits `index-progress` with `{ initialized, total }`, at least every 32 files and once on completion, yielding to the renderer between batches (#184). Views read progress only from this event or `status()`.
 - **High-frequency UI state never bumps the index revision.** Access times, recent files, selection, focus, etc. live in separate stores with their own events, never in indexed objects (lesson from upstream #87).
@@ -382,10 +385,10 @@ interface DisplaySettings {
 ```
 
 - The tab also shows diagnostics: index status, connected consumers (from `ConsumerInfo`), and a "Reindex vault"
-  action.
-- **View plugins keep only plugin-specific options.** For `datacore-view-preact` that is essentially "Enable
-  JavaScript views". If a view plugin's options are this small, it may expose them as commands or a single toggle
-  instead of its own tab.
+  action. (P2: the tab is declared through `getSettingDefinitions()`, so Obsidian 1.13+ includes it in settings
+  search; `display()` renders the same definitions on older versions.)
+- **View plugins keep only plugin-specific options.** `datacore-view-preact` has none (`enableJs` was removed in P2),
+  so it has no tab. A view plugin with few options may expose them as commands or a single toggle instead of a tab.
 - Views re-render on `display-settings` changes.
 
 ### 8.3 Persistence
@@ -422,6 +425,9 @@ Today's UI, ported to consume `datacore-client` (+ `shared`) only:
 
 - Codeblock processors and CodeMirror modes for `dc` / `dct` / `dcx` / `dctx` (§9.3).
 - The script-facing local API: wraps `ScopedDatacore.local(path)` and adds hooks (`useQuery`, `useFullQuery`, `useFile`, `useCurrentFile`, `useIndexUpdates`, `useInterning`, Preact hooks), components (`Table`, `List`, `Card`, `Callout`, `Stack`, `Group`, `Literal`, `Markdown`, `Link`, `LinkEmbed`, `SpanEmbed`, `Icon`, `Button`, `Textbox`, `Checkbox`, `Slider`, `Switch`, `VanillaSelect`, `embed`), and `dc.require` (script cache, with `__filename`/`__dirname` and host modules).
+- **Breaking for scripts (P2):** the engine no longer patches the global `Array.isArray`, so
+  `Array.isArray(dataArray)` is `false`. Use `dc.array(x)` / `.array()` to convert. The views still render DataArrays
+  as children and as list values.
 - Settings: none, so no settings tab. `enableJs` is removed: in Datacore every view is a script, so enabling this plugin is the opt-in to running scripts (P2 decision 2). Presentation defaults come from the engine via `dc.settings.display` (§8.2).
 - Identity: plugin id `datacore-view-preact`, display name "Datacore View: Preact", release repo `yankeeinlondon/datacore-view-preact`.
 
@@ -559,7 +565,7 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 | **P-1 — Fork baseline** ✅ | Upstream open PRs triaged ([evaluation](../2026-11-08-active-prs/evaluation.md)); #180, #184, #122, #150, #181 and fixes from #157/#87 merged on `pre-fork-upstream`, tagged `fork-baseline` | 345 tests pass; `tsc`, library build, api-extractor and plugin build pass |
 | **P0 — Monorepo scaffold** ✅ | pnpm workspaces; current code moved into `packages/engine` *unchanged* (still a single plugin, including UI); Vitest; scaffolds for contract, client, shared, view-preact, view-vue; oxlint + oxfmt; Changesets; Docusaurus as a workspace package | Plugin build output behaves identically to `fork-baseline`; all 345 tests pass under Vitest; lint/format/typecheck clean; empty packages build |
 | **P1 — Contract & engine API** ✅ | `datacore-contract` interfaces + constants; client (`getDatacore`, guards, value helpers); registry protocol; `EngineApiImpl`; settings split; namespaced cache; `window.dc`; Obsidian prototype extensions removed; UI rewired onto the contract API (Preact itself leaves the engine in P2; see p1-plan) | UI uses only the contract API (lint-enforced); contract type tests; registry load-order and revocation tests; api-extractor reports reviewed |
-| **P2 — `datacore-view-preact`** | Views moved into their own plugin consuming only the client + shared; `dc`/`dct`/`dcx`/`dctx` languages; migration command | Parity vault renders identically; plugins work in either load order; disabling/re-enabling the engine recovers views; runs alongside upstream Datacore |
+| **P2 — `datacore-view-preact`** ✅ | Views moved into their own plugin consuming only the client + shared; `dc`/`dct`/`dcx`/`dctx` languages; migration command | Parity vault renders identically; plugins work in either load order; disabling/re-enabling the engine recovers views; runs alongside upstream Datacore |
 | **P3 — Stabilize & publish** | Contract and client `1.0.0` on npm; release CI to per-plugin release repos; BRAT betas; example third-party consumer in `fixtures/`; docs | External example plugin works against the published client; API report frozen; BRAT install works for both plugins |
 | **P4 — Store submission** | Submit `datacore-engine` and `datacore-view-preact` to the community store | Accepted |
 | **P5 — `datacore-view-vue`** | Separate spec (`features/2026-11-08-frontend/`) | — |

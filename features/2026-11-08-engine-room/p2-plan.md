@@ -344,3 +344,57 @@ at startup, before the layout loaded.
 - Parity identical to the (updated) baseline. Tests: contract 7, shared 51, client 25, view-preact 64, engine 369.
 
 Remaining: step 10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).
+
+### Step 10 ✅ (2026-11-12): verification
+
+All of it was run in the Test Vault through `obsidian-cli eval`. Screenshots were taken with Electron's
+`capturePage()` from the background window, which never took focus. The window paints lazily in the background,
+so each capture forces a repaint first.
+
+- **Parity:** identical to the baseline, which differs from the P1 capture only in the `Array.isArray(dc.array)` row
+  (step 9). It also matches in reverse load order and with upstream Datacore running alongside.
+- **Lifecycle:** disabling the engine replaces every open block with "Datacore Engine is not running (it was disabled
+  or is reloading)"; re-enabling it brings them back without reopening the note. Both load orders work.
+- **Beside upstream Datacore** (0.1.29, enabled for the session only): a `datacorejsx` block renders through
+  upstream and a `dcx` block through view-preact, in both load orders. `window.dc` stays the engine's.
+- **Migration command:** converted the scratch vault (step 7). A temporary note showed the modal counting the
+  top-level and callout blocks, leaving out the example nested in a ````` ````markdown ````` fence; Cancel changed
+  nothing.
+- **Settings tab:** Display, Indexing, and Diagnostics (index status, connected plugins, and a new "Reindex vault"
+  button, `f2b2631`).
+- **Bundles:** engine 95 modules, no preact or sucrase; view-preact 140 modules, no engine sources, no luxon.
+
+## Outcome (2026-11-12)
+
+P2 is complete. Every exit criterion is met:
+
+| # | Criterion | Result |
+|---|---|---|
+| 1 | `datacore-view-preact` owns the views, reaching the engine only through client + shared | ✅ Lint and pnpm isolation enforce it |
+| 2 | The engine has no rendering code | ✅ No preact/sucrase in its bundle; keeps the settings tab, reindex, the registry host, and `window.dc` |
+| 3 | One implementation of the identity-safe value helpers, public in the client | ✅ Step 2 |
+| 4 | `dc`/`dct`/`dcx`/`dctx` with highlighting; `datacore*` never registered | ✅ Step 6, plus the open-notes highlighting fix |
+| 5 | Migration command | ✅ Step 7 |
+| 6 | Parity | ✅ Identical, apart from the intended `Array.isArray` row |
+| 7 | Lifecycle, both load orders, beside upstream | ✅ Step 10 |
+| 8 | `enableJs` gone | ✅ Step 8 |
+| 9 | No global `Array.isArray` patch | ✅ Step 9 (a Preact `options.vnode` hook keeps DataArray children rendering) |
+| 10 | Lint at 0 with `--deny-warnings` | ✅ Every package |
+
+**Beyond the plan:** `ScopedDatacore.release()` (contract minor, fixes a per-reload handle leak); the highlighting
+fix for notes open when view-preact loads; the upstream `YamlConversion.yaml` fix; and the "Reindex vault" button.
+
+**Carried forward** (each fix needs a re-baseline with the diff reviewed):
+- Script JSX leaks `__self`/`__source` attributes (set sucrase `production: true` in `ui/scripting.ts`).
+- `nullAs: "-"` renders as an empty bullet list.
+- Block-link embeds show the whole note.
+- `dc.List` task children don't show.
+- The script-facing `dc` lacks contract members such as `page()`.
+- `DataArray.expand()` drops nodes without the key (inherited from Dataview).
+- The field-write helpers write arrays and objects as JSON (1.1).
+- Lessons for test sessions:
+  - An Obsidian code-block conflict test (§14.2) leaves processors that outlive their plugin.
+  - Engines built before step 9 leave the `Array.isArray` patch in place after unloading.
+  - Both need a fresh Obsidian session, and only the user restarts Obsidian.
+
+Tests at the end of P2: contract 7, shared 51, client 25, view-preact 64, engine 369.

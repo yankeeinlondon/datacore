@@ -55,3 +55,35 @@ green, no large blobs); pushing in phase-sized segments (`p0-monorepo`, then `p1
 CI on `master` found two problems that local runs hid: the docs package's typecheck needs `@types/node` on a clean
 install, and the docs deploy fails because GitHub Pages is not enabled on the fork. Both are handled in items 5
 and 9.
+
+### 2–6 ✅ (2026-11-12): P2.1, packaging, release tooling, docs merged
+
+Four subagents worked in parallel worktrees; all merged into `master` with `pnpm check && pnpm build` green and
+CI green on GitHub.
+
+- **P2.1** (`5ccc27e`…`42eb605`): script JSX compiled in production mode (no `__self`/`__source`); the `nullAs`
+  placeholder renders as text; embeds get `#Header` / `#^block` subpaths; `dc.List` nests list-item and task
+  children (`$elements`, an upstream bug); the script `dc` implements the path-scoped contract API (`page()` was the
+  only missing member). Parity re-baselined (`a531c6b`) after reviewing the diff: exactly those changes.
+- **npm packaging**: contract and client 1.0.0 (ESM + CJS, types for both), READMEs, changelogs; packed tarballs
+  verified in an outside project (strict `tsc` under bundler/node16/nodenext/node10, runtime ESM and CJS). The
+  engine now reports API 1.0.0, and view-preact requires `minApi: "1.0"`.
+- **Release tooling**: `scripts/release-plugin.mjs` (release repo files + GitHub release via `gh`; refuses dirty
+  trees, existing versions, unsynced manifests), `release-plugins.yml` (manual, needs a `RELEASE_TOKEN` secret),
+  `manifest-beta.json` for both plugins, store-ready descriptions.
+- **Docs**: installation, migrating from Datacore, plugin-author guide; CI docs typecheck fix; site URL for Pages.
+- Also: agent worktrees ignored by lint/format/git; shared's tests resolve workspace sources under the SSR
+  conditions (CI runs tests before build); the fork's copyright line added to the MIT license.
+
+**Store submission changed upstream (May 2026):** plugins are submitted through the community.obsidian.md portal
+with the maintainer's Obsidian account, not by PR to `obsidian-releases` (its `community-plugins.json` is now a
+mirror). Step 13 is therefore Ken's to click; everything before it is prepared.
+
+### 7–9 ✅ (2026-11-12): betas released, BRAT install, docs live
+
+- Release repos created; `0.1.0-beta.1` released for both (engine: `main.js`, `manifest.json`; view-preact adds
+  `styles.css`).
+- **BRAT 2.2.0** in the Test Vault installed both betas into empty plugin folders: both load, report
+  `0.1.0-beta.1`, `main.js` byte-identical to the release assets (BRAT rewrites `manifest.json` on one line; same
+  content), and the parity snapshot is identical to the baseline.
+- GitHub Pages enabled (Actions); docs deployed to https://yankeeinlondon.github.io/datacore/.

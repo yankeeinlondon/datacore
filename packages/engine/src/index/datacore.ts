@@ -1,3 +1,4 @@
+import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
 import { deferred, Deferred } from "utils/deferred";
 import { Datastore, Substorer } from "index/datastore";
 import { FileCache, LocalStorageCache } from "index/persister";
@@ -295,6 +296,8 @@ export class Datacore extends Component {
     public on(evt: "initialized", callback: () => void, context?: unknown): EventRef;
     /** Called periodically while datacore is performing its initial index, and once more when it finishes. */
     public on(evt: "index-progress", callback: (progress: IndexProgress) => void, context?: unknown): EventRef;
+    /** Called when the shared display settings change. */
+    public on(evt: "display-settings", callback: (display: DisplaySettings) => void, context?: unknown): EventRef;
 
     on<T extends Function>(evt: string, callback: T, context?: unknown): EventRef {
         return this.events.on(evt, callback as unknown as (...args: unknown[]) => unknown, context);
@@ -318,10 +321,17 @@ export class Datacore extends Component {
     private trigger(evt: "initialized"): void;
     /** Trigger an initial-index progress event. */
     private trigger(evt: "index-progress", progress: IndexProgress): void;
+    /** Trigger a display-settings change event. */
+    private trigger(evt: "display-settings", display: DisplaySettings): void;
 
     /** Trigger an event. */
     private trigger(evt: string, ...args: unknown[]): void {
         this.events.trigger(evt, ...args);
+    }
+
+    /** @internal Publish a display-settings change; called when settings are updated. */
+    public notifyDisplaySettings(display: DisplaySettings): void {
+        this.trigger("display-settings", display);
     }
 
     /** @internal Publish initial-index progress; called by the initializer. */

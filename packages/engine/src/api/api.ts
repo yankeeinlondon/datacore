@@ -1,38 +1,17 @@
 /**
  * @module api
  */
-import { Link } from "expression/link";
-import { Datacore } from "index/datacore";
-import { SearchResult } from "index/datastore";
-import { EXPRESSION, PRIMITIVES, QUERY } from "expression/parser";
-import { IndexQuery } from "index/types/index-query";
-import { Indexable } from "index/types/indexable";
-import { MarkdownPage } from "index/types/markdown";
-import { Result } from "./result";
 import { App, Component, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { DatacoreJSRenderer } from "ui/javascript";
 import { DatacoreLocalApi } from "./local-api";
-import Parsimmon from "parsimmon";
-import { Coerce } from "./coerce";
-import { DataArray } from "./data-array";
-import * as luxon from "luxon";
+import { QueryApi } from "./query-api";
 import * as preact from "preact";
-import { Expression } from "expression/expression";
-import { Literal, Literals } from "expression/literal";
-import { Variables } from "expression/evaluator";
 
 /**
  * Exterally visible API for datacore.
  * @public
  */
-export class DatacoreApi {
-    public constructor(public core: Datacore) {}
-
-    /** Get access to luxon functions. */
-    get luxon(): typeof luxon {
-        return luxon;
-    }
-
+export class DatacoreApi extends QueryApi {
     /** Get access to preact functions. */
     get preact(): typeof preact {
         return preact;
@@ -50,132 +29,6 @@ export class DatacoreApi {
     /** Construct a local API for the file at the given path. */
     public local(path: string): DatacoreLocalApi {
         return new DatacoreLocalApi(this, path);
-    }
-
-    /////////////////////////
-    // Querying + Fetching //
-    /////////////////////////
-
-    /** Load a markdown file by full path or link. */
-    public page<T extends MarkdownPage = MarkdownPage>(path: string | Link): T | undefined;
-    public page(path: string | Link): MarkdownPage | undefined {
-        const realPath = Literals.isLink(path) ? path.path : path;
-
-        return this.core.datastore.load(realPath) as MarkdownPage | undefined;
-    }
-
-    /** Execute a textual or typed index query, returning all results. */
-    public query<T extends Indexable = Indexable>(query: string | IndexQuery): T[];
-    public query(query: string | IndexQuery): Indexable[] {
-        return this.tryQuery(query).orElseThrow();
-    }
-
-    /** Execute a textual or typed index query, returning all results. */
-    public tryQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<T[], string>;
-    public tryQuery(query: string | IndexQuery): Result<Indexable[], string> {
-        return this.tryFullQuery(query).map((result) => result.results);
-    }
-
-    /** Execute a textual or typed index query, returning results plus performance metadata. */
-    public fullquery<T extends Indexable = Indexable>(query: string | IndexQuery): SearchResult<T>;
-    public fullquery(query: string | IndexQuery): SearchResult<Indexable> {
-        return this.tryFullQuery(query).orElseThrow();
-    }
-
-    /** Execute a textual or typed index query, returning results plus performance metadata. */
-    public tryFullQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<SearchResult<T>, string>;
-    public tryFullQuery(query: string | IndexQuery): Result<SearchResult<Indexable>, string> {
-        const parsedQuery = typeof query === "string" ? QUERY.query.tryParse(query) : query;
-        return this.core.datastore.search(parsedQuery);
-    }
-
-    ///////////////////////
-    // General utilities //
-    ///////////////////////
-
-    /** Utilities for coercing types into one specific type for easier programming. */
-    public coerce = Coerce;
-
-    /** Resolve a local or absolute path or link to an absolute path. */
-    public resolvePath(path: string | Link, sourcePath?: string): string {
-        const rawpath = Literals.isLink(path) ? path.path : path;
-        if (rawpath.startsWith("/")) return rawpath.substring(1);
-
-        const absolute = this.core.metadataCache.getFirstLinkpathDest(rawpath, sourcePath ?? "");
-        if (absolute) return absolute.path;
-
-        return rawpath;
-    }
-
-    /** Try to parse the given query, returning a monadic success/failure result. */
-    public tryParseQuery(query: string | IndexQuery): Result<IndexQuery, string> {
-        if (!(typeof query === "string")) return Result.success(query);
-
-        const result = QUERY.query.parse(query);
-        if (result.status) return Result.success(result.value);
-        else return Result.failure(Parsimmon.formatError(query, result));
-    }
-
-    /** Try to parse the given query, throwing an error if it is invalid. */
-    public parseQuery(query: string | IndexQuery): IndexQuery {
-        return this.tryParseQuery(query).orElseThrow((e) => "Failed to parse query: " + e);
-    }
-
-    /** Create a file link pointing to the given path. */
-    public fileLink(path: string): Link {
-        return Link.file(path);
-    }
-
-    /** Create a link to a header with the given name. */
-    public headerLink(path: string, header: string): Link {
-        return Link.header(path, header);
-    }
-
-    /** Create a link to a block with the given path and block ID. */
-    public blockLink(path: string, block: string): Link {
-        return Link.block(path, block);
-    }
-
-    /** Try to parse the given link, throwing an error if it is invalid. */
-    public parseLink(linktext: string): Link {
-        return this.tryParseLink(linktext).orElseThrow((e) => "Failed to parse link: " + e);
-    }
-
-    /** Try to parse a link, returning a monadic success/failure result. */
-    public tryParseLink(linktext: string): Result<Link, string> {
-        const parsed = PRIMITIVES.embedLink.parse(linktext);
-        if (!parsed.status) return Result.failure(Parsimmon.formatError(linktext, parsed));
-
-        return Result.success(parsed.value);
-    }
-
-    /** Create a data array from a regular array. */
-    public array<T>(input: T[] | DataArray<T>): DataArray<T> {
-        return DataArray.wrap(input);
-    }
-
-    /** Evaluate an expression and return it's evaluated value, throwing an exception on failure. */
-    public evaluate(
-        expression: string | Expression,
-        variables?: Record<string, Literal>,
-        sourcePath?: string
-    ): Literal {
-        return this.tryEvaluate(expression, variables, sourcePath).orElseThrow();
-    }
-
-    /** Evaluate an expression and return it's evaluated value. */
-    public tryEvaluate(
-        expression: string | Expression,
-        variables?: Record<string, Literal>,
-        sourcePath?: string
-    ): Result<Literal, string> {
-        if (typeof expression === "string") {
-            const parsed = EXPRESSION.expression.parse(expression);
-            if (!parsed.status) return Result.failure(Parsimmon.formatError(expression, parsed));
-            expression = parsed.value;
-        }
-
-        return this.core.datastore.evaluator(sourcePath).evaluate(expression, Variables.infer(variables));
     }
 
     /////////////////////

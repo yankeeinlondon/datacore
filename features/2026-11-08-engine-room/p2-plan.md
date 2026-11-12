@@ -299,4 +299,16 @@ Each step ended with the parity snapshot identical to the baseline.
   "Converted 2 code blocks in 1 note."; the note now renders as views: "100 books done · 510 open tasks". The old
   "450" figure predates the parity data: `Fixtures/` has 450 open tasks and `Parity/Data` adds 60.
 
-Remaining: steps 8–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).
+### Step 8 ✅ (2026-11-12): `enableJs` removed
+
+- Removed from the engine's `Settings`, `DEFAULT_SETTINGS`, and `ENGINE_KEYS` (`bf3acff`). `migrateSettings` copies
+  only known keys, so a stale `enableJs` in `data.json` is ignored and dropped on the next save (new test). The spec's
+  §3 table and §9.1 now say view-preact has no settings.
+- In the app, the reloaded engine's settings no longer include `enableJs`. Parity snapshot identical to the baseline.
+- **Session hygiene:** after an engine reload, a `dc` code-block processor leaked by the step-6 experiment (§14.2)
+  threw "handle (datacore-view-preact) is revoked". It belonged to an old view-preact instance whose client had
+  stopped listening. Restarting Obsidian cleared it (4 processors at priority −100, one per language). A leaked
+  processor outlives its plugin, so these errors are expected after a §14.2 conflict test. They are not a reconnect
+  bug.
+
+Remaining: steps 9–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

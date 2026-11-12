@@ -106,7 +106,8 @@
           {
             "assertFunctionNames": ["expect", "expectEvals", "check", "checkRoundTrip"]
           }
-        ]
+        ],
+        "obsidianmd/regex-lookbehind": "off"
       }
     }
   ]

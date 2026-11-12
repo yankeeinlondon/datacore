@@ -12,7 +12,6 @@ import { DateTime } from 'luxon';
 import { Duration } from 'luxon';
 import { EventRef } from 'obsidian';
 import { Events } from 'obsidian';
-import { FileManager } from 'obsidian';
 import * as hooks from 'preact/hooks';
 import { HTMLAttributes } from 'preact/compat';
 import { JSX } from 'preact/compat';
@@ -25,7 +24,6 @@ import { MetadataCache } from 'obsidian';
 import { Plugin as Plugin_2 } from 'obsidian';
 import * as preact_2 from 'preact';
 import { PropsWithChildren } from 'preact/compat';
-import { Queue } from '@datastructures-js/queue';
 import { default as React_2 } from 'preact/compat';
 import { ReactNode } from 'preact/compat';
 import { TFile } from 'obsidian';
@@ -353,17 +351,18 @@ export namespace DataArray {
 
 // @public
 export class Datacore extends Component {
+    // Warning: (ae-forgotten-export) The symbol "DatacoreServices" needs to be exported by the entry point index.d.ts
     // Warning: (ae-incompatible-release-tags) The symbol "__constructor" is marked as @public, but its signature references "Settings" which is marked as @internal
-    constructor(app: App, version: string, settings: Settings);
+    constructor(app: App, version: string, settings: Settings, services?: Partial<DatacoreServices>);
     // (undocumented)
     app: App;
     // @internal
     datastore: Datastore;
     events: Events;
-    // Warning: (ae-forgotten-export) The symbol "FileImporter" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "FileImportService" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    importer: FileImporter;
+    importer: FileImportService;
     index(): Promise<void>;
     initialize(): void;
     initialized: boolean;
@@ -380,10 +379,10 @@ export class Datacore extends Component {
     on(evt: "rename", callback: (newPath: string, oldPath: string) => void, context?: unknown): EventRef;
     on(evt: "initialized", callback: () => void, context?: unknown): EventRef;
     on(evt: "index-progress", callback: (progress: IndexProgress) => void, context?: unknown): EventRef;
-    // Warning: (ae-forgotten-export) The symbol "LocalStorageCache" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "FileCache" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    persister: LocalStorageCache;
+    persister: FileCache;
     read(file: TFile): Promise<string>;
     // Warning: (ae-forgotten-export) The symbol "EmbedQueue" needs to be exported by the entry point index.d.ts
     //
@@ -1589,7 +1588,7 @@ export interface TableColumn<T, V = Literal> {
     render?: (value: V, object: T) => Literal | ReactNode;
     title?: string | ReactNode | (() => string | ReactNode);
     value: (object: T) => V;
-    width?: "minimum" | "maximum" | string;
+    width?: "minimum" | "maximum" | (string & {});
 }
 
 // @public
@@ -1626,7 +1625,7 @@ export function valueFrontmatterEntry(raw: JsonFrontmatterEntry): FrontmatterEnt
 // @public
 export function VanillaSelect(props: {
     className?: string;
-    options: {
+    options?: {
         value: string;
         label: string;
     }[];

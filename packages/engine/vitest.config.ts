@@ -6,6 +6,8 @@ const source = fileURLToPath(new URL("./src", import.meta.url));
 export default defineConfig({
     resolve: {
         alias: [
+            // Tests never start web workers; keep the real worker source (which installs a global handler) out.
+            { find: /^index\/web-worker\/importer\.worker$/, replacement: `${source}/test/shims/importer-worker.ts` },
             // The engine imports its own modules bare, relative to `baseUrl: "src"` (e.g. "index/datacore"); mirror that.
             {
                 find: /^(api|expression|index|test|ui|utils|settings|main)(\/.*)?$/,

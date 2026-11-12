@@ -62,13 +62,13 @@ The engine core is already mostly render-free:
 |---|---|---|
 | `src/index/**`, `src/expression/**` | No Preact imports | Move as-is into `engine` |
 | `api/result.ts` | Imported by engine modules (`datastore`, `query-executor`, `evaluator`, `binaryop`, `filters`, `embed-queue`, `edit/field`) | `Result` *type* in contract; implementation in engine (and exposed via client helpers as needed) |
-| `expression/binaryop.ts:192` | Reads view settings (`defaultDateFormat`, `defaultDateTimeFormat`, `renderNullAs`) to stringify values | Engine owns a separate *coercion format* setting; display formats move to view settings |
+| `expression/binaryop.ts:192` | Reads the date formats and `renderNullAs` to stringify values | These become engine-owned **display defaults** (§8.2), used by the engine for stringification and shared with every view |
 | `api/data-array.ts`, `api/coerce.ts` | Pure utilities | Engine; exposed through the contract (`dc.array`, `dc.coerce`) |
 | `api/api.ts` | Mixes queries with `executeJs*` rendering and `get preact()` | Query half becomes the engine API; rendering half moves to `view-preact` |
 | `api/local-api.tsx` | Mixes query methods, Preact hooks, and components; exposes `core` (internals) and `app` | Split: path-scoped query methods → contract (`local(path)`); hooks/components → `view-preact` |
 | `api/script-cache.ts` | Script loading (`dc.require`) imports Preact `h`/`Fragment` | Moves to `view-preact`; later the shared module loader (§11.4) |
 | `ui/hooks.tsx` | Reaches into `datacore.datastore.revision` and `datacore.on("update")` | Rebuilt on the contract's `revision` and `subscribe` |
-| `settings.ts` | Mixes engine settings (importer threads/utilization, inline fields, list items) with view settings (paging, render depth, formats, `enableJs`) | Split into `EngineSettings` and per-view settings |
+| `settings.ts` | Mixes engine settings (importer threads/utilization, inline fields, list items) with presentation settings (paging, render depth, formats) and `enableJs` | `EngineSettings` = indexing + **display defaults** (one tab, owned by the engine); only plugin-specific options (e.g. `enableJs`) stay with a view plugin (§8.2) |
 | `main.ts` | Registers codeblocks, CodeMirror modes, `window.datacore`, settings tab | Split between the engine plugin and `view-preact` |
 | `LoadingProgress` (`ui/loading-boundary.tsx`) | Reads `datacore.initializer.progress()` for its initial render (events carry the payload since #184) | Contract `status()` supplies the initial progress |
 | UI imports of `Literals.*` (8 files) | Runtime helpers with `instanceof` checks | Identity-safe replacements in the **client** (D7) |
@@ -309,6 +309,10 @@ interface DatacoreApi {
   on(evt: "rename", cb: (newPath: string, oldPath: string) => void): Disposable;
   on(evt: "initialized", cb: () => void): Disposable;
   on(evt: "index-progress", cb: (progress: IndexProgress) => void): Disposable; // { initialized, total }
+  on(evt: "display-settings", cb: (display: DisplaySettings) => void): Disposable;
+
+  // Shared presentation preferences, owned by the engine's settings tab (read-only for consumers; §8.2)
+  readonly settings: { readonly display: DisplaySettings };
 
   // Path-scoped view of the API (replaces today's DatacoreLocalApi query half)
   local(sourcePath: string): DatacoreLocalQueryApi;
@@ -346,20 +350,42 @@ Explicitly **not** in the contract: `core`, `datastore`, `persister`, `importer`
 
 Everything in `src/index/**` and `src/expression/**`, plus `Result`, `DataArray`, `Coerce`, the persister, the inline worker, and an `EngineApiImpl implements DatacoreApi`. Pure helpers it shares with the views come from `shared`.
 
-### 8.2 Engine settings & settings tab
+### 8.2 Settings: one tab, owned by the engine
+
+Obsidian gives each plugin its own settings tab, and plugins cannot contribute sections to another plugin's tab. Rather
+than build a cross-plugin settings API, **the engine's tab is the single settings tab** for the whole family. It holds
+indexing options plus **display defaults** that every view plugin (Preact, Vue, third parties) reads through the
+contract, so users set things like the date format once.
 
 ```ts
 interface EngineSettings {
+  // Indexing
   importerNumThreads: number;
   importerUtilization: number;
   indexInlineFields: boolean;
   indexListItems: boolean;
-  /** Formats used when the *engine* stringifies values (e.g. string concatenation in expressions). */
-  coercion: { dateFormat: string; dateTimeFormat: string; nullAs: string };
+  /** Presentation defaults shared by all views; also used by the engine when stringifying values in expressions. */
+  display: DisplaySettings;
+}
+
+/** Contract type; exposed read-only as `dc.settings.display`, with a `display-settings` change event. */
+interface DisplaySettings {
+  dateFormat: string;          // luxon format
+  dateTimeFormat: string;      // luxon format
+  nullAs: string;              // how empty values render
+  pagingEnabled: boolean;      // views page results by default
+  pageSize: number;            // default rows per page
+  scrollOnPageChange: boolean;
+  maxRecursiveRenderDepth: number;
 }
 ```
 
-The settings tab also shows diagnostics: index status, connected consumers (from `ConsumerInfo`), and a "Reindex vault" command.
+- The tab also shows diagnostics: index status, connected consumers (from `ConsumerInfo`), and a "Reindex vault"
+  action.
+- **View plugins keep only plugin-specific options.** For `datacore-view-preact` that is essentially "Enable
+  JavaScript views". If a view plugin's options are this small, it may expose them as commands or a single toggle
+  instead of its own tab.
+- Views re-render on `display-settings` changes.
 
 ### 8.3 Persistence
 
@@ -395,7 +421,7 @@ Today's UI, ported to consume `datacore-client` (+ `shared`) only:
 
 - Codeblock processors and CodeMirror modes for `dc` / `dct` / `dcx` / `dctx` (§9.3).
 - The script-facing local API: wraps `ScopedDatacore.local(path)` and adds hooks (`useQuery`, `useFullQuery`, `useFile`, `useCurrentFile`, `useIndexUpdates`, `useInterning`, Preact hooks), components (`Table`, `List`, `Card`, `Callout`, `Stack`, `Group`, `Literal`, `Markdown`, `Link`, `LinkEmbed`, `SpanEmbed`, `Icon`, `Button`, `Textbox`, `Checkbox`, `Slider`, `Switch`, `VanillaSelect`, `embed`), and `dc.require` (script cache, with `__filename`/`__dirname` and host modules).
-- View settings: paging, page size, scroll-on-page-change, max render depth, display date formats, `renderNullAs`, `enableJs`.
+- Settings: only `enableJs` ("Enable JavaScript views"); all presentation defaults come from the engine via `dc.settings.display` (§8.2).
 - Identity: plugin id `datacore-view-preact`, display name "Datacore View: Preact", release repo `yankeeinlondon/datacore-view-preact`.
 
 ### 9.2 Parity requirements
@@ -541,7 +567,7 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 
 | Risk | Mitigation |
 |---|---|
-| Users must install two plugins (engine + views) | Clear "engine missing" notices from `getDatacore`; view settings link to the engine; option C later |
+| Users must install two plugins (engine + views) | Clear "engine missing" notices from `getDatacore`; one settings tab (the engine's) for the whole family; option C later |
 | Contract grows into a mirror of internals | Separate contract package, api-extractor review, views restricted to client (D8, D9) |
 | Duplicate contract copies split brand types | Consumers install the client only; client re-exports the contract with a caret range (§7.3) |
 | Hidden `instanceof` on consumer-supplied values | Audit in P1 (§7.4); tests that pass "foreign" `Link`/`DateTime` copies into the engine |

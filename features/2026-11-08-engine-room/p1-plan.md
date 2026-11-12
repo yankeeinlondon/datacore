@@ -121,9 +121,11 @@ Each step ends green (CI sequence) and is committed separately. Steps 1–2 are 
   identity), `versions.json` restarted. The upstream changelog is archived.
 - Cache: `datacore-engine/cache/${app.appId}`; entries keyed by an **index schema version** constant, not the plugin
   version. Verify whether IndexedDB is shared across vaults (spec §14.1) and record the answer.
-- **Settings split:** `EngineSettings` (§8.2, incl. `coercion` formats used by `binaryop`) vs view settings (paging,
-  formats, render depth, `enableJs`). Still one plugin and one settings tab in P1, with two clearly separated objects
-  and sections. A one-time migration reads upstream-style `data.json` keys if present.
+- **Settings (§8.2):** `EngineSettings` = indexing + `display: DisplaySettings` (formats, `nullAs`, paging, page size,
+  scroll-on-page-change, render depth). `binaryop` stringification reads `display`. `enableJs` is the only
+  view-specific option; it stays in the engine plugin until P2 moves it to `datacore-view-preact`. One settings tab,
+  permanently owned by the engine. A one-time migration reads upstream-style flat `data.json` keys if present.
+- Contract: `DisplaySettings`, `dc.settings.display`, and the `display-settings` event (views re-render on change).
 
 ### 8. Rewire the in-engine UI onto the API
 
@@ -153,10 +155,10 @@ Each step ends green (CI sequence) and is committed separately. Steps 1–2 are 
 | Removing `dc.core` breaks scripts that used internals | Documented breaking change; parity vault covers the documented surface |
 | Prototype-extension removal changes behaviour subtly | `Array.contains` and `includes` are equivalent (no `NaN` cases in this code); covered by tests |
 
-## Open points to confirm before starting
+## Decisions taken before starting
 
-1. **Plugin version reset to `0.1.0`** for the new `datacore-engine` identity (rather than continuing 0.1.29)?
-2. **Keep the in-engine settings tab as one tab with two sections** in P1 (split into two plugins' tabs in P2)?
-3. **Fake-vault fixture** (step 2) is a test-only package or a folder in the engine: suggest
-   `packages/engine/src/test/fixtures/` for now, and promote it to a shared test package if `view-preact` needs it in
-   P2.
+1. The renamed `datacore-engine` plugin restarts at **0.1.0** (new plugin identity).
+2. **One settings tab, owned by the engine, permanently** (spec §8.2): indexing + display defaults shared by all
+   views; view plugins keep only plugin-specific options.
+3. The fake-vault test fixture lives in `packages/engine/src/test/fixtures/`, promoted to a shared test package only
+   if `view-preact` needs it in P2.

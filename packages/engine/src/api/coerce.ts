@@ -78,7 +78,8 @@ export namespace Coerce {
 
     /** Coerces anything into an array, by converting non-arrays into unit length arrays. */
     export function array(value: Literal): Literal[] | undefined {
-        if (Array.isArray(value)) return value;
+        // A DataArray counts as an array (it is returned as-is, as it was under the old Array.isArray patch).
+        if (Literals.isArray(value)) return value;
         else return [value];
     }
 }

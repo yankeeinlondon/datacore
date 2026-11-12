@@ -2,6 +2,7 @@ import type { DatacoreApi, Disposable, IndexProgress } from "@yankeeinlondon/dat
 import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from "preact/compat";
 import type { Literal } from "@yankeeinlondon/datacore-contract";
 import { type FunctionComponent, type JSX, type VNode, createElement, isValidElement } from "preact";
+import { isLiteralArray } from "@yankeeinlondon/datacore-shared";
 import { ErrorMessage, Lit } from "./markdown";
 
 import "./errors.css";
@@ -98,11 +99,12 @@ export function ScriptContainer({
 export function makeRenderableElement(object: unknown, sourcePath: string): JSX.Element {
     if (typeof object === "function") {
         return createElement(object as FunctionComponent<unknown>, {});
-    } else if (Array.isArray(object)) {
+    } else if (isLiteralArray(object)) {
+        // A plain array or an engine DataArray (copied: Preact only flattens plain arrays).
         return createElement(
             "div",
             {},
-            (object as unknown[]).map((x) => makeRenderableElement(x, sourcePath))
+            Array.from(object).map((x) => makeRenderableElement(x, sourcePath))
         );
     } else if (isValidElement(object)) {
         return object;

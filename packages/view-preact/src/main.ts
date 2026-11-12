@@ -5,6 +5,7 @@ import { DatacoreBlock } from "./block";
 import { EngineConnection } from "./connection";
 import { CONVERT_COMMAND_NAME, startConversion } from "./migrate/modal";
 import { rebuildViewsWithCodeBlocks } from "./refresh";
+import { installDataArrayChildren } from "./ui/data-array-children";
 import { EmbedQueue } from "./ui/embed-queue";
 import type { ScriptLanguage } from "./ui/scripting";
 
@@ -55,6 +56,7 @@ export default class DatacoreViewPreactPlugin extends Plugin {
     private readonly views = new WeakMap<DatacoreHandle, PreactViewApi>();
 
     onload(): void {
+        this.register(installDataArrayChildren());
         const reader = this.addChild(new EmbedQueue(this.app.vault, () => 8));
         const connection = new EngineConnection(this.app, this);
         this.register(() => connection.stop());

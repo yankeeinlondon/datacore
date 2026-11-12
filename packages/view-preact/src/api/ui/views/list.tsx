@@ -96,7 +96,7 @@ export function ListView<T>(props: ListViewProps<T>) {
 
     const groupings = useMemo(() => {
         if (!props.groupings) return undefined;
-        if (Array.isArray(props.groupings)) return props.groupings;
+        if (isLiteralArray(props.groupings)) return Array.from(props.groupings);
 
         if (typeof props.groupings === "function") return [{ render: props.groupings }];
         else return [props.groupings];

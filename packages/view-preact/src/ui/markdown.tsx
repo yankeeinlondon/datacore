@@ -231,10 +231,12 @@ function RawLit({
     } else if (typeof value === "function") {
         return <Fragment>&lt;function&gt;</Fragment>;
     } else if (isLiteralArray(value)) {
+        // A DataArray's map() returns a DataArray, which Preact cannot render as children; use a plain array.
+        const items: Literal[] = Array.from(value as Iterable<Literal>);
         if (!inline) {
             return (
                 <ul className={"dataview dataview-ul dataview-result-list-ul"}>
-                    {value.map((subvalue) => (
+                    {items.map((subvalue) => (
                         <li className="dataview-result-list-li">
                             <Lit value={subvalue} sourcePath={sourcePath} inline={inline} depth={depth + 1} />
                         </li>
@@ -242,11 +244,11 @@ function RawLit({
                 </ul>
             );
         } else {
-            if (value.length == 0) return <Fragment>&lt;Empty List&gt;</Fragment>;
+            if (items.length == 0) return <Fragment>&lt;Empty List&gt;</Fragment>;
 
             return (
                 <span className="dataview dataview-result-list-span">
-                    {value.map((subvalue, index) => (
+                    {items.map((subvalue, index) => (
                         <Fragment>
                             {index == 0 ? "" : ", "}
                             <Lit value={subvalue} sourcePath={sourcePath} inline={inline} depth={depth + 1} />

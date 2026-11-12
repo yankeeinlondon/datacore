@@ -437,8 +437,7 @@ class DataArrayImpl<T> implements DataArray<T>, Contract.DataArray<T> {
             let value = (next as Record<string, unknown>)[key];
 
             if (value === undefined || value === null) continue;
-            if (Array.isArray(value)) value.forEach((v) => queue.push(v));
-            else if (DataArray.isDataArray(value)) value.forEach((v) => queue.push(v));
+            if (Array.isArray(value) || DataArray.isDataArray(value)) value.forEach((v) => queue.push(v));
             else queue.push(value);
 
             result.push(next);
@@ -497,9 +496,3 @@ export namespace DataArray {
         return Literals.compare(first as Literal | undefined, second as Literal | undefined);
     }
 }
-
-// A scary looking polyfill, sure, but it fixes up data array/array interop for us.
-const oldArrayIsArray = Array.isArray;
-Array.isArray = (arg): arg is unknown[] => {
-    return oldArrayIsArray(arg) || DataArray.isDataArray(arg);
-};

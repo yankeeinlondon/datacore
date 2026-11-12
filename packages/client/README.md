@@ -24,9 +24,10 @@ pnpm add @yankeeinlondon/datacore-client
 # or: npm install @yankeeinlondon/datacore-client
 ```
 
-The package is ESM with bundled type declarations. Obsidian plugins are bundled (esbuild, Rollup, Vite), which handle
-it out of the box. TypeScript resolves it with `moduleResolution` set to `bundler`, `node16`/`nodenext`, or the classic
-`node` setting used by the Obsidian sample plugin.
+The package ships ESM and CommonJS builds with type declarations for both. Obsidian plugins are bundled (esbuild,
+Rollup, Vite), which pick the right build automatically. TypeScript resolves it with `moduleResolution` set to
+`bundler`, `node16`/`nodenext`, or the classic `node` setting used by the Obsidian sample plugin. The engine is only
+reachable inside Obsidian, but the guards and value helpers are plain functions you can unit-test under Node.
 
 Do **not** also install `@yankeeinlondon/datacore-contract` directly: two copies of the contract would split its
 branded types. Import everything from the client.

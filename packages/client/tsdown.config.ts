@@ -2,7 +2,7 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
     entry: ["src/index.ts"],
-    format: ["esm"],
+    format: ["esm", "cjs"],
     platform: "neutral",
     // Eager tsc emit: the lazy per-file mode fails to emit declarations for shared files reached through re-exports.
     dts: { tsc: { eager: true } },

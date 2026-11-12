@@ -58,7 +58,8 @@ export default class DatacoreViewPreactPlugin extends Plugin {
     onload(): void {
         this.register(installDataArrayChildren());
         const reader = this.addChild(new EmbedQueue(this.app.vault, () => 8));
-        const connection = new EngineConnection(this.app, this);
+        // The views need contract API 1.x (e.g. `release()`, `inferLink`); an older or newer major is "incompatible".
+        const connection = new EngineConnection(this.app, this, { minApi: "1.0" });
         this.register(() => connection.stop());
         void connection.start();
 

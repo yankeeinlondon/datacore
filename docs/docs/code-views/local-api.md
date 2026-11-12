@@ -214,6 +214,16 @@ return function View() {
 }
 ```
 
+### `dc.page()`
+
+Load a markdown page by its full vault path or a link, or `undefined` if there is no such page. Like the other direct
+queries, it does not re-render your view when the page changes; use `dc.useFile()` for that.
+
+```jsx
+dc.page("Books/Dune.md") => // the page, or undefined
+dc.page(dc.fileLink("Books/Dune.md")) => // the same page
+```
+
 ### `dc.query()`
 
 Execute a [query](/data/query) against the datacore index, returning a list of all matched [results](/data). Will raise an exception

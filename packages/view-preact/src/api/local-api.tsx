@@ -34,10 +34,14 @@ import { Card } from "./ui/views/cards";
 import { ListView } from "./ui/views/list";
 
 /**
- * Local API provided to specific codeblocks when they are executing.
+ * Local API provided to specific codeblocks when they are executing. It covers the engine's path-scoped query API
+ * (`DatacoreLocalQueryApi`, forwarded to `engine.local(path)`) plus the hooks, components, and `require`.
+ *
+ * `currentFile` keeps upstream's signature (it returns `T`, where the contract says `T | undefined`), so it is left out
+ * of the `implements` check.
  * @public
  */
-export class DatacoreLocalApi {
+export class DatacoreLocalApi implements Omit<DatacoreLocalQueryApi, "currentFile"> {
     /** The engine (contract API only). */
     private readonly engine: DatacoreApi;
     /** The engine's query API scoped to this script's file. */
@@ -202,6 +206,11 @@ export class DatacoreLocalApi {
     /////////////
     // Queries //
     /////////////
+
+    /** Load a markdown page by its full vault path or a link. */
+    public page<T extends MarkdownPage = MarkdownPage>(path: string | Link): T | undefined {
+        return this.local.page<T>(path);
+    }
 
     /** Execute a textual or typed index query, returning all results. */
     public query<T extends Indexable = Indexable>(query: string | IndexQuery): T[] {

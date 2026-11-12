@@ -77,9 +77,9 @@ values exactly as views do:
 | `mapLeaves(x, fn)` | Apply `fn` to every leaf of nested lists and objects. |
 
 ```ts
-import { compare, literalToString, typeOf } from "@yankeeinlondon/datacore-client";
+import { compare, literalToString, typeOf, type MarkdownPage } from "@yankeeinlondon/datacore-client";
 
-const books = dc.query("@page and #book");
+const books = dc.query<MarkdownPage>("@page and #book");
 books.sort((a, b) => compare(a.value("rating"), b.value("rating")));
 
 const display = dc.settings.display;
@@ -112,12 +112,12 @@ deep they are:
 recognize them:
 
 ```ts
-import { isDateTime } from "@yankeeinlondon/datacore-client";
+import { isDateTime, type MarkdownPage } from "@yankeeinlondon/datacore-client";
 
 const { DateTime } = dc.luxon;
 const weekAgo = DateTime.now().minus({ days: 7 });
 
-const recent = dc.query("@page").filter((page) => {
+const recent = dc.query<MarkdownPage>("@page").filter((page) => {
     const due = page.value("due");
     return isDateTime(due) && due > weekAgo;
 });

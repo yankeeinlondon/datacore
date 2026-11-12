@@ -271,4 +271,17 @@ Each step ended with the parity snapshot identical to the baseline.
   Verified in Obsidian: disable/enable the engine recovers open views; both load orders; an engine enabled after the
   client's 10 s timeout still connects.
 
-Remaining: steps 6–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).
+### Step 6 ✅ (2026-11-12): `dc` / `dct` / `dcx` / `dctx`
+
+- view-preact registers only the four `dc*` languages (processors and CodeMirror modes); `datacore*` blocks stay plain
+  code. `dc.require` still recognizes `datacore*` fences inside a referenced section, so old script modules keep
+  loading during migration.
+- **Spec §14.2 answered** (see spec): a duplicate language registration throws *and* leaks a post-processor in
+  Obsidian 1.15.1. view-preact checks the private registry first and skips a taken language with a warning (try/catch
+  stays as a fallback); verified in the app that nothing leaks and the other languages still register.
+- Parity: the parity notes now use `dc*` fences; the normalizer maps upstream language classes to their `dc*`
+  equivalents, and the stored baseline was renormalized (a diff of exactly the 23 language-class renames). Snapshot
+  identical to the baseline.
+- Docs use the new names. Removed dead CSS for `.block-language-datacore(js)` (no element used those classes).
+
+Remaining: steps 7–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

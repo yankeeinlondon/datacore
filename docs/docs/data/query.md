@@ -71,7 +71,7 @@ matches objects and instead matches all parents of those objects. For example, i
 
 ```js
 // Find all pages that contain datacore codeblocks.
-@page and parentof(@codeblock and $languages.contains("datacorejs"))
+@page and parentof(@codeblock and $languages.contains("dc"))
 
 // Find pages which have `Daily` sections.
 @page and parentof(@section and $name = "Daily")

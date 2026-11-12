@@ -2,7 +2,7 @@
 
 ## Module
 
-```datacorejs
+```dc
 function shout(text) {
     return text.toUpperCase() + "!";
 }
@@ -11,7 +11,7 @@ return { shout };
 
 ## Uses
 
-```datacorejsx
+```dcx
 return function View() {
     const [state, setState] = dc.useState(undefined);
     dc.useEffect(() => {

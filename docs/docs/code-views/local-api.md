@@ -11,7 +11,7 @@ which you can build our more complicated views.
 Datacore codeblocks are built on React, so the basic structure of any codeblock will generally look like:
 
 ~~~
-```datacorejsx
+```dcx
 // Return a react functional component which renders your view.
 return function View() {
     // Call functions on the datacore API, 'dc'.

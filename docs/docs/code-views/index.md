@@ -5,7 +5,9 @@ sidebar_position: 400
 ---
 
 Datacore supports Javascript, JSX, Typescript, and TSX. To add code to a page, use an embedded
-codeblock with the language `datacorejs`, `datacorejsx`, `datacorets`, or `datacoretsx` respectively.
+codeblock with the language `dc`, `dcx`, `dct`, or `dctx` respectively. These blocks are rendered by the
+**Datacore View: Preact** plugin, which needs **Datacore Engine**. (Upstream Datacore used `datacorejs`, `datacorejsx`,
+`datacorets`, and `datacoretsx`; the command "Convert datacore code blocks to dc" migrates existing notes.)
 The engine API is also available to scripts, Templater/QuickAdd, and the developer console as the global
 `window.dc`. Plugins should use `getDatacore()` from `@yankeeinlondon/datacore-client` instead.
 
@@ -16,14 +18,14 @@ views can be fully interactive with buttons, time-base elements, and custom CSS.
 (essentially a smaller variant of `React`) for rendering. The most basic codeblock looks like so:
 
 ~~~
-```datacorejsx
+```dcx
 return function View() {
     return <p>Hello!</p>;
 }
 ```
 ~~~
 
-Codeblocks should be annotated with `datacorejsx` to use JSX, and they should return a React Component
+Codeblocks should be annotated with `dcx` to use JSX, and they should return a React Component
 (the `return function View()` in the example), which will be rendered. Codeblocks have access to the `dc` global variable,
 which provides a very rich API for querying state via React Hooks.
 
@@ -219,7 +221,7 @@ const { Notice } = await dc.require("obsidian");
 
 Every script has two variables describing where it lives in the vault, which makes relative imports possible:
 
-- `__filename` - the vault-relative path of the file containing the script. For a `datacorejs`/`jsx`/`ts`/`tsx`
+- `__filename` - the vault-relative path of the file containing the script. For a `dc`/`dcx`/`dct`/`dctx`
   codeblock, or a codeblock loaded with `dc.require`, this is the **markdown note** containing the codeblock; for a
   `.js`/`.ts` file loaded with `dc.require`, it is that file.
 - `__dirname` - the folder containing `__filename` (an empty string for files at the vault root).

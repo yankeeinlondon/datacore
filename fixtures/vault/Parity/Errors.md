@@ -2,7 +2,7 @@
 
 ## Invalid query
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and (");
     return <p>{books.length}</p>;
@@ -11,7 +11,7 @@ return function View() {
 
 ## Thrown error
 
-```datacorejsx
+```dcx
 return function View() {
     throw new Error("parity: thrown on purpose");
 }
@@ -19,7 +19,7 @@ return function View() {
 
 ## Syntax error
 
-```datacorejsx
+```dcx
 return function View() {
     return <p>unclosed
 }
@@ -27,6 +27,6 @@ return function View() {
 
 ## Nothing returned
 
-```datacorejsx
+```dcx
 const unused = 1;
 ```

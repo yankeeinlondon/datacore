@@ -17,6 +17,8 @@ module.exports = class DatacoreParityPlugin extends Plugin {
             mount: (path) => this.mount(path),
             html: (id) => this.mounted.get(id)?.container.innerHTML,
             unmount: (id) => this.unmount(id),
+            /** The `obsidian` module, for inspecting app internals from `obsidian-cli eval` (dev only). */
+            obsidian: require("obsidian"),
         };
         this.register(() => {
             for (const id of Array.from(this.mounted.keys())) this.unmount(id);

@@ -1,6 +1,6 @@
 # Links and Embeds
 
-```datacorejsx
+```dcx
 return function View() {
     const book = dc.useFile("Parity/Data/Parity Book 03.md");
     const review = dc.useQuery("@section and $name = \"Review\" and childof(@page and $name = \"Parity Book 03\")")[0];

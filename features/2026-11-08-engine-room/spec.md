@@ -582,6 +582,10 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 Facts to confirm during implementation, and follow-ups to schedule:
 
 1. Whether Obsidian's IndexedDB is shared across vaults (P1; the cache name is vault-scoped either way).
-2. Obsidian's behaviour on duplicate codeblock-language registration (P2; defensive handling only, since names no longer collide).
+2. ~~Obsidian's behaviour on duplicate codeblock-language registration~~. Resolved in P2 (Obsidian 1.15.1): the
+   second `registerMarkdownCodeBlockProcessor` for a language **throws** ("…is already registered") and the first
+   registrant keeps it, but the post-processor Obsidian created before throwing is **never removed**, so it keeps
+   rendering that language with the second plugin's handler until Obsidian restarts. `datacore-view-preact` therefore
+   checks the (private) registry before registering each `dc*` language and skips taken ones with a warning.
 3. ~~`eslint-plugin-obsidianmd` compatibility with oxlint `jsPlugins`~~. Resolved in P0: untyped rules work in oxlint; the 7 type-aware rules and manifest/license validation run in ESLint.
 4. Whether to move to TypeScript 6/7 (7.0.2 is the latest release). Gated on api-extractor, tsdown d.ts generation, and typescript-eslint support.

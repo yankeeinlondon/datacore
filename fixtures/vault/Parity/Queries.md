@@ -1,6 +1,6 @@
 # Queries and expressions
 
-```datacorejsx
+```dcx
 return function View() {
     const rows = [
         ["query count", dc.query("@page and #pbook and rating > 3").length],

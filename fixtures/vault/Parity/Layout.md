@@ -1,6 +1,6 @@
 # Layout
 
-```datacorejsx
+```dcx
 return function View() {
     const book = dc.useFile("Parity/Data/Parity Book 07.md");
     return (

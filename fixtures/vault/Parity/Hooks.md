@@ -1,6 +1,6 @@
 # Hooks
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook");
     const full = dc.useFullQuery("@page and #pauthor");

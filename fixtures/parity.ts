@@ -9,6 +9,7 @@
  *   node parity.ts sync                 # copy vault/ into the target vault, (re)load the helper plugin
  *   node parity.ts snapshot <name>      # render every Parity/*.md note into parity/<name>/
  *   node parity.ts compare <a> <b>      # diff two snapshots; exits 1 when they differ
+ *   node parity.ts renormalize <name>   # re-apply the normalization rules to a stored snapshot
  *
  * Options: --vault <name> (default: $PARITY_VAULT or "Test Vault"); $OBSIDIAN_CLI overrides the CLI binary.
  */
@@ -172,12 +173,20 @@ function sync(vault: string): void {
     );
 }
 
+/** Upstream language suffix → dc language. */
+const DC_LANGUAGES: Record<string, string> = { js: "dc", ts: "dct", jsx: "dcx", tsx: "dctx" };
+
 /** Make snapshots diffable: one tag per line, volatile attributes and stack frames removed. */
 function normalize(html: string): string {
     return (
         html
             // Obsidian/Preact generated ids and per-render keys.
             .replace(/\s(id|data-id|data-heading-id|aria-controls|aria-labelledby)="[^"]*"/g, "")
+            // Upstream's code block languages became dc/dct/dcx/dctx (P2 step 6); compare across the rename.
+            .replace(
+                /block-language-datacore(js|ts|jsx|tsx)\b/g,
+                (_match, language: string) => `block-language-${DC_LANGUAGES[language] ?? language}`
+            )
             // Stack frames carry bundle line numbers, which change with every build; keep only the error message.
             .replace(/\n\s+at [^\n<]*/g, "")
             .replace(/></g, ">\n<")
@@ -227,6 +236,18 @@ function snapshot(vault: string, name: string): void {
     }
 }
 
+/** Re-apply the current normalization to a stored snapshot (after normalization rules change). */
+function renormalize(name: string): void {
+    const dir = join(SNAPSHOT_DIR, name);
+    const notes = readdirSync(dir).filter((file) => file.endsWith(".html"));
+    for (const note of notes) {
+        const path = join(dir, note);
+        // Undo the one-tag-per-line layout first so normalization sees the original markup.
+        writeFileSync(path, normalize(readFileSync(path, "utf8").replace(/>\n</g, "><").trimEnd()));
+    }
+    console.log(`Renormalized ${notes.length} notes in ${dir}`);
+}
+
 /** Compare the rendered notes of two snapshots (`_meta.json` describes the environment and is only printed). */
 function compare(first: string, second: string): void {
     const [a, b] = [join(SNAPSHOT_DIR, first), join(SNAPSHOT_DIR, second)];
@@ -266,6 +287,10 @@ switch (command) {
     case "snapshot":
         if (!rest[0]) throw new Error("Usage: node parity.ts snapshot <name>");
         snapshot(vault, rest[0]);
+        break;
+    case "renormalize":
+        if (!rest[0]) throw new Error("Usage: node parity.ts renormalize <name>");
+        renormalize(rest[0]);
         break;
     case "compare":
         if (!rest[0] || !rest[1]) throw new Error("Usage: node parity.ts compare <a> <b>");

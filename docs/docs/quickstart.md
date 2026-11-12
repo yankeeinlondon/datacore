@@ -25,7 +25,7 @@ To immediately get something on the screen, add a datacore code block to any pag
 show how many markdown pages you have in your vault:
 
 ~~~
-```datacorejsx
+```dcx
 // All datacore views should return a React component; in practice, this is going to be
 return function View() {
     const pages = dc.useQuery("@page").length;
@@ -38,7 +38,7 @@ return function View() {
 Alternatively, if a trivial component that shows how many pages you have is too pedestrian, here is the classic table view:
 
 ~~~
-```datacorejsx
+```dcx
 // A list of columns to show in the table.
 const COLUMNS = [
     { id: "Name", value: page => page.$link },

@@ -2,7 +2,7 @@
 
 ## Paged (explicit page size)
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook");
     const sorted = dc.useMemo(() => [...books].sort((a, b) => a.$name.localeCompare(b.$name)), [books]);
@@ -26,7 +26,7 @@ return function View() {
 
 ## Default paging (display settings)
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook");
     const sorted = dc.useMemo(() => [...books].sort((a, b) => a.$name.localeCompare(b.$name)), [books]);
@@ -36,7 +36,7 @@ return function View() {
 
 ## Grouped
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook and rating >= 4");
     const grouped = dc.useArray(books, (array) =>
@@ -57,7 +57,7 @@ return function View() {
 
 ## Custom column rendering
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook and status = \"done\"");
     const sorted = dc.useMemo(() => [...books].sort((a, b) => a.$name.localeCompare(b.$name)).slice(0, 4), [books]);

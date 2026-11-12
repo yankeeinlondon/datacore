@@ -49,13 +49,17 @@ export class ScriptCache {
     private static SCRIPT_LANGUAGES: Record<string, ScriptLanguage> = {
         js: "js",
         javascript: "js",
+        dc: "js",
         datacorejs: "js",
         typescript: "ts",
         ts: "ts",
+        dct: "ts",
         datacorets: "ts",
         jsx: "jsx",
+        dcx: "jsx",
         datacorejsx: "jsx",
         tsx: "tsx",
+        dctx: "tsx",
         datacoretsx: "tsx",
     };
 

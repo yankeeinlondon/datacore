@@ -1,6 +1,6 @@
 # Literals
 
-```datacorejsx
+```dcx
 return function View() {
     const book = dc.useFile("Parity/Data/Parity Book 12.md");
     const values = [

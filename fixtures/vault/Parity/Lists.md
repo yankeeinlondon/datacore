@@ -2,7 +2,7 @@
 
 ## Unordered, ordered, block
 
-```datacorejsx
+```dcx
 return function View() {
     const authors = dc.useQuery("@page and #pauthor");
     const sorted = dc.useMemo(() => [...authors].sort((a, b) => a.$name.localeCompare(b.$name)), [authors]);
@@ -18,7 +18,7 @@ return function View() {
 
 ## Grouped and paged
 
-```datacorejsx
+```dcx
 return function View() {
     const books = dc.useQuery("@page and #pbook");
     const grouped = dc.useArray(books, (array) =>
@@ -30,7 +30,7 @@ return function View() {
 
 ## Tasks with children
 
-```datacorejsx
+```dcx
 return function View() {
     const tasks = dc.useQuery("@task and childof(@page and #pbook and rating = 5)");
     const sorted = dc.useMemo(

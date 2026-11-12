@@ -1,6 +1,6 @@
 # Controls
 
-```datacorejsx
+```dcx
 return function View() {
     const [count, setCount] = dc.useState(0);
     return (

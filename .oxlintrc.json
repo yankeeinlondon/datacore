@@ -1,0 +1,104 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "jsPlugins": ["eslint-plugin-obsidianmd", "./tools/lint/datacore-rules.mjs"],
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "ignorePatterns": ["**/build/**", "**/dist/**", "docs/**", "features/**"],
+  "rules": {
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error", "debug"]
+      }
+    ],
+    "no-new-func": "error",
+    "obsidianmd/commands/no-command-in-command-id": "warn",
+    "obsidianmd/commands/no-command-in-command-name": "warn",
+    "obsidianmd/commands/no-default-hotkeys": "warn",
+    "obsidianmd/commands/no-plugin-id-in-command-id": "warn",
+    "obsidianmd/commands/no-plugin-name-in-command-name": "warn",
+    "obsidianmd/settings-tab/no-manual-html-headings": "error",
+    "obsidianmd/settings-tab/no-problematic-settings-headings": "error",
+    "obsidianmd/settings-tab/require-display": "warn",
+    "obsidianmd/settings-tab/prefer-setting-definitions": "warn",
+    "obsidianmd/settings-tab/prefer-update-over-display": "warn",
+    "obsidianmd/settings-tab/no-deprecated-display": "warn",
+    "obsidianmd/vault/iterate": "warn",
+    "obsidianmd/detach-leaves": "error",
+    "obsidianmd/editor-drop-paste": "warn",
+    "obsidianmd/no-sample-code": "error",
+    "obsidianmd/object-assign": "warn",
+    "obsidianmd/prefer-abstract-input-suggest": "warn",
+    "obsidianmd/sample-names": "error",
+    "obsidianmd/no-global-this": "warn",
+    "obsidianmd/platform": "error",
+    "obsidianmd/prefer-window-timers": "warn",
+    "obsidianmd/prefer-active-doc": "warn",
+    "obsidianmd/hardcoded-config-path": "warn",
+    "obsidianmd/no-forbidden-elements": "error",
+    "obsidianmd/no-nodejs-modules": "warn",
+    "obsidianmd/no-tfile-tfolder-cast": "warn",
+    "obsidianmd/no-static-styles-assignment": "error",
+    "obsidianmd/prefer-get-language": "warn",
+    "obsidianmd/regex-lookbehind": "error"
+  },
+  "overrides": [
+    {
+      "files": ["packages/view-*/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@yankeeinlondon/datacore-engine",
+                "message": "View plugins consume the engine only through @yankeeinlondon/datacore-client (Engine Room spec, D9)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/shared/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "obsidian",
+                "allowTypeImports": true,
+                "message": "datacore-shared must not import obsidian at runtime (Engine Room spec, D9); type-only imports are fine."
+              },
+              {
+                "name": "@yankeeinlondon/datacore-engine",
+                "message": "datacore-shared must not depend on the engine."
+              }
+            ]
+          }
+        ],
+        "datacore/no-class": "error"
+      }
+    },
+    {
+      "files": ["**/src/test/**", "**/*.test.ts", "**/*.config.*", "tools/**", "scripts/**", "packages/*/scripts/**"],
+      "rules": {
+        "no-console": "off",
+        "obsidianmd/no-nodejs-modules": "off",
+        "obsidianmd/prefer-active-doc": "off",
+        "obsidianmd/prefer-window-timers": "off",
+        "obsidianmd/no-global-this": "off",
+        "vitest/expect-expect": [
+          "warn",
+          {
+            "assertFunctionNames": ["expect", "expectEvals", "check"]
+          }
+        ]
+      }
+    }
+  ]
+}

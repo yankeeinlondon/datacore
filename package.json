@@ -12,12 +12,19 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "fmt": "oxfmt .",
-    "fmt:check": "oxfmt --check ."
+    "fmt:check": "oxfmt --check .",
+    "lint": "oxlint --type-aware && eslint ."
   },
   "devDependencies": {
+    "@eslint/json": "2.1.1",
+    "eslint": "9.39.5",
+    "eslint-plugin-obsidianmd": "0.5.1",
     "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2006",
     "tsdown": "0.23.7",
     "typescript": "5.8.3",
+    "typescript-eslint": "8.72.2",
     "vitest": "5.1.0"
   }
 }

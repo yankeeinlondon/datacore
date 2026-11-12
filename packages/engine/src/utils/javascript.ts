@@ -31,6 +31,8 @@ export function evalInContext(script: string, variables: Record<string, unknown>
     const keys = pairs.map(([key, _]) => key);
     const values = pairs.map(([_, value]) => value);
 
+    // Executing user-authored view scripts is the feature; this is the single sanctioned dynamic-code entry point.
+    // oxlint-disable-next-line no-new-func
     return new Function(...keys, script)(...values);
 }
 

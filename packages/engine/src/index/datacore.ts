@@ -1,7 +1,7 @@
 import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
 import { deferred, Deferred } from "utils/deferred";
 import { Datastore, Substorer } from "index/datastore";
-import { FileCache, LocalStorageCache } from "index/persister";
+import { FileCache, INDEX_SCHEMA_VERSION, LocalStorageCache } from "index/persister";
 import { Indexable, INDEXABLE_EXTENSIONS } from "index/types/indexable";
 import { FileImporter, FileImportService, ImportThrottle } from "index/web-worker/importer";
 import { ImportResult } from "index/web-worker/message";
@@ -57,7 +57,8 @@ export class Datacore extends Component {
 
         this.vault = app.vault;
         this.metadataCache = app.metadataCache;
-        this.persister = services.persister ?? new LocalStorageCache("primary", version);
+        // Vault-scoped cache, validated by index schema version (not plugin version).
+        this.persister = services.persister ?? new LocalStorageCache(app.appId ?? "default", INDEX_SCHEMA_VERSION);
         this.events = new Events();
 
         this.datastore = new Datastore(app.vault, app.metadataCache, settings);
@@ -501,7 +502,7 @@ export class DatacoreInitializer extends Component {
         try {
             // Handle loading markdown files from cache.
             const cached = await this.core.persister.loadFile(file.path);
-            if (cached && cached.time >= file.stat.mtime && cached.version == this.core.version) {
+            if (cached && cached.time >= file.stat.mtime && cached.version == INDEX_SCHEMA_VERSION) {
                 if (file.extension === "md") {
                     const data = MarkdownPage.from(cached.data as JsonMarkdownPage, (link) => link);
                     this.core.storeMarkdown(data);

@@ -60,7 +60,7 @@ export async function createTestEngine(options: TestEngineOptions = {}): Promise
     const app = new FakeApp();
     for (const note of options.notes ?? []) app.seed(built(note));
 
-    const cache = options.cache ?? new MemoryCache(TEST_ENGINE_VERSION);
+    const cache = options.cache ?? new MemoryCache();
     const settings: Settings = { ...DEFAULT_SETTINGS, ...options.settings };
     const core = new Datacore(app.asApp(), TEST_ENGINE_VERSION, settings, {
         importer: new InProcessImporter(app.obsidianVault, app.fileManager, app.obsidianMetadataCache),

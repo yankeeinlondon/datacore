@@ -4,7 +4,7 @@ import type { MarkdownPage, MarkdownTaskItem } from "index/types/markdown";
 import { InProcessImporter } from "index/web-worker/in-process-importer";
 import { MemoryCache } from "test/fixtures/memory-cache";
 import { note } from "test/fixtures/note-builder";
-import { createTestEngine, TEST_ENGINE_VERSION, TestEngine } from "test/fixtures/test-engine";
+import { createTestEngine, TestEngine } from "test/fixtures/test-engine";
 
 const dune = () =>
     note("Books/Dune.md")
@@ -82,8 +82,18 @@ describe("headless engine harness", () => {
         expect(paths(engine.query("@page and #book"))).toEqual(["Archive/Foundation.md", "Books/Dune.md"]);
     });
 
+    it("ignores cache entries written for a different index schema", async () => {
+        const cache = new MemoryCache("0-outdated");
+        const first = await createTestEngine({ notes: [dune(), foundation()], cache });
+        first.dispose();
+
+        const imports = vi.spyOn(InProcessImporter.prototype, "import");
+        engine = await createTestEngine({ notes: [dune(), foundation()], cache });
+        expect(imports).toHaveBeenCalledTimes(2);
+    });
+
     it("starts from the cache when files are unchanged", async () => {
-        const cache = new MemoryCache(TEST_ENGINE_VERSION);
+        const cache = new MemoryCache();
         const first = await createTestEngine({ notes: [dune(), foundation()], cache });
         expect([...cache.entries.keys()].sort()).toEqual(["Books/Dune.md", "Books/Foundation.md"]);
         first.dispose();

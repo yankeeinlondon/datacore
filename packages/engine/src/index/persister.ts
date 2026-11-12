@@ -22,6 +22,18 @@ export interface FileCache {
     synchronize(existing: string[] | Set<string>): Promise<Set<string>>;
 }
 
+/**
+ * Version of the serialized index format stored in the cache. Cached entries from any other version are ignored and
+ * re-imported. Bump this whenever the JSON written by `json()` on indexed objects changes shape; plugin releases that
+ * do not change the format leave the cache valid.
+ */
+export const INDEX_SCHEMA_VERSION = "1";
+
+/** IndexedDB database name for a vault's cache. Vault-scoped, and distinct from upstream Datacore's. */
+export function cacheName(vaultId: string): string {
+    return `datacore-engine/cache/${vaultId}`;
+}
+
 /** Simpler wrapper for a file-backed cache for arbitrary metadata. */
 export class LocalStorageCache implements FileCache {
     public persister: LocalForage;
@@ -31,7 +43,7 @@ export class LocalStorageCache implements FileCache {
         public version: string
     ) {
         this.persister = localforage.createInstance({
-            name: "datacore/cache/" + appId,
+            name: cacheName(appId),
             driver: [localforage.INDEXEDDB],
             description: "Cache metadata about files and sections in the datacore index.",
         });
@@ -39,10 +51,10 @@ export class LocalStorageCache implements FileCache {
 
     /** Drop the entire cache instance and re-create a new fresh instance. */
     public async recreate() {
-        await localforage.dropInstance({ name: "datacore/cache/" + this.appId });
+        await localforage.dropInstance({ name: cacheName(this.appId) });
 
         this.persister = localforage.createInstance({
-            name: "datacore/cache/" + this.appId,
+            name: cacheName(this.appId),
             driver: [localforage.INDEXEDDB],
             description: "Cache metadata about files and sections in the datacore index.",
         });

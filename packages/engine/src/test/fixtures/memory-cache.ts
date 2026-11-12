@@ -1,10 +1,10 @@
 /** In-memory `FileCache` (the IndexedDB-backed cache's test double). */
-import type { Cached, FileCache } from "index/persister";
+import { INDEX_SCHEMA_VERSION, type Cached, type FileCache } from "index/persister";
 
 export class MemoryCache implements FileCache {
     readonly entries = new Map<string, Cached<Partial<unknown>>>();
 
-    constructor(private readonly version: string) {}
+    constructor(private readonly version: string = INDEX_SCHEMA_VERSION) {}
 
     async loadFile(path: string): Promise<Cached<Partial<unknown>> | undefined> {
         return this.entries.get(path);

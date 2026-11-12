@@ -44,14 +44,17 @@ export default class DatacorePlugin extends Plugin implements EngineSettingsHost
         this.addCommand({
             id: "datacore-reindex-vault",
             name: "Reindex entire vault",
-            callback: async () => {
-                console.debug("Datacore: dropping the datastore and reindexing all items.");
-                await this.core.reindex();
-            },
+            callback: () => this.reindex(),
         });
 
         // Initialize as soon as the workspace is ready.
         this.app.workspace.onLayoutReady(async () => this.core.initialize());
+    }
+
+    /** Drop the index and reindex every file. */
+    async reindex(): Promise<void> {
+        console.debug("Datacore: dropping the datastore and reindexing all items.");
+        await this.core.reindex();
     }
 
     /** Index state for the settings tab's diagnostics. */

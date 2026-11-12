@@ -16,6 +16,7 @@ function tab(overrides: Partial<EngineSettingsHost> = {}): GeneralSettingsTab {
         updateDisplay: () => Promise.resolve(),
         indexStatus: () => ({ initialized: true, objects: 1234, revision: 7 }),
         consumers: () => [{ id: "datacore-view-preact", name: "Datacore View: Preact" }],
+        reindex: () => Promise.resolve(),
         ...overrides,
     } as unknown as EngineSettingsHost;
     return new GeneralSettingsTab({} as never, host);
@@ -38,6 +39,7 @@ describe("GeneralSettingsTab", () => {
             "Importer utilization",
             "Index status",
             "Connected plugins",
+            "Reindex vault",
         ]);
     });
 

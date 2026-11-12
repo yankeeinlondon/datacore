@@ -36,6 +36,8 @@ export interface EngineSettingsHost extends Plugin {
     indexStatus(): { initialized: boolean; objects: number; revision: number };
     /** Plugins currently connected through the client (view plugins and others). */
     consumers(): ConsumerInfo[];
+    /** Drop the index and reindex the whole vault (also the "Reindex entire vault" command). */
+    reindex(): Promise<void>;
 }
 
 const LUXON_FORMATS =
@@ -237,6 +239,22 @@ export class GeneralSettingsTab extends PluginSettingTab {
                 name: "Connected plugins",
                 aliases: ["consumers", "views", "diagnostics"],
                 render: (setting) => setting.setDesc(describeConsumers(plugin.consumers())),
+            },
+            {
+                name: "Reindex vault",
+                desc: "Drop the index and rebuild it from every file in the vault.",
+                aliases: ["rebuild index"],
+                render: (setting) =>
+                    setting.addButton((button) =>
+                        button.setButtonText("Reindex").onClick(async () => {
+                            button.setDisabled(true);
+                            try {
+                                await plugin.reindex();
+                            } finally {
+                                button.setDisabled(false);
+                            }
+                        })
+                    ),
             },
         ];
     }

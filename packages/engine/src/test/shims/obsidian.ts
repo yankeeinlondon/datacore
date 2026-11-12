@@ -173,4 +173,7 @@ export class Setting {
     addDropdown(): this {
         return this.control("dropdown");
     }
+    addButton(): this {
+        return this.control("button");
+    }
 }

@@ -3,7 +3,6 @@ name: Test deployment
 defaults:
   run:
     shell: bash
-    working-directory: ./docs
 
 on:
   pull_request:
@@ -20,12 +19,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: yarn
+          node-version-file: .nvmrc
+          cache: pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Test build website
-        run: yarn run build
+        run: pnpm docs:build

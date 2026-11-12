@@ -1,8 +1,21 @@
 packages:
   - "packages/*"
+  - "docs"
 
 # pnpm 10 blocks dependency lifecycle scripts unless allowed here.
 onlyBuiltDependencies:
   - "@codemirror/language" # git-hosted fork (lishid/cm-language) builds on install
   - esbuild
   - esbuild-plugin-inline-worker # git-hosted
+
+# Declare dependencies that third-party packages use without listing them (they relied on hoisting, which this
+# workspace disables; see .npmrc).
+packageExtensions:
+  "@docusaurus/theme-classic@3.5.2":
+    dependencies:
+      webpack: "^5.88.1"
+
+overrides:
+  # Docusaurus 3.5.2 deep-imports webpack/lib/ContextReplacementPlugin, which later webpack 5 releases moved.
+  # Pinned to the version upstream's docs/yarn.lock resolved. Only the docs site uses webpack.
+  webpack: 5.95.0

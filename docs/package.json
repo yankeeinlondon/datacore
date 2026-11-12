@@ -1,5 +1,5 @@
 {
-  "name": "datacore",
+  "name": "@yankeeinlondon/datacore-docs",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.5.2",
+    "@docusaurus/theme-classic": "3.5.2",
     "@docusaurus/tsconfig": "3.5.2",
     "@docusaurus/types": "3.5.2",
     "typescript": "~5.5.2"

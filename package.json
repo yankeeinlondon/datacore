@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm -r --workspace-concurrency=1 build",
+    "build": "pnpm -r --filter=!@yankeeinlondon/datacore-docs build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "fmt": "oxfmt .",
@@ -16,7 +16,9 @@
     "lint": "oxlint --type-aware && eslint .",
     "changeset": "changeset",
     "release:version": "changeset version && node scripts/sync-plugin-manifests.mjs && pnpm install --lockfile-only",
-    "manifests:check": "node scripts/sync-plugin-manifests.mjs --check"
+    "manifests:check": "node scripts/sync-plugin-manifests.mjs --check",
+    "docs:build": "pnpm --filter @yankeeinlondon/datacore-docs build",
+    "docs:start": "pnpm --filter @yankeeinlondon/datacore-docs start"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",

@@ -162,3 +162,65 @@ Each step ends green (CI sequence) and is committed separately. Steps 1–2 are 
    views; view plugins keep only plugin-specific options.
 3. The fake-vault test fixture lives in `packages/engine/src/test/fixtures/`, promoted to a shared test package only
    if `view-preact` needs it in P2.
+
+## Outcome (2026-11-11)
+
+P1 is implemented on branch `p1-contract` (20 commits after `ee8998c`). `pnpm check` (format, lint, typecheck, tests,
+manifests) and `pnpm build` (including api-extractor reports) pass. Tests: contract 7, shared 6, client 20, engine 389.
+
+### Exit criteria
+
+| # | Criterion | Result |
+|---|---|---|
+| 1 | Contract defines the v1 surface, no logic, API report | ✅ `datacore-contract`: 105 exports; constants are the only runtime code; `datacore-contract.api.md` |
+| 2 | Engine classes `implements` the contract; drift caught | ✅ 18 `implements` clauses; a deliberate mismatch fails with TS2420 |
+| 3 | Client: locator, scoped/reconnecting handles, guards, helpers; tested without Obsidian | ✅ `getDatacore`/`tryGetDatacore`, reconnect with subscription replay, guards and value helpers; 20 tests + end-to-end test against the real engine |
+| 4 | Host provider registration, revocation, `window.dc` | ✅ `EngineHost`; both load orders, restart, revocation, foreign `window.dc` tested |
+| 5 | Reactivity per §7.6; revision rule as a contract test | ✅ `subscribe`/`watchFile`/`onRevision`/typed events; shared evaluation per revision; revision rule tested against the real engine |
+| 6 | Identity, cache, settings | ✅ `datacore-engine` 0.1.0; cache `datacore-engine/cache/<appId>` keyed by `INDEX_SCHEMA_VERSION`; engine-owned `display` settings with upstream migration |
+| 7 | UI uses only the contract API; lint-enforced | ✅ `ViewServices` (engine/app/reader); lint forbids runtime imports of engine internals from UI code |
+| 8 | No Obsidian prototype extensions in the engine | ✅ replaced; test polyfills removed |
+| 9 | Zero warnings in contract/client/shared; `--deny-warnings` | ✅ contract, client, shared, view-preact at 0 with `--deny-warnings`; engine 152 → 23 |
+| 10 | Upstream library build retired | ✅ api-extractor now runs on contract and client |
+
+### Deviations
+
+- **Preact stays in the engine plugin until P2** (sequencing correction above). In P1 the UI was rewired onto the
+  contract API; the boundary rule covers engine *internals* (Datacore, datastore, cache, importers, settings, the API
+  implementation). The UI still imports the engine's pure value helpers (`Literals`, `Groupings`, `Link` runtime),
+  which P2 ports to identity-safe versions in `shared`/client before moving the views out.
+- **`resolveLink` added to the contract** (link/link text → page, section, or block). The script loader needs it,
+  and so will third-party plugins.
+- **Registry functions live in `shared`** (pure functions over the registry object) and are bundled into both the
+  engine and the client. The client bundles `shared` (`tsdown noExternal`), since `shared` is not published.
+- **Workspace packages use a `source` export condition** (TypeScript sources for tsc/Vitest/esbuild in the workspace;
+  `dist` for api-extractor and npm).
+- **The engine's `DatacoreApi` (UI facade) was renamed `DatacoreViewApi`** to avoid clashing with the contract's
+  `DatacoreApi`. `window.datacore` was removed in favour of `window.dc`.
+
+### Bugs found and fixed
+
+- Canvas file and web cards claimed to be text cards (`$types = CanvasTextCard.TYPES`).
+- `tryQuery`/`tryFullQuery` threw on an unparseable query instead of returning a failure.
+- `useIndexUpdates` never honoured `debounce: 0` (`settings?.debounce && settings.debounce == 0` is never true).
+- Identity checks (`instanceof Link/DateTime/Duration/DataArrayImpl`) failed for values from other bundles; they now
+  use brands and luxon's cross-copy checks.
+
+### Findings carried into P2+
+
+- **Global `Array.isArray` patch:** `data-array.ts` replaces `Array.isArray` so `DataArray`s count as arrays. That
+  changes a global for every plugin in the vault; revisit before the store submission.
+- **Value-helper port:** `Literals.compare`/`toString`/groupings need identity-safe versions (in `shared` or the client)
+  before the views can leave the engine.
+- **Remaining engine lint (23):** 16 template-literal/stringification findings in error messages, 6 unbound-method
+  references in the expression engine, and Obsidian's declarative settings API (`getSettingDefinitions`).
+- **`enableJs` is never read:** the setting exists but nothing enforces it. Decide in P2 whether JS views are gated.
+- **IndexedDB scope across vaults** (spec §14.1) is still unverified in Obsidian; the cache name is vault-scoped
+  either way.
+
+### Manual check
+
+Pending (needs Obsidian): install the P1 build (`packages/engine/scripts/install-built <vault>`, now
+`.obsidian/plugins/datacore-engine/`) in the scratch vault, remove the old `datacore` plugin folder from P0, and
+confirm: the views render as in P0, `window.dc` works in the console, the settings tab shows the Display and Indexing
+sections (changing the page size re-renders tables), and the startup progress counter appears.

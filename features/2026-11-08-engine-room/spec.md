@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved; **P0 complete** (v0.4, 2026-11-11). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11) |
+| **Status** | Approved; **P0 complete**, **P1 implemented** (v0.5, 2026-11-11). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11) |
 | **Date** | 2026-11-08 (updated 2026-11-11) |
 | **Owner** | Ken Snyder |
 | **Product** | **datacore-engine** ("Datacore Engine") |
@@ -290,6 +290,7 @@ interface DatacoreApi {
   tryEvaluate(expr: string | Expression, vars?: Variables, sourcePath?: string): Result<Literal, string>;
 
   // Links & paths
+  resolveLink(link: string | Link, sourcePath?: string): Indexable | undefined; // file, section, or block
   resolvePath(path: string | Link, sourcePath?: string): string;
   fileLink(path: string): Link;
   headerLink(path: string, header: string): Link;
@@ -557,7 +558,7 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 |---|---|---|
 | **P-1 — Fork baseline** ✅ | Upstream open PRs triaged ([evaluation](../2026-11-08-active-prs/evaluation.md)); #180, #184, #122, #150, #181 and fixes from #157/#87 merged on `pre-fork-upstream`, tagged `fork-baseline` | 345 tests pass; `tsc`, library build, api-extractor and plugin build pass |
 | **P0 — Monorepo scaffold** ✅ | pnpm workspaces; current code moved into `packages/engine` *unchanged* (still a single plugin, including UI); Vitest; scaffolds for contract, client, shared, view-preact, view-vue; oxlint + oxfmt; Changesets; Docusaurus as a workspace package | Plugin build output behaves identically to `fork-baseline`; all 345 tests pass under Vitest; lint/format/typecheck clean; empty packages build |
-| **P1 — Contract & engine API** | `datacore-contract` interfaces + constants; client (`getDatacore`, guards, value helpers); registry protocol; `EngineApiImpl`; settings split; namespaced cache; `window.dc`; Obsidian prototype extensions removed; Preact removed from the engine | Engine has no `preact` dependency; contract type tests; registry load-order and revocation tests; api-extractor reports reviewed |
+| **P1 — Contract & engine API** ✅ | `datacore-contract` interfaces + constants; client (`getDatacore`, guards, value helpers); registry protocol; `EngineApiImpl`; settings split; namespaced cache; `window.dc`; Obsidian prototype extensions removed; UI rewired onto the contract API (Preact itself leaves the engine in P2; see p1-plan) | UI uses only the contract API (lint-enforced); contract type tests; registry load-order and revocation tests; api-extractor reports reviewed |
 | **P2 — `datacore-view-preact`** | Views moved into their own plugin consuming only the client + shared; `dc`/`dct`/`dcx`/`dctx` languages; migration command | Parity vault renders identically; plugins work in either load order; disabling/re-enabling the engine recovers views; runs alongside upstream Datacore |
 | **P3 — Stabilize & publish** | Contract and client `1.0.0` on npm; release CI to per-plugin release repos; BRAT betas; example third-party consumer in `fixtures/`; docs | External example plugin works against the published client; API report frozen; BRAT install works for both plugins |
 | **P4 — Store submission** | Submit `datacore-engine` and `datacore-view-preact` to the community store | Accepted |

@@ -42,10 +42,12 @@ export default [
         rules: TYPED_OBSIDIAN_RULES,
     },
     {
-        files: ["packages/*/manifest.json"],
+        // manifest-beta.json is what BRAT reads and what the build ships; hold it to the store's rules too. `checkId`
+        // adds the id rules for unpublished plugins (no "obsidian", must not end in "plugin").
+        files: ["packages/*/manifest.json", "packages/*/manifest-beta.json"],
         language: "json/json",
         plugins: { json, obsidianmd },
-        rules: { "obsidianmd/validate-manifest": "warn" },
+        rules: { "obsidianmd/validate-manifest": ["warn", { checkId: true }] },
     },
     {
         files: ["LICENSE.txt"],

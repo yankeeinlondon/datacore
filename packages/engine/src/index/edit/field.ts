@@ -27,6 +27,8 @@ export async function editProvenance(app: App, provenance: Provenance, value: Li
             return Result.success(null);
         case "inline-field":
             return editInlineField(app, file, provenance.line, provenance.key, value);
+        case "intrinsic":
+            return Result.failure(`Intrinsic fields (derived from '${provenance.file}') cannot be edited.`);
     }
 }
 

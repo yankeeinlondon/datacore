@@ -7,11 +7,14 @@ import { getDatacore, tryGetDatacore, type AppLike, type ComponentLike, type Dat
 class FakeEngine {
     readonly connections: ConsumerInfo[] = [];
     readonly subscriptions = new Set<string>();
+    /** Number of `release()` calls on this engine's handles (only when it supports release). */
+    releases = 0;
     readonly provider: EngineProvider;
 
     constructor(
         readonly name: string,
-        apiVersion = "1.0.0"
+        apiVersion = "1.0.0",
+        private readonly supportsRelease = false
     ) {
         this.provider = {
             kind: "host",
@@ -34,6 +37,7 @@ class FakeEngine {
                 this.subscriptions.add(query);
                 return { dispose: () => this.subscriptions.delete(query) };
             },
+            ...(this.supportsRelease ? { release: () => void (this.releases += 1) } : {}),
         } as unknown as ScopedDatacore;
     }
 }
@@ -187,6 +191,35 @@ describe("handle lifecycle", () => {
         const second = new FakeEngine("second");
         registerProvider(getOrCreateRegistry(host), second.provider);
         expect(second.subscriptions.size).toBe(0);
+    });
+
+    it("releases the engine-side handle once when the consumer unloads", async () => {
+        const engine = new FakeEngine("first", "1.0.0", true);
+        const handle = await connected(engine);
+        consumer.unload();
+        handle.release(); // idempotent
+        expect(engine.releases).toBe(1);
+        expect(handle.revoked).toBe(true);
+    });
+
+    it("release() disconnects for good: no reconnect, calls throw", async () => {
+        const first = new FakeEngine("first", "1.0.0", true);
+        const handle = await connected(first);
+        handle.subscribe("@page", () => {});
+        handle.release();
+        expect(first.releases).toBe(1);
+        expect(first.subscriptions.size).toBe(0);
+        expect(() => handle.query("@page")).toThrowError(expect.objectContaining({ code: "revoked" }));
+
+        unregisterProvider(getOrCreateRegistry(host), first.provider);
+        registerProvider(getOrCreateRegistry(host), new FakeEngine("second").provider);
+        expect(handle.revoked).toBe(true);
+    });
+
+    it("works with engines that predate release()", async () => {
+        const handle = await connected(new FakeEngine("old"));
+        expect(() => consumer.unload()).not.toThrow();
+        expect(handle.revoked).toBe(true);
     });
 
     it("disposes a single subscription without replaying it later", async () => {

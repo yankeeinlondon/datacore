@@ -199,4 +199,9 @@ export interface ScopedDatacore extends DatacoreApi {
     onRevoked(callback: () => void): Disposable;
     /** Dispose every subscription made through this handle. */
     disposeAll(): void;
+    /**
+     * Disconnect this handle: dispose its subscriptions and remove it from the engine's list of connected consumers.
+     * The handle then behaves as revoked. Idempotent. The client calls this when the consumer unloads.
+     */
+    release(): void;
 }

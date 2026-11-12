@@ -153,8 +153,24 @@ function reconnectingHandle(
         return inner;
     };
 
+    let released = false;
+    const release = () => {
+        if (released) return;
+        released = true;
+        (extras.disposeAll as () => void)();
+        stopListening();
+        revokedListeners.clear();
+        reconnectedListeners.clear();
+        const current = inner;
+        inner = undefined;
+        provider = undefined;
+        // Engines older than `release()` simply keep the handle until they unload.
+        (current as Partial<ScopedDatacore> | undefined)?.release?.();
+    };
+
     const extras: Partial<Record<keyof DatacoreHandle, unknown>> = {
         consumer: info,
+        release,
         onRevoked: (callback: () => void): Disposable => {
             revokedListeners.add(callback);
             return { dispose: () => revokedListeners.delete(callback) };
@@ -199,15 +215,7 @@ function reconnectingHandle(
         },
     });
 
-    return {
-        handle,
-        dispose: () => {
-            (extras.disposeAll as () => void)();
-            stopListening();
-            revokedListeners.clear();
-            reconnectedListeners.clear();
-        },
-    };
+    return { handle, dispose: release };
 }
 
 /** Wrap a provider for a consumer, tying cleanup to the consumer's unload. */

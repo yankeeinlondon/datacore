@@ -30,7 +30,7 @@ interface ScopeState {
  * Wrap the engine API for one consumer: subscriptions made through the handle are tracked (so `disposeAll()` and
  * revocation clean up exactly that consumer's work), and every member throws a `revoked` error once the engine unloads.
  */
-function scope(api: EngineApi, state: ScopeState): Contract.ScopedDatacore {
+function scope(api: EngineApi, state: ScopeState, onRelease: () => void): Contract.ScopedDatacore {
     const ensureLive = () => {
         if (state.revoked) {
             throw new DatacoreError(
@@ -48,6 +48,13 @@ function scope(api: EngineApi, state: ScopeState): Contract.ScopedDatacore {
         },
         disposeAll: () => {
             for (const disposable of Array.from(state.disposables)) disposable.dispose();
+        },
+        release: () => {
+            if (state.revoked) return;
+            for (const disposable of Array.from(state.disposables)) disposable.dispose();
+            state.revoked = true;
+            state.revokedListeners.clear();
+            onRelease();
         },
     };
 
@@ -147,7 +154,12 @@ export class EngineHost {
             revokedListeners: new Set(),
         };
         this.handles.add(state);
-        return scope(this.api, state);
+        return scope(this.api, state, () => this.handles.delete(state));
+    }
+
+    /** The consumers with a live (not released or revoked) handle, in connection order. */
+    consumers(): Contract.ConsumerInfo[] {
+        return Array.from(this.handles, (state) => state.consumer);
     }
 
     /** Define `dc` on the host as a read-only getter, unless something else already owns that name. */

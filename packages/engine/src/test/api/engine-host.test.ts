@@ -87,6 +87,24 @@ describe("EngineHost: scoped handles", () => {
         expect(secondCallback).toHaveBeenCalledTimes(2);
     });
 
+    it("release() disposes the handle's subscriptions and drops it from consumers()", async () => {
+        host.start();
+        const first = connect("first");
+        connect("second");
+        const callback = vi.fn();
+        first.subscribe("@page", callback, { debounce: 0 });
+        expect(host.consumers().map((consumer) => consumer.id)).toEqual(["first", "second"]);
+
+        first.release();
+        first.release(); // idempotent
+        expect(first.revoked).toBe(true);
+        expect(() => first.query("@page")).toThrowError(expect.objectContaining({ code: "revoked" }));
+        expect(host.consumers().map((consumer) => consumer.id)).toEqual(["second"]);
+
+        await engine.write(note("Books/Dune.md").paragraph("#book updated"));
+        expect(callback).toHaveBeenCalledTimes(1); // initial only
+    });
+
     it("announces deactivation while still usable, then revokes handles on stop", async () => {
         host.start();
         const handle = connect();

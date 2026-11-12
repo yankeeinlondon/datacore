@@ -825,6 +825,7 @@ export interface ScopedDatacore extends DatacoreApi {
     readonly consumer: ConsumerInfo;
     disposeAll(): void;
     onRevoked(callback: () => void): Disposable;
+    release(): void;
     readonly revoked: boolean;
 }
 

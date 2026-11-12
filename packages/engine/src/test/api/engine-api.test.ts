@@ -49,6 +49,14 @@ describe("EngineApi: queries", () => {
         expect(() => api.evaluate("1 +")).toThrowError(expect.objectContaining({ code: "evaluation-failed" }));
     });
 
+    it("resolves links to the indexed objects they point to", async () => {
+        await engine.write(note("Notes/Plan.md").heading(1, "Goals").paragraph("Ship it. ^next"));
+        expect(api.resolveLink("Notes/Plan.md")?.$typename).toBe("Page");
+        expect(api.resolveLink("Notes/Plan.md#Goals")?.$typename).toBe("Section");
+        expect(api.resolveLink("Notes/Plan.md#^next")?.$typename).toBe("Block");
+        expect(api.resolveLink("Missing.md")).toBeUndefined();
+    });
+
     it("scopes evaluation to a source file with local()", () => {
         const local = api.local("Books/Dune.md");
         expect(local.currentPath()).toBe("Books/Dune.md");

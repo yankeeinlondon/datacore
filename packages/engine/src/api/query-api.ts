@@ -72,6 +72,11 @@ export class QueryApi implements Contract.DatacoreQueryApi {
     /** Utilities for coercing types into one specific type for easier programming. */
     public coerce = Coerce;
 
+    /** Resolve a link (or link text) to the indexed object it points to (file, section, or block). */
+    public resolveLink(link: string | Link, sourcePath?: string): Contract.Indexable | undefined {
+        return this.core.datastore.resolveLink(link, sourcePath);
+    }
+
     /** Resolve a local or absolute path or link to an absolute path. */
     public resolvePath(path: string | Link, sourcePath?: string): string {
         const rawpath = Literals.isLink(path) ? path.path : path;

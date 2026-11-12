@@ -86,6 +86,12 @@ export interface DatacoreQueryApi {
         sourcePath?: string
     ): Result<Literal, string>;
 
+    /**
+     * Resolve a link (or link text such as `"Note#Heading"` / `"Note#^block"`) to the indexed object it points to: the
+     * file for file links, the section for header links, the block for block links. Relative links resolve against
+     * `sourcePath`.
+     */
+    resolveLink(link: string | Link, sourcePath?: string): Indexable | undefined;
     /** Resolve a link or (relative) path to an absolute vault path. */
     resolvePath(path: string | Link, sourcePath?: string): string;
     /** Create a link to a file. */

@@ -59,6 +59,10 @@ export class LocalQueryApi extends QueryApi implements Contract.DatacoreLocalQue
         return super.resolvePath(path, sourcePath ?? this.path);
     }
 
+    public override resolveLink(link: string | Link, sourcePath?: string): Contract.Indexable | undefined {
+        return super.resolveLink(link, sourcePath ?? this.path);
+    }
+
     public override tryEvaluate(
         expression: string | Expression,
         variables?: Record<string, Literal>,

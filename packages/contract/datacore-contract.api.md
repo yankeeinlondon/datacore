@@ -234,6 +234,7 @@ export interface DatacoreQueryApi {
     parseLink(linktext: string): Link;
     parseQuery(query: string | IndexQuery): IndexQuery;
     query<T extends Indexable = Indexable>(query: string | IndexQuery): T[];
+    resolveLink(link: string | Link, sourcePath?: string): Indexable | undefined;
     resolvePath(path: string | Link, sourcePath?: string): string;
     tryEvaluate(expression: string | Expression, variables?: Record<string, Literal>, sourcePath?: string): Result<Literal, string>;
     tryFullQuery<T extends Indexable = Indexable>(query: string | IndexQuery): Result<SearchResult<T>, string>;

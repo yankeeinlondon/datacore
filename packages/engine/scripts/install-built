@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the plugin and allows you to provide a path to the vault that it should be installed in.
 # Useful for when you want to dry-run the plugin in a vault other than the test vault.
-PLUGIN_NAME="datacore"
+PLUGIN_NAME="datacore-engine"
 VAULT="$1"
 
 if [ -z "$VAULT" ]; then

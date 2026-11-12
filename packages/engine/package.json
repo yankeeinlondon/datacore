@@ -1,8 +1,8 @@
 {
   "name": "@yankeeinlondon/datacore-engine",
-  "version": "0.1.29",
+  "version": "0.1.0",
   "private": true,
-  "description": "Reactive data engine for Obsidian.md.",
+  "description": "Datacore Engine: the shared, headless query engine plugin for Obsidian.",
   "scripts": {
     "build": "node esbuild.config.mjs production",
     "dev": "node esbuild.config.mjs",
@@ -16,7 +16,7 @@
     "dataview",
     "pkm"
   ],
-  "author": "Michael Brenan",
+  "author": "Ken Snyder <ken@ken.net>",
   "license": "MIT",
   "devDependencies": {
     "@codemirror/language": "github:lishid/cm-language#a9c3c7efe17dd1d24395ee2a179fe12dd6ed1e76",

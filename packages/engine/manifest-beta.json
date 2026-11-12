@@ -1,10 +1,10 @@
 {
-  "id": "datacore",
-  "name": "Datacore",
-  "version": "0.1.29",
+  "id": "datacore-engine",
+  "name": "Datacore Engine",
+  "version": "0.1.0",
   "minAppVersion": "1.4.11",
-  "description": "Reactive query engine backed by Javascript or a custom query language.",
-  "author": "Michael Brenan",
-  "authorUrl": "https://github.com/blacksmithgu",
+  "description": "Shared query engine for your vault: indexes notes and canvases and answers queries for Datacore views and other plugins.",
+  "author": "Ken Snyder",
+  "authorUrl": "https://github.com/yankeeinlondon",
   "isDesktopOnly": false
 }

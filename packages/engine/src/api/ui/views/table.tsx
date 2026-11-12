@@ -26,7 +26,7 @@ export interface TableColumn<T, V = Literal> {
     title?: string | ReactNode | (() => string | ReactNode);
 
     /** If present, the CSS width to apply to the column. 'minimum' will set the column size to it's smallest possible value, while 'maximum' will do the opposite. */
-    width?: "minimum" | "maximum" | string;
+    width?: "minimum" | "maximum" | (string & {});
 
     /** Value function which maps the row to the value being rendered. */
     value: (object: T) => V;

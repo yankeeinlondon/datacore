@@ -663,7 +663,7 @@ export class MarkdownListItem implements Indexable, Linkbearing, Taggable, Field
                 // Remove any valid block ID, keeping preceding whitespace.
                 .replace(/(\s)\^[a-zA-Z0-9-]+$/u, "$1")
                 // Keep everything before the first inline field, or everything if there isn't one.
-                .split(/[[\(][^:(\[]+::\s*.*?[\])]/u)[0]
+                .split(/[[(][^:([]+::\s*.*?[\])]/u)[0]
                 // Trim whitespace.
                 .trim()
         );

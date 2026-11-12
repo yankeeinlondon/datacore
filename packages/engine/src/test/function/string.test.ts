@@ -131,4 +131,5 @@ describe("truncate()", () => {
     test("10", () => check(`truncate("Hello There!", 10, "!")`).toEqual("Hello The!"));
 });
 
+// oxlint-disable-next-line vitest/valid-expect -- returns the expectation so callers chain the matcher
 export const check = (text: string) => expect(parseEval(text));

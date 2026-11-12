@@ -162,7 +162,7 @@ export function Switch(
 export function VanillaSelect(
     props: {
         className?: string;
-        options: { value: string; label: string }[];
+        options?: { value: string; label: string }[];
         value?: string;
         defaultValue?: string;
         onValueChange?: (value: string) => void;

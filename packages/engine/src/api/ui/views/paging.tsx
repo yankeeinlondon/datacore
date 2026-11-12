@@ -153,7 +153,7 @@ export function usePaging({
     pageSize,
     elements,
 }: {
-    initialPage: number;
+    initialPage?: number;
     pageSize: number;
     elements: number;
 }): [number, number, (page: number) => void] {
@@ -200,7 +200,7 @@ export function useDatacorePaging({
     elements,
     container,
 }: {
-    initialPage: number;
+    initialPage?: number;
     paging: number | boolean | undefined;
     scrollOnPageChange?: boolean | number;
     elements: number;

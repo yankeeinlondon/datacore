@@ -93,7 +93,7 @@ export function markdownSourceImport(
         }
     } else {
         // Find the start of the first section.
-        const first = sections.getPairOrNextHigher(0)?.[1]!;
+        const first = sections.getPairOrNextHigher(0)![1];
 
         if (first.start > 0 && !emptylines(lines, 0, first.start)) {
             const section = new SectionData(0, first.start, getFileTitle(path), 1, 0);

@@ -124,7 +124,22 @@ function stage(pkgName) {
     fs.rmSync(stageDir, { recursive: true, force: true });
     fs.mkdirSync(stageSrcDir, { recursive: true });
     copySources(path.join(packageDir, "src"), stageSrcDir);
-    if (pkgName === "client") copySources(sharedSrcDir, path.dirname(stageSharedEntry));
+    if (pkgName === "client") {
+        copySources(sharedSrcDir, path.dirname(stageSharedEntry));
+        // JSR rejects global type augmentation ("modifying global types is not allowed"), which the dry run does not
+        // check. `global.ts` only types `window.dc` for scripts; the JSR build leaves it out (see the client README).
+        fs.rmSync(path.join(stageSrcDir, "global.ts"));
+        const indexFile = path.join(stageSrcDir, "index.ts");
+        const index = fs.readFileSync(indexFile, "utf8");
+        const withoutGlobal = index.replace(/^import\s+["']\.\/global\.ts["'];\r?\n/m, "");
+        if (withoutGlobal === index) throw new Error('staged client: expected `import "./global.ts";` in index.ts');
+        fs.writeFileSync(indexFile, withoutGlobal);
+    }
+    for (const file of listSources(stageSrcDir)) {
+        if (/^\s*declare\s+global\b/m.test(fs.readFileSync(path.join(stageSrcDir, file), "utf8"))) {
+            throw new Error(`staged ${pkgName}: ${file} augments global types, which JSR rejects`);
+        }
+    }
 
     const used = bareSpecifiers(stageSrcDir);
     const unmapped = used.filter((specifier) => !(specifier in IMPORTS));

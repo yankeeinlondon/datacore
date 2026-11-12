@@ -33,6 +33,11 @@ npx jsr add @yankeeinlondon/datacore-client
 # or: deno add jsr:@yankeeinlondon/datacore-client
 ```
 
+One difference: JSR does not allow packages to augment global types, so the JSR build does not declare `window.dc`.
+If you use `window.dc` (scripts, the console), declare it yourself:
+`declare global { interface Window { dc?: import("@yankeeinlondon/datacore-client").DatacoreApi } }`. Plugins should
+use `getDatacore()` instead anyway.
+
 The package ships ESM and CommonJS builds with type declarations for both. Obsidian plugins are bundled (esbuild,
 Rollup, Vite), which pick the right build automatically. TypeScript resolves it with `moduleResolution` set to
 `bundler`, `node16`/`nodenext`, or the classic `node` setting used by the Obsidian sample plugin. The engine is only

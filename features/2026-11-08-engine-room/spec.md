@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved for implementation (v0.3; all decisions closed 2026-11-11) |
+| **Status** | Approved; **P0 complete** (v0.4, 2026-11-11). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11) |
 | **Date** | 2026-11-08 (updated 2026-11-11) |
 | **Owner** | Ken Snyder |
 | **Product** | **datacore-engine** ("Datacore Engine") |
@@ -98,7 +98,7 @@ Users may have upstream Datacore (`datacore`) installed alongside these plugins.
 | Global | `window.datacore` | `window.dc` (engine API; §8.5) |
 | IndexedDB | `datacore/cache/primary` | `datacore-engine/cache/<appId>` |
 | Codeblock languages | `datacorejs`, `datacorejsx`, `datacorets`, `datacoretsx` | `dc`, `dcx`, `dct`, `dctx` (§9.3) |
-| Registry | — | `globalThis[Symbol.for("datacore-engine.registry")]` |
+| Registry | — | `window[Symbol.for("datacore-engine.registry")]` |
 
 Still to verify (P1/P2): whether Obsidian's IndexedDB is shared across vaults (the cache name is vault-scoped either way), and what Obsidian does on duplicate codeblock-language registration (now only relevant for defensive coding).
 
@@ -117,7 +117,7 @@ All decisions are closed.
 | D7 | **v1 API scope: core read + reactive only.** | Writes (`setField`, capability `write`) in 1.1; custom functions (`functions`, capability `functions`) in 1.2; custom indexers in 2.0. Names and capability flags are reserved now. |
 | D8 | **Contract-first, in its own package.** | `datacore-contract` defines the API (types + protocol constants). The engine's classes `implements` the contract interfaces. `datacore-client` depends on the contract (caret range) and re-exports it; consumers install the client only. |
 | D9 | **Import boundaries + `shared`.** | View packages depend on `client` + `shared`, never `engine` (pnpm isolation + `no-restricted-imports`). Identity-safe value helpers live in the client (public); pure utilities live in private `shared`: pure functions and constants only, no classes, no state, no runtime `obsidian`. |
-| D10 | **Tooling.** | pnpm workspaces; Node 22 LTS; TypeScript 5.x (strict in contract/client/shared) with project references; Vitest; esbuild (plugins) / Vite (view-vue); tsdown (contract, client) + api-extractor; **oxlint** (type-aware) + **oxfmt**; **Changesets for all packages**; Docusaurus as a workspace package (§10). |
+| D10 | **Tooling.** | pnpm workspaces; Node 22 LTS; TypeScript 5.x (strict in contract/client/shared) with a shared base config and per-package typechecking; Vitest; esbuild (plugins) / Vite (view-vue); tsdown (contract, client) + api-extractor; **oxlint** (type-aware) + a minimal ESLint for type-aware Obsidian rules + **oxfmt**; **Changesets for all packages**; Docusaurus as a workspace package (§10). |
 | D11 | **Vue authoring model: deferred** to the frontend spec, under three constraints (§9.5). | |
 
 ## 6. Architecture
@@ -131,7 +131,7 @@ flowchart LR
 
   subgraph obsidian["Obsidian vault window"]
     engine["datacore-engine plugin<br/>index · expressions · persister · workers"]
-    slot[("globalThis[Symbol.for('datacore-engine.registry')]")]
+    slot[("window[Symbol.for('datacore-engine.registry')]")]
     preact["datacore-view-preact plugin"]
     vue["datacore-view-vue plugin (later)"]
     third["3rd-party plugins"]
@@ -201,6 +201,8 @@ There is also a synchronous variant: `tryGetDatacore(app, opts): ScopedDatacore 
 ### 7.2 Registry protocol (load-order independent)
 
 Plugin load order is not guaranteed. Both sides use **get-or-create** on one shared registry object, so whichever loads first creates it. The symbol key and protocol types live in `datacore-contract`.
+
+The registry lives on the main `window` (not `globalThis`): in Obsidian's renderer they are the same object, but Obsidian's guidelines (`obsidianmd/no-global-this`) require `window`/`activeWindow`. It must be the **main** `window`, never `activeWindow`, so popout windows share the one registry.
 
 ```ts
 const REGISTRY = Symbol.for("datacore-engine.registry");
@@ -370,7 +372,7 @@ The settings tab also shows diagnostics: index status, connected consumers (from
 |---|---|
 | Plugin id / display name | `datacore-engine` / "Datacore Engine" |
 | Release repo | `yankeeinlondon/datacore-engine` |
-| Registry | `globalThis[Symbol.for("datacore-engine.registry")]` |
+| Registry | `window[Symbol.for("datacore-engine.registry")]` |
 | Global | `window.dc` (§8.5) |
 | IndexedDB | `datacore-engine/cache/<appId>` |
 | Workspace events | `datacore-engine:*` |
@@ -446,7 +448,8 @@ datacore/
 ├── scripts/             # release helpers (manifest sync, …)
 ├── .changeset/
 ├── pnpm-workspace.yaml
-├── tsconfig.base.json   # shared options; per-package tsconfigs + project references
+├── tsconfig.base.json   # shared options; each package extends it and typechecks with tsc --noEmit
+├── tsconfig.json        # root-level and package config files (keeps type-aware tooling inside the repo)
 ├── .oxlintrc.json
 ├── .oxfmtrc.json        # migrated from .prettierrc
 └── package.json         # root scripts: build, test, lint, fmt, typecheck, dev, release
@@ -457,11 +460,11 @@ datacore/
 | Area | Choice | Notes |
 |---|---|---|
 | Package manager / runtime | **pnpm** workspaces (pinned via `packageManager`); **Node 22 LTS** (`.nvmrc`, `engines`) | pnpm's isolated `node_modules` enforces D9 |
-| TypeScript | latest 5.x; `strict: true` in contract, client, shared; engine keeps current flags (tightened later); project references (`tsc -b`) | The engine keeps its `baseUrl: "src"` bare imports internally |
-| Tests | **Vitest** (jsdom); shared setup file with `obsidian` shim + `contains`/`remove` polyfills; `vite-tsconfig-paths` for engine bare imports; `expectTypeOf` type tests for contract/client | |
+| TypeScript | **5.9.3** (latest 5.x); `strict: true` in contract, client, shared; engine keeps current flags (tightened later); per-package `tsc --noEmit`; workspace packages export `src` in development and `dist` via `publishConfig` | The engine's bare imports resolve via explicit relative `paths` (TypeScript 7-compatible). TypeScript 6/7 are available; moving to them is a future decision |
+| Tests | **Vitest** (jsdom); shared setup file with `obsidian` shim + `contains`/`remove` polyfills; explicit aliases for the engine's bare imports; `expectTypeOf` type tests for contract/client | |
 | Plugin bundling | **esbuild** (engine, view-preact); **Vite** for view-vue (later) | esbuild version upgrade happens separately from the restructure |
 | Library builds | **tsdown** (contract, client): ESM + `.d.ts`, `exports` maps; **api-extractor** reports | CI fails on unreviewed contract changes |
-| Lint | **oxlint** with `--type-aware` (oxlint-tsgolint), Vitest plugin, `no-restricted-imports` for boundaries, **`eslint-plugin-obsidianmd` via `jsPlugins`** | JS plugins are alpha in oxlint. Fallback: a minimal ESLint config running only the obsidianmd rules in CI |
+| Lint | **oxlint** with `--type-aware` (oxlint-tsgolint): Vitest plugin, `no-restricted-imports` for boundaries, local `datacore/no-class` rule, and **`eslint-plugin-obsidianmd`'s untyped rules via `jsPlugins`**. **ESLint 10** (`eslint.config.mjs`) runs only obsidianmd's 7 type-aware rules plus manifest/license validation | oxlint's JS-plugin bridge provides no TypeScript program, so type-aware ESLint rules cannot run there |
 | Format | **oxfmt**, config migrated from `.prettierrc` (`oxfmt --migrate=prettier`): 4 spaces, width 120, ES5 trailing commas, double quotes | One isolated reformat commit, listed in `.git-blame-ignore-revs` |
 | Task running | pnpm recursive scripts (`pnpm -r`, `--filter`) | Add Turbo only if builds get slow |
 | Versioning | **Changesets for all packages** (`privatePackages: { version: true, tag: true }`; `docs` ignored; internal dependency bumps on) | §10.4 |
@@ -527,7 +530,7 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 | Phase | Outcome | Exit criteria |
 |---|---|---|
 | **P-1 — Fork baseline** ✅ | Upstream open PRs triaged ([evaluation](../2026-11-08-active-prs/evaluation.md)); #180, #184, #122, #150, #181 and fixes from #157/#87 merged on `pre-fork-upstream`, tagged `fork-baseline` | 345 tests pass; `tsc`, library build, api-extractor and plugin build pass |
-| **P0 — Monorepo scaffold** | pnpm workspaces; current code moved into `packages/engine` *unchanged* (still a single plugin, including UI); Vitest; scaffolds for contract, client, shared, view-preact, view-vue; oxlint + oxfmt; Changesets; Docusaurus as a workspace package | Plugin build output behaves identically to `fork-baseline`; all 345 tests pass under Vitest; lint/format/typecheck clean; empty packages build |
+| **P0 — Monorepo scaffold** ✅ | pnpm workspaces; current code moved into `packages/engine` *unchanged* (still a single plugin, including UI); Vitest; scaffolds for contract, client, shared, view-preact, view-vue; oxlint + oxfmt; Changesets; Docusaurus as a workspace package | Plugin build output behaves identically to `fork-baseline`; all 345 tests pass under Vitest; lint/format/typecheck clean; empty packages build |
 | **P1 — Contract & engine API** | `datacore-contract` interfaces + constants; client (`getDatacore`, guards, value helpers); registry protocol; `EngineApiImpl`; settings split; namespaced cache; `window.dc`; Obsidian prototype extensions removed; Preact removed from the engine | Engine has no `preact` dependency; contract type tests; registry load-order and revocation tests; api-extractor reports reviewed |
 | **P2 — `datacore-view-preact`** | Views moved into their own plugin consuming only the client + shared; `dc`/`dct`/`dcx`/`dctx` languages; migration command | Parity vault renders identically; plugins work in either load order; disabling/re-enabling the engine recovers views; runs alongside upstream Datacore |
 | **P3 — Stabilize & publish** | Contract and client `1.0.0` on npm; release CI to per-plugin release repos; BRAT betas; example third-party consumer in `fixtures/`; docs | External example plugin works against the published client; API report frozen; BRAT install works for both plugins |
@@ -543,14 +546,15 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 | Duplicate contract copies split brand types | Consumers install the client only; client re-exports the contract with a caret range (§7.3) |
 | Hidden `instanceof` on consumer-supplied values | Audit in P1 (§7.4); tests that pass "foreign" `Link`/`DateTime` copies into the engine |
 | Breaking changes for upstream users (`dc.core`, codeblock names) | Documented; migration command for code fences; parity vault catches other regressions |
-| oxlint JS plugins are alpha | Fallback: minimal ESLint config for `eslint-plugin-obsidianmd` only |
+| oxlint JS plugins are alpha | Untyped obsidianmd rules verified with positive controls; typed rules run in ESLint |
 | Losing upstream fixes (hard fork) | Open PRs merged into `fork-baseline`; track later upstream work in `features/*-active-prs`; port selectively |
 | Subscription cost with many consumers | Debounce, shared result caching for identical queries, incremental invalidation later |
 
-## 14. Remaining verifications
+## 14. Remaining verifications & follow-ups
 
-Not decisions, just facts to confirm during implementation:
+Facts to confirm during implementation, and follow-ups to schedule:
 
 1. Whether Obsidian's IndexedDB is shared across vaults (P1; the cache name is vault-scoped either way).
 2. Obsidian's behaviour on duplicate codeblock-language registration (P2; defensive handling only, since names no longer collide).
-3. `eslint-plugin-obsidianmd` compatibility with oxlint `jsPlugins` (P0; ESLint fallback otherwise).
+3. ~~`eslint-plugin-obsidianmd` compatibility with oxlint `jsPlugins`~~. Resolved in P0: untyped rules work in oxlint; the 7 type-aware rules and manifest/license validation run in ESLint.
+4. Whether to move to TypeScript 6/7 (7.0.2 is the latest release). Gated on api-extractor, tsdown d.ts generation, and typescript-eslint support.

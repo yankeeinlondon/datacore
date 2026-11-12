@@ -111,3 +111,74 @@ Install the built engine plugin (still id `datacore` in P0) into a scratch vault
 | oxlint JS plugin (alpha) can't run obsidianmd | ESLint fallback for those rules only |
 | esbuild upgrade breaks worker inlining | Isolated step 7b; vendor a minimal plugin if needed |
 | Reformat commit makes blame noisy | `.git-blame-ignore-revs` |
+
+## Outcome (2026-11-11)
+
+P0 is complete on branch `p0-monorepo` (20 commits after `ca33fbd`). Every step was verified before the next began. The
+full CI sequence (`pnpm install --frozen-lockfile`, `fmt:check`, `lint`, `typecheck`, `test`, `build`,
+`manifests:check`, `git diff --exit-code`) passes from a clean install.
+
+### Exit criteria
+
+| # | Criterion | Result |
+|---|---|---|
+| 1 | Clean pnpm install, no yarn artefacts | ✅ `yarn.lock` and `docs/yarn.lock` removed; `pnpm-lock.yaml` tracked |
+| 2 | Engine bundle equivalent to `fork-baseline` | ✅ byte-equivalent (normalized) through step 7a. After the esbuild 0.28 upgrade (7b): identical bundled module set (153), inline worker present, size within 0.2%, smoke-load exports the same `Plugin` subclass |
+| 3 | 345 tests under Vitest | ✅ titles identical to the Jest baseline; plus contract (2) and client (1) tests |
+| 4 | typecheck / lint / fmt clean | ✅ 0 errors (warnings are upstream code, tracked below) |
+| 5 | Scaffolds build/typecheck | ✅ contract, client, shared, view-preact (no-op plugin), view-vue (identity only) |
+| 6 | Changesets for all packages; docs build | ✅ dry run verified bumps, cascade and manifest sync, then discarded |
+| 7 | TypeScript and esbuild upgraded separately | ✅ TS 5.9.3; esbuild 0.28.2; also ESLint 10.13.0 and `@types/node` 22 |
+
+### Deviations from the plan
+
+- **No TypeScript project references.** `composite` requires declaration emit, which clashes with the engine's
+  `noEmit` setup. Instead there is a shared `tsconfig.base.json` with per-package `tsc --noEmit`. Workspace packages
+  export `src` during development and swap to `dist` via `publishConfig`, so cross-package typechecking needs no
+  prebuild.
+- **No `vite-tsconfig-paths`.** It only applies `baseUrl` to files matched by a tsconfig's `include`. Explicit
+  Vitest aliases mirror the engine's bare-import roots instead.
+- **Lint is a hybrid.** oxlint is primary (type-aware via tsgolint, untyped obsidianmd rules via `jsPlugins`,
+  boundaries, local `datacore/no-class`). A minimal ESLint runs the 7 **type-aware** obsidianmd rules plus
+  manifest/license validation, which oxlint's JS-plugin bridge cannot run (no TypeScript program for JS plugins).
+- **Engine tsconfig modernized** (needed by tsgolint, which is TypeScript 7-based): `paths` instead of `baseUrl`,
+  `moduleResolution: bundler`, no `downlevelIteration`, `include: ["src"]`. Bundles verified equivalent.
+- **pnpm isolation enforced per project:** `.npmrc` sets `shamefully-hoist=false`, because a user-level `.npmrc` had
+  `shamefully-hoist=true`, which silently defeats the package boundaries (D9).
+- **Docs needed pnpm fixes:** `packageExtensions` (theme-classic → webpack), a `webpack` override to the
+  upstream-locked 5.95.0 (Docusaurus 3.5.2 deep-imports a file later webpack moved), and an explicit
+  `@docusaurus/theme-classic` devDependency for the docs typecheck.
+- **Engine version aligned** to its last released manifest (0.1.29). Upstream's package.json lagged, and its release
+  script always wrote `minAppVersion` 0.12.0 into `versions.json`.
+- **TypeScript 7.0.2 is now the latest release** (6.0.3 is the transition release). Per D10 we stayed on 5.x
+  (5.9.3); moving to 7 is a separate decision (api-extractor, tsdown d.ts generation, typescript-eslint
+  `<6.1.0` peer).
+
+### Bugs found and fixed along the way
+
+- **Canvas cards lost data under define-semantics class fields** (`98c833b`): subclasses re-declared fields that
+  `BaseCanvasCard` assigns via `Object.assign`; now `declare`d. Latent in production (es2018 + legacy semantics),
+  exposed by Vitest/Oxc.
+- **Two `meta()` assertions never ran** (`a350d84`): `.toBeNull` without `()`.
+- **`editProvenance` could return `undefined`** for intrinsic provenance (`efe36cd`). The file was outside tsc's
+  entry-point include list, so the error went unnoticed.
+
+### Carried into P1 (from linting and the migration)
+
+- **Registry global:** obsidianmd `no-global-this` flags `globalThis`; put the registry on `window` (spec §7.2).
+- **3 `no-misused-promises` violations** (async `onload` overrides in `datacore.ts` and `javascript.tsx`, and an
+  async attribute handler in `embed.tsx`): downgraded to warnings per file in `eslint.config.mjs`; fix when those
+  files are reworked.
+- **~150 oxlint warnings** in upstream code (81 unused vars, 16 floating promises, 11 template-literal coercions, …):
+  burn down in P1, then enable `--deny-warnings`.
+- **Obsidian prototype extensions** (`Array.prototype.contains`/`remove`) are still polyfilled in tests
+  (`src/test/setup.ts`); remove them from engine code (spec §4.2.1).
+- **Field writes (1.1):** `editProvenance` deletes a frontmatter key and then immediately re-assigns it, so deletion
+  never takes effect.
+- **`console.log` calls** in `main.ts`/`datacore.ts` (Obsidian guidelines allow warn/error/debug only).
+
+### Manual check
+
+Still to do (needs Obsidian): install the built engine plugin into a scratch vault **without** upstream Datacore
+(`packages/engine/scripts/install-built <vault>`, plugin id still `datacore` in P0). Confirm it indexes, a
+`datacorejsx` view renders, and the startup progress counter shows.

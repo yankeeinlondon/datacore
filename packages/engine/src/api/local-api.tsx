@@ -387,7 +387,7 @@ export class DatacoreLocalApi {
     public embed = ((element: Indexable) => {
         // TODO: We should add embeds as a new tag on indexable types and add an embedding abstraction.
         // For now, it's fairly useful enough to just hardcode some useful things that are embeddable.
-        if (element.$types.contains("markdown") && element.$file && "$position" in element) {
+        if (element.$types.includes("markdown") && element.$file && "$position" in element) {
             const { start, end } = element.$position as { start: number; end: number };
             if (!Literals.isNumber(start) || !Literals.isNumber(end))
                 return (

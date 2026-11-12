@@ -445,7 +445,8 @@ export class DatacoreInitializer extends Component {
 
     /** Process the result of an initialization and queue more runs. */
     private handleResult(file: TFile, result: InitializationResult) {
-        this.current.remove(file);
+        const index = this.current.indexOf(file);
+        if (index !== -1) this.current.splice(index, 1);
         this.initialized++;
 
         if (result.status === "skipped") this.skipped++;

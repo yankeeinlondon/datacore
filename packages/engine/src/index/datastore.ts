@@ -202,7 +202,7 @@ export class Datastore {
         this.types.set(object.$id, object.$types);
 
         // Exact and derived tags.
-        if (object.$types.contains(TAGGABLE_TYPE) && iterableExists(object, "$tags")) {
+        if (object.$types.includes(TAGGABLE_TYPE) && iterableExists(object, "$tags")) {
             const tags = object.$tags as Set<string>;
 
             this.etags.set(object.$id, tags);
@@ -210,7 +210,7 @@ export class Datastore {
         }
 
         // Exact and derived links.
-        if (object.$types.contains(LINKBEARING_TYPE) && iterableExists(object, "$links")) {
+        if (object.$types.includes(LINKBEARING_TYPE) && iterableExists(object, "$links")) {
             this.links.set(
                 object.$id,
                 (object.$links as Link[]).map((link) => link.obsidianLink())
@@ -218,7 +218,7 @@ export class Datastore {
         }
 
         // All fields on an object.
-        if (object.$types.contains(FIELDBEARING_TYPE) && "fields" in object) {
+        if (object.$types.includes(FIELDBEARING_TYPE) && "fields" in object) {
             for (const field of object.fields as Iterable<Field>) {
                 const norm = field.key.toLowerCase();
                 if (!this.fields.has(norm)) this.fields.set(norm, new SetFieldIndex());
@@ -232,14 +232,14 @@ export class Datastore {
     private _unindex(object: Indexable) {
         this.types.delete(object.$id, object.$types);
 
-        if (object.$types.contains(TAGGABLE_TYPE) && iterableExists(object, "$tags")) {
+        if (object.$types.includes(TAGGABLE_TYPE) && iterableExists(object, "$tags")) {
             const tags = object.$tags as Set<string>;
 
             this.etags.delete(object.$id, tags);
             this.tags.delete(object.$id, extractSubtags(tags));
         }
 
-        if (object.$types.contains(LINKBEARING_TYPE) && iterableExists(object, "$links")) {
+        if (object.$types.includes(LINKBEARING_TYPE) && iterableExists(object, "$links")) {
             // Assume links are normalized when deleting them. Could be broken but I hope not. We can always use a 2-way index to
             // fix this if we encounter non-normalized links.
             this.links.delete(
@@ -248,7 +248,7 @@ export class Datastore {
             );
         }
 
-        if (object.$types.contains(FIELDBEARING_TYPE) && "fields" in object) {
+        if (object.$types.includes(FIELDBEARING_TYPE) && "fields" in object) {
             for (const field of object.fields as Iterable<Field>) {
                 const norm = field.key.toLowerCase();
                 if (!this.fields.has(norm)) continue;
@@ -540,7 +540,7 @@ export class Datastore {
         const matches = new Set<string>();
         for (const objectId of index.all()) {
             const object = this.objects.get(objectId);
-            if (!object || !object.$types.contains(FIELDBEARING_TYPE)) continue;
+            if (!object || !object.$types.includes(FIELDBEARING_TYPE)) continue;
 
             const field = (object as unknown as Fieldbearing).field(normkey);
             if (!field) continue;
@@ -599,7 +599,7 @@ export class Datastore {
 
         if (
             (direction === "both" || direction === "outgoing") &&
-            object.$types.contains(LINKABLE_TYPE) &&
+            object.$types.includes(LINKABLE_TYPE) &&
             iterableExists(object, "$links")
         ) {
             for (const link of object.$links as Link[]) {

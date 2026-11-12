@@ -79,8 +79,10 @@ values exactly as views do:
 ```ts
 import { compare, literalToString, typeOf, type MarkdownPage } from "@yankeeinlondon/datacore-client";
 
-const books = dc.query<MarkdownPage>("@page and #book");
-books.sort((a, b) => compare(a.value("rating"), b.value("rating")));
+// Query results are shared snapshots: copy before sorting.
+const books = [...dc.query<MarkdownPage>("@page and #book")].sort((a, b) =>
+    compare(a.value("rating"), b.value("rating"))
+);
 
 const display = dc.settings.display;
 const text = literalToString(books[0]?.value("finished"), {

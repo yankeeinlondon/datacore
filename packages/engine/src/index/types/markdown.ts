@@ -160,8 +160,7 @@ export class MarkdownPage implements File, Linkbearing, Taggable, Indexable, Fie
 /** @public */
 export namespace MarkdownPage {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownPage, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownPage, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public A single markdown section inside of a page. */
@@ -272,8 +271,7 @@ export class MarkdownSection implements Indexable, Taggable, Linkable, Linkbeari
 /** @public */
 export namespace MarkdownSection {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownSection, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownSection, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public Base class for all markdown blocks. */
@@ -374,8 +372,7 @@ export class MarkdownBlock implements Indexable, Linkbearing, Taggable, Fieldbea
 /** @public */
 export namespace MarkdownBlock {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownBlock, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownBlock, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public Special block for markdown lists (of either plain list entries or tasks). */
@@ -425,8 +422,7 @@ export class MarkdownListBlock extends MarkdownBlock implements Taggable, Linkbe
 /** @public */
 export namespace MarkdownListBlock {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownListBlock, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownListBlock, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public A block containing markdown code. */
@@ -503,8 +499,7 @@ export class MarkdownCodeblock extends MarkdownBlock implements Indexable, Field
 /** @public */
 export namespace MarkdownCodeblock {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownCodeblock, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownCodeblock, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public A data-annotated YAML codeblock. */
@@ -579,8 +574,7 @@ export class MarkdownDatablock extends MarkdownBlock implements Indexable, Field
 /** @public */
 export namespace MarkdownDatablock {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownDatablock, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownDatablock, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public A specific list item in a list. */
@@ -719,8 +713,7 @@ export class MarkdownListItem implements Indexable, Linkbearing, Taggable, Field
 /** @public */
 export namespace MarkdownListItem {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownListItem, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownListItem, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public A specific task inside of a markdown list. */
@@ -773,8 +766,7 @@ export class MarkdownTaskItem extends MarkdownListItem implements Indexable, Lin
 /** @public */
 export namespace MarkdownTaskItem {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<MarkdownTaskItem, keyof TypedValuebearing<Fields>>,
-            TypedValuebearing<Fields> {}
+        extends Omit<MarkdownTaskItem, keyof TypedValuebearing<Fields>>, TypedValuebearing<Fields> {}
 }
 
 /** @public An entry in the frontmatter; includes the raw value, parsed value, and raw key (before lower-casing). */

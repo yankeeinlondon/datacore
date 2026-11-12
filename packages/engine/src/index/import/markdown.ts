@@ -471,7 +471,12 @@ export class ListBlockData {
     public metadata: Metadata = new Metadata();
     public items: ListItemData[] = [];
 
-    public constructor(public start: number, public end: number, public ordinal: number, public blockId?: string) {}
+    public constructor(
+        public start: number,
+        public end: number,
+        public ordinal: number,
+        public blockId?: string
+    ) {}
 
     public build(): JsonMarkdownListBlock {
         return {

@@ -128,8 +128,7 @@ export class Canvas implements Linkable, File, Linkbearing, Taggable, Indexable,
 /** @public */
 export namespace Canvas {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<Canvas, keyof TypedFieldbearing<Fields>>,
-            TypedFieldbearing<Fields> {}
+        extends Omit<Canvas, keyof TypedFieldbearing<Fields>>, TypedFieldbearing<Fields> {}
 }
 
 /** All supported canvas card types. */
@@ -245,8 +244,7 @@ export class CanvasTextCard extends BaseCanvasCard implements Linkbearing, Tagga
 /** @public */
 export namespace CanvasTextCard {
     export interface Typed<Fields extends { [key in string]?: Literal }>
-        extends Omit<CanvasTextCard, keyof TypedFieldbearing<Fields>>,
-            TypedFieldbearing<Fields> {}
+        extends Omit<CanvasTextCard, keyof TypedFieldbearing<Fields>>, TypedFieldbearing<Fields> {}
 }
 
 /** Canvas card that is just a file embedding. */

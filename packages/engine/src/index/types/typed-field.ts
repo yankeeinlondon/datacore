@@ -3,7 +3,7 @@ import { Literal } from "expression/literal";
 
 interface TypedField<
     Fields extends { [key in string]?: Literal } = { [key in string]?: Literal },
-    T extends keyof Fields & string = keyof Fields & string
+    T extends keyof Fields & string = keyof Fields & string,
 > extends Field {
     /** The value of the field. */
     value: Exclude<Fields[T], undefined>;
@@ -11,7 +11,7 @@ interface TypedField<
 
 type KeyedField<
     Fields extends { [key in string]?: Literal },
-    Key extends keyof Fields & string
+    Key extends keyof Fields & string,
 > = undefined extends Fields[Key] ? TypedField<Fields, Key> | undefined : TypedField<Fields, Key>;
 
 export interface TypedValuebearing<Fields extends { [key in string]?: Literal }> extends TypedFieldbearing<Fields> {

@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
     "jsx": "react-jsx",
-		"jsxImportSource": "preact",
+    "jsxImportSource": "preact",
     "noImplicitAny": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
@@ -22,11 +22,11 @@
     "downlevelIteration": true,
     "esModuleInterop": true,
     "lib": ["dom", "es5", "scripthost", "es2018", "DOM.Iterable"],
-		"paths": {
+    "paths": {
       "react": ["preact/compat"],
       "react-dom": ["preact/compat"]
     },
     "outDir": "build/declarations"
   },
-  "include": ["src/index.ts", "src/typings/*.d.ts", "node_modules/localforage/typings/localforage.d.ts"],
+  "include": ["src/index.ts", "src/typings/*.d.ts", "node_modules/localforage/typings/localforage.d.ts"]
 }

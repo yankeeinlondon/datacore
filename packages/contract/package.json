@@ -9,13 +9,19 @@
     "url": "git+https://github.com/yankeeinlondon/datacore.git",
     "directory": "packages/contract"
   },
-  "keywords": ["obsidian", "datacore", "datacore-engine"],
+  "keywords": [
+    "obsidian",
+    "datacore",
+    "datacore-engine"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public",
     "exports": {

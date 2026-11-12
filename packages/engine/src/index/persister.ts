@@ -14,7 +14,10 @@ export interface Cached<T> {
 export class LocalStorageCache {
     public persister: LocalForage;
 
-    public constructor(public appId: string, public version: string) {
+    public constructor(
+        public appId: string,
+        public version: string
+    ) {
         this.persister = localforage.createInstance({
             name: "datacore/cache/" + appId,
             driver: [localforage.INDEXEDDB],

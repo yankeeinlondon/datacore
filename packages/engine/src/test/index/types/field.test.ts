@@ -10,7 +10,11 @@ class DummyFields implements Indexable {
     public $id: string = "dummy";
     public $typename: string = "Dummy";
 
-    public constructor(public $text: string, public $value: number, public $size: number) {}
+    public constructor(
+        public $text: string,
+        public $value: number,
+        public $size: number
+    ) {}
 
     public get $valueSize(): number {
         return this.$value + this.$size;

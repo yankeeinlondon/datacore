@@ -32,7 +32,10 @@ export class EverythingFieldIndex implements FieldIndex {
 
 /** Specialized field index for IDs which knows to directly just return the ID. */
 export class IdFieldIndex implements FieldIndex {
-    public constructor(public all: () => Set<string>, public lookup: (id: string) => boolean) {}
+    public constructor(
+        public all: () => Set<string>,
+        public lookup: (id: string) => boolean
+    ) {}
 
     public add(id: string, value: Literal): void {}
     public delete(id: string, value: Literal): void {}

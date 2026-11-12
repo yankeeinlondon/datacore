@@ -58,7 +58,7 @@ export class DatacoreJSRenderer extends MarkdownRenderChild {
             render(
                 <ErrorMessage
                     message="Datacore failed to render the code block."
-                    error={ex instanceof Error ? ex.stack ?? ex.message : String(ex)}
+                    error={ex instanceof Error ? (ex.stack ?? ex.message) : String(ex)}
                 />,
                 this.container
             );

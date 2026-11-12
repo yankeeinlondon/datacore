@@ -38,7 +38,10 @@ export class DatacoreLocalApi {
     /** @internal The cache of all currently loaded scripts in this context. */
     private scriptCache: ScriptCache;
 
-    public constructor(public api: DatacoreApi, public path: string) {
+    public constructor(
+        public api: DatacoreApi,
+        public path: string
+    ) {
         this.scriptCache = new ScriptCache(this.core.datastore);
     }
 

@@ -1,0 +1,5 @@
+/* Shown in a code block while Datacore Engine is not available. */
+.datacore-engine-unavailable {
+    color: var(--text-muted);
+    font-style: italic;
+}

@@ -9,6 +9,8 @@ import type { EngineConnection } from "./connection";
 import { unavailableMessage } from "./connection";
 import type { ScriptLanguage } from "./ui/scripting";
 
+import "./block.css";
+
 /** Renders a script into a container on behalf of a parent component; returns the child to remove later. */
 export type ScriptRenderer = (
     engine: DatacoreHandle,

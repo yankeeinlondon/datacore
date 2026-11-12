@@ -1,5 +1,13 @@
 # @yankeeinlondon/datacore-client
 
+## 1.0.1
+
+### Patch Changes
+
+- JSR: luxon's types now resolve for JSR consumers; the JSR build leaves out the `window.dc` global typing, which JSR does not allow (the README shows how to declare it). No API change.
+- Updated dependencies
+  - @yankeeinlondon/datacore-contract@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

@@ -6,7 +6,7 @@
 
 import { DateTime } from 'luxon';
 import { Duration } from 'luxon';
-import { luxon as luxon_2 } from 'luxon';
+import * as Luxon from 'luxon';
 
 // @public
 export type ArithmeticOp = "+" | "-" | "*" | "/" | "%" | "&" | "|";
@@ -230,7 +230,7 @@ export interface DatacoreQueryApi {
     fullquery<T extends Indexable = Indexable>(query: string | IndexQuery): SearchResult<T>;
     headerLink(path: string, header: string): Link;
     inferLink(linktext: string): Link;
-    readonly luxon: luxon_2;
+    readonly luxon: typeof Luxon;
     page<T extends MarkdownPage = MarkdownPage>(path: string | Link): T | undefined;
     parseLink(linktext: string): Link;
     parseQuery(query: string | IndexQuery): IndexQuery;

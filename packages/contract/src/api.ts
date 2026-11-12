@@ -1,4 +1,5 @@
 /** The engine API: what `getDatacore()` returns and what `window.dc` exposes. */
+import type * as Luxon from "luxon";
 import type { Capability } from "./constants";
 import type { Coerce } from "./coerce";
 import type { DataArray } from "./data-array";
@@ -112,7 +113,7 @@ export interface DatacoreQueryApi {
     inferLink(linktext: string): Link;
 
     /** The engine's copy of luxon (create dates/durations with this so they match engine values). */
-    readonly luxon: typeof import("luxon");
+    readonly luxon: typeof Luxon;
     /** Convert values into specific types. */
     readonly coerce: Coerce;
     /** Wrap an array (or `DataArray`) in the engine's chainable `DataArray`. */

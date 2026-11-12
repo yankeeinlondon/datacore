@@ -1,5 +1,11 @@
 # @yankeeinlondon/datacore-contract
 
+## 1.0.1
+
+### Patch Changes
+
+- JSR: luxon's types now resolve for JSR consumers (Deno and npm-compat). luxon ships no types, so the JSR build marks every type-only luxon import with `@ts-types="npm:@types/luxon"`; before, `DateTime`/`Duration` fell back to `any`. `DatacoreApi.luxon` is typed through a named type-only import (same type). No API change.
+
 ## 1.0.0
 
 ### Major Changes

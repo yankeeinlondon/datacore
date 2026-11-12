@@ -86,10 +86,16 @@ const contractMajor = readJson(path.join(root, "packages", "contract", "package.
 
 /** Import map for every bare specifier the staged sources may use. */
 const IMPORTS = {
-    // luxon is type-only in the contract, shared, and the client; Deno picks up `@types/luxon` for the npm package.
+    // luxon is type-only in the contract, shared, and the client. luxon ships no types, so every luxon import gets a
+    // `@ts-types` directive pointing at `@types/luxon` (see LUXON_TYPES); without it the types resolve to `any`.
     luxon: "npm:luxon@^2.4.0",
     [CONTRACT_SPECIFIER]: `jsr:${CONTRACT_SPECIFIER}@^${contractMajor}.0.0`,
 };
+
+/** Deno's directive for an npm package whose types live in a separate `@types` package. */
+const LUXON_TYPES = '// @ts-types="npm:@types/luxon@^2.4.0"';
+/** A whole `import ... from "luxon";` line (every luxon import in the sources is a top-level type-only import). */
+const LUXON_IMPORT = /^import\s[^;]*\sfrom\s["']luxon["'];$/gm;
 
 function stage(pkgName) {
     const packageDir = path.join(root, "packages", pkgName);
@@ -100,6 +106,7 @@ function stage(pkgName) {
 
     /** Relative specifiers get explicit extensions; the shared package becomes a relative path into `_shared/`. */
     function rewrite(code, sourceFile, stagedFile) {
+        code = code.replace(LUXON_IMPORT, (line) => `${LUXON_TYPES}\n${line}`);
         return code.replace(SPECIFIER_PATTERN, (match, prefix, quote, specifier) => {
             let next = specifier;
             if (specifier.startsWith(".")) {
@@ -136,7 +143,11 @@ function stage(pkgName) {
         fs.writeFileSync(indexFile, withoutGlobal);
     }
     for (const file of listSources(stageSrcDir)) {
-        if (/^\s*declare\s+global\b/m.test(fs.readFileSync(path.join(stageSrcDir, file), "utf8"))) {
+        const staged = fs.readFileSync(path.join(stageSrcDir, file), "utf8");
+        if (/import\(\s*["']luxon["']\s*\)/.test(staged)) {
+            throw new Error(`staged ${pkgName}: ${file} has an inline import("luxon"), which cannot carry @ts-types`);
+        }
+        if (/^\s*declare\s+global\b/m.test(staged)) {
             throw new Error(`staged ${pkgName}: ${file} augments global types, which JSR rejects`);
         }
     }

@@ -1,6 +1,7 @@
 /**
  * @module indexables
  */
+import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { Extractors, Field, Fieldbearing, FIELDBEARING_TYPE, FieldExtractor } from "expression/field";
 import { FILE_TYPE, Indexable, Linkable, LINKABLE_TYPE, Linkbearing, Taggable, TAGGABLE_TYPE } from "./indexable";
 import {
@@ -30,7 +31,7 @@ import { Literal } from "expression/literal";
 import { TypedFieldbearing } from "./typed-field";
 
 /** A canvas file, consisting of a set of canvas cards. */
-export class Canvas implements Linkable, File, Linkbearing, Taggable, Indexable, Fieldbearing {
+export class Canvas implements Linkable, File, Linkbearing, Taggable, Indexable, Fieldbearing, Contract.Canvas {
     static TYPES = [FILE_TYPE, "canvas", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = Canvas.TYPES;
@@ -135,7 +136,7 @@ export namespace Canvas {
 export type CanvasCard = CanvasTextCard | CanvasFileCard | CanvasWebCard;
 
 /** Shared metadata for all canvas cards. */
-export abstract class BaseCanvasCard implements Indexable, Linkable {
+export abstract class BaseCanvasCard implements Indexable, Linkable, Contract.BaseCanvasCard {
     abstract $types: string[];
     abstract $typename: string;
     abstract readonly $type: string;
@@ -171,7 +172,10 @@ export abstract class BaseCanvasCard implements Indexable, Linkable {
 }
 
 /** Canvas card with markdown text in it. */
-export class CanvasTextCard extends BaseCanvasCard implements Linkbearing, Taggable, Indexable, Fieldbearing {
+export class CanvasTextCard
+    extends BaseCanvasCard
+    implements Linkbearing, Taggable, Indexable, Fieldbearing, Contract.CanvasTextCard
+{
     static TYPES = ["canvas-card", "markdown", "canvas-text-card", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = CanvasTextCard.TYPES;
@@ -248,7 +252,7 @@ export namespace CanvasTextCard {
 }
 
 /** Canvas card that is just a file embedding. */
-export class CanvasFileCard extends BaseCanvasCard implements Indexable {
+export class CanvasFileCard extends BaseCanvasCard implements Indexable, Contract.CanvasFileCard {
     static TYPES = ["canvas-card", "markdown", "canvas-file-card", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = CanvasTextCard.TYPES;
@@ -281,7 +285,7 @@ export class CanvasFileCard extends BaseCanvasCard implements Indexable {
     }
 }
 
-export class CanvasWebCard extends BaseCanvasCard implements Indexable {
+export class CanvasWebCard extends BaseCanvasCard implements Indexable, Contract.CanvasWebCard {
     static TYPES = ["canvas-card", "markdown", "canvas-web-card", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = CanvasTextCard.TYPES;

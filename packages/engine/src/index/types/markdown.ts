@@ -1,6 +1,7 @@
 /**
  * @module indexables
  */
+import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { Link, Literal, Literals } from "expression/literal";
 import { getFileTitle } from "utils/normalizers";
 import {
@@ -34,7 +35,7 @@ import { JsonConversion } from "./json/common";
 import { TypedValuebearing } from "./typed-field";
 
 /** @public A markdown file in the vault; the source of most metadata. */
-export class MarkdownPage implements File, Linkbearing, Taggable, Indexable, Fieldbearing {
+export class MarkdownPage implements File, Linkbearing, Taggable, Indexable, Fieldbearing, Contract.MarkdownPage {
     /** All of the types that a markdown file is. */
     static TYPES = [FILE_TYPE, "markdown", "page", TAGGABLE_TYPE, LINKABLE_TYPE, LINKBEARING_TYPE, FIELDBEARING_TYPE];
 
@@ -164,7 +165,9 @@ export namespace MarkdownPage {
 }
 
 /** @public A single markdown section inside of a page. */
-export class MarkdownSection implements Indexable, Taggable, Linkable, Linkbearing, Fieldbearing {
+export class MarkdownSection
+    implements Indexable, Taggable, Linkable, Linkbearing, Fieldbearing, Contract.MarkdownSection
+{
     /** All of the types that a markdown section is. */
     static TYPES = ["markdown", "section", TAGGABLE_TYPE, LINKABLE_TYPE, LINKBEARING_TYPE, FIELDBEARING_TYPE];
 
@@ -275,7 +278,7 @@ export namespace MarkdownSection {
 }
 
 /** @public Base class for all markdown blocks. */
-export class MarkdownBlock implements Indexable, Linkbearing, Taggable, Fieldbearing {
+export class MarkdownBlock implements Indexable, Linkbearing, Taggable, Fieldbearing, Contract.MarkdownBlock {
     static TYPES = ["markdown", "block", LINKBEARING_TYPE, TAGGABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownBlock.TYPES;
@@ -376,7 +379,7 @@ export namespace MarkdownBlock {
 }
 
 /** @public Special block for markdown lists (of either plain list entries or tasks). */
-export class MarkdownListBlock extends MarkdownBlock implements Taggable, Linkbearing {
+export class MarkdownListBlock extends MarkdownBlock implements Taggable, Linkbearing, Contract.MarkdownListBlock {
     static TYPES = ["markdown", "block", "block-list", TAGGABLE_TYPE, LINKBEARING_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownListBlock.TYPES;
@@ -426,7 +429,10 @@ export namespace MarkdownListBlock {
 }
 
 /** @public A block containing markdown code. */
-export class MarkdownCodeblock extends MarkdownBlock implements Indexable, Fieldbearing, Linkbearing {
+export class MarkdownCodeblock
+    extends MarkdownBlock
+    implements Indexable, Fieldbearing, Linkbearing, Contract.MarkdownCodeblock
+{
     static TYPES = ["markdown", "block", "codeblock", TAGGABLE_TYPE, LINKBEARING_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownCodeblock.TYPES;
@@ -503,7 +509,10 @@ export namespace MarkdownCodeblock {
 }
 
 /** @public A data-annotated YAML codeblock. */
-export class MarkdownDatablock extends MarkdownBlock implements Indexable, Fieldbearing, Linkbearing {
+export class MarkdownDatablock
+    extends MarkdownBlock
+    implements Indexable, Fieldbearing, Linkbearing, Contract.MarkdownDatablock
+{
     static TYPES = ["markdown", "block", "datablock", TAGGABLE_TYPE, LINKBEARING_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownDatablock.TYPES;
@@ -578,7 +587,7 @@ export namespace MarkdownDatablock {
 }
 
 /** @public A specific list item in a list. */
-export class MarkdownListItem implements Indexable, Linkbearing, Taggable, Fieldbearing {
+export class MarkdownListItem implements Indexable, Linkbearing, Taggable, Fieldbearing, Contract.MarkdownListItem {
     static TYPES = ["markdown", "list-item", LINKBEARING_TYPE, TAGGABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownListItem.TYPES;
@@ -717,7 +726,10 @@ export namespace MarkdownListItem {
 }
 
 /** @public A specific task inside of a markdown list. */
-export class MarkdownTaskItem extends MarkdownListItem implements Indexable, Linkbearing, Taggable, Fieldbearing {
+export class MarkdownTaskItem
+    extends MarkdownListItem
+    implements Indexable, Linkbearing, Taggable, Fieldbearing, Contract.MarkdownTaskItem
+{
     static TYPES = ["markdown", "list-item", "task", LINKBEARING_TYPE, TAGGABLE_TYPE, FIELDBEARING_TYPE];
 
     $types: string[] = MarkdownTaskItem.TYPES;

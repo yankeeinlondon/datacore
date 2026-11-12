@@ -3,15 +3,9 @@
   "version": "0.1.29",
   "private": true,
   "description": "Reactive data engine for Obsidian.md.",
-  "main": "build/library/index.js",
-  "types": "build/library/index.d.ts",
-  "files": [
-    "build/library"
-  ],
   "scripts": {
-    "build": "tsc && tsc --project tsconfig.library.json && api-extractor run --local && node esbuild.config.mjs production all",
-    "build-plugin": "tsc && node esbuild.config.mjs production plugin",
-    "build-library": "tsc --project tsconfig.library.json && api-extractor run --local --verbose && node esbuild.config.mjs production library",
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs",
     "test": "vitest run",
     "test-watch": "vitest",
     "typecheck": "tsc"
@@ -28,7 +22,6 @@
     "@codemirror/language": "github:lishid/cm-language#a9c3c7efe17dd1d24395ee2a179fe12dd6ed1e76",
     "@codemirror/state": "^6.0.1",
     "@codemirror/view": "^6.0.1",
-    "@microsoft/api-extractor": "^7.52.7",
     "@types/luxon": "^2.3.2",
     "@types/node": "^22.20.5",
     "@types/parsimmon": "^1.10.6",
@@ -46,6 +39,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@yankeeinlondon/datacore-contract": "workspace:^",
     "builtin-modules": "3.3.0",
     "emoji-regex": "^10.2.1",
     "flatqueue": "^2.0.3",

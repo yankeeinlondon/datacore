@@ -1,10 +1,11 @@
+import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { getFileTitle, normalizeHeaderForLink } from "utils/normalizers";
 
 /**
  * The Obsidian 'link', used for uniquely describing a file, header, or block.
  * @group Common Types
  */
-export class Link {
+export class Link implements Contract.Link {
     /** The file path this link points to. */
     public path: string;
     /** The display name associated with the link. */

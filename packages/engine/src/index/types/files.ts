@@ -1,6 +1,7 @@
 /**
  * @module indexables
  */
+import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { Link } from "expression/link";
 import { FILE_TYPE, File, Indexable, LINKABLE_TYPE, Linkable } from "./indexable";
 import { DateTime } from "luxon";
@@ -8,7 +9,7 @@ import { Extractors, FIELDBEARING_TYPE, FieldExtractor, Fieldbearing } from "exp
 import { Literal } from "expression/literal";
 
 /** Datacore representation of a generic file with no additional parsing. */
-export class GenericFile implements File, Indexable, Fieldbearing, Linkable {
+export class GenericFile implements File, Indexable, Fieldbearing, Linkable, Contract.GenericFile {
     static TYPES: string[] = [FILE_TYPE, FIELDBEARING_TYPE, LINKABLE_TYPE];
 
     $types: string[] = GenericFile.TYPES;

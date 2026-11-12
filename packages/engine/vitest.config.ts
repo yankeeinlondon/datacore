@@ -1,10 +1,13 @@
 import { fileURLToPath } from "node:url";
+import { defaultClientConditions } from "vite";
 import { defineConfig } from "vitest/config";
 
 const source = fileURLToPath(new URL("./src", import.meta.url));
 
 export default defineConfig({
     resolve: {
+        // Resolve workspace packages to their TypeScript sources (the "source" export condition).
+        conditions: ["source", ...defaultClientConditions],
         alias: [
             // Tests never start web workers; keep the real worker source (which installs a global handler) out.
             { find: /^index\/web-worker\/importer\.worker$/, replacement: `${source}/test/shims/importer-worker.ts` },

@@ -1,4 +1,5 @@
 /** @module api */
+import type * as Contract from "@yankeeinlondon/datacore-contract";
 import { GroupElement, Groupings, Literal, Literals } from "expression/literal";
 
 /** @public A function which maps an array element to some value. */
@@ -129,7 +130,7 @@ export interface DataArray<T> {
 }
 
 /** @internal Implementation of DataArray, minus the dynamic variable access, which is implemented via proxy. */
-class DataArrayImpl<T> implements DataArray<T> {
+class DataArrayImpl<T> implements DataArray<T>, Contract.DataArray<T> {
     private static ARRAY_FUNCTIONS: Set<string> = new Set([
         "chain",
         "where",

@@ -119,6 +119,9 @@ importers:
       '@fortawesome/react-fontawesome':
         specifier: ^0.2.0
         version: 0.2.2(@fortawesome/fontawesome-svg-core@6.7.2)(react@19.3.1)
+      '@yankeeinlondon/datacore-contract':
+        specifier: workspace:^
+        version: link:../contract
       builtin-modules:
         specifier: 3.3.0
         version: 3.3.0
@@ -162,9 +165,6 @@ importers:
       '@codemirror/view':
         specifier: ^6.0.1
         version: 6.38.0
-      '@microsoft/api-extractor':
-        specifier: ^7.52.7
-        version: 7.52.8(@types/node@22.20.5)
       '@types/luxon':
         specifier: ^2.3.2
         version: 2.4.0

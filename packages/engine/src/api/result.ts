@@ -1,5 +1,7 @@
+import type * as Contract from "@yankeeinlondon/datacore-contract";
+
 /** @public Functional return type for error handling. */
-export class Success<T, E> {
+export class Success<T, E> implements Contract.Success<T, E> {
     public successful: true;
 
     public constructor(public value: T) {
@@ -40,7 +42,7 @@ export class Success<T, E> {
 }
 
 /** @public Functional return type for error handling. */
-export class Failure<T, E> {
+export class Failure<T, E> implements Contract.Failure<T, E> {
     public successful: false;
 
     public constructor(public error: E) {

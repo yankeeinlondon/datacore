@@ -30,7 +30,8 @@
       "main": ["./src/main"],
       "react": ["./node_modules/preact/compat"],
       "react-dom": ["./node_modules/preact/compat"]
-    }
+    },
+    "customConditions": ["source"]
   },
   "include": ["src"]
 }

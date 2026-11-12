@@ -1,7 +1,7 @@
 {
   "id": "datacore-view-preact",
   "name": "Datacore View: Preact",
-  "version": "0.1.0-beta.1",
+  "version": "1.0.0",
   "minAppVersion": "1.4.11",
   "description": "Render live, interactive views from JavaScript, TypeScript, JSX and TSX code blocks (dc, dct, dcx, dctx). Requires the Datacore Engine plugin.",
   "author": "Ken Snyder",

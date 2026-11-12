@@ -246,3 +246,29 @@ Findings recorded in the baseline as-is (fix later, then re-baseline with the di
   `childSource` default before treating it as a bug.
 - **Script-facing `dc` lacks contract members** such as `page()` (upstream's local API never had it). Step 5 wraps
   `ScopedDatacore.local(path)`, which has them; decide whether they become part of the documented script surface.
+
+### Steps 2–5 ✅ (2026-11-11)
+
+Each step ended with the parity snapshot identical to the baseline.
+
+- **Step 2** (`92350af`): value helpers in `shared/src/values` (guards with strictly-`true` markers, `wrapValue`,
+  `typeOf`, `compare`, `equals`, `literalToString`, `isTruthy`, `mapLeaves`, groupings, date/duration formatting). The
+  client re-exports them (public names avoid generic ones: `literalToString`, `groupingSize`, `sliceGrouping`); the
+  engine's `Literals`/`Groupings` are thin typed wrappers. tsdown needed eager d.ts emit for re-exported shared files.
+- **Step 3** (`1425296`): `inferLink(linktext)` (one method covers both `Link.infer` and `Link.parseInner`: the
+  `|display` split is the only difference, and `|` cannot appear in file names). Paths, line ranges, media, and
+  `deferred` moved to `shared`.
+- **Step 4** (`0523848`): the UI imports only the contract, `shared`, preact, and obsidian; lint enforces it with a
+  negated pattern list. Deviations: the **index-type guards moved to `shared`** too (the views need `isListItem`/
+  `isSection`/`isCodeblock`; the client re-exports them), and the views got a **local `Result`** (the engine keeps
+  its class-based one on hot evaluation paths; view results never reach the engine).
+- **Step 5** (`1fcc76e`, `5868ad1`, `6db20b9`): the move. view-preact has `EngineConnection` (wraps `getDatacore`,
+  retries on the next engine activation, never loops on an incompatible engine) and `DatacoreBlock` (notice while
+  unavailable, rebuilds the script on reconnect). Client additions: `DatacoreHandle.onReconnected`, and
+  `AppLike = object` (the old type rejected Obsidian's `App` for every consumer, TS2559). Engine bundle 93 modules,
+  no preact/sucrase/styles. `scripts/install-built <vault> [engine|view-preact]` replaces the engine-only script (and
+  clears `CDPATH`, which made a relative `cd` jump to another repository).
+  Verified in Obsidian: disable/enable the engine recovers open views; both load orders; an engine enabled after the
+  client's 10 s timeout still connects.
+
+Remaining: steps 6–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

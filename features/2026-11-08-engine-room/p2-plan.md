@@ -311,4 +311,12 @@ Each step ended with the parity snapshot identical to the baseline.
   processor outlives its plugin, so these errors are expected after a §14.2 conflict test. They are not a reconnect
   bug.
 
+**Fix found after step 8** (`2385950`): `dc*` blocks in notes that were open when view-preact was enabled or
+reloaded had no syntax highlighting. An editor resolves a fence's mode at parse time and keeps the result, so a
+block parsed before the modes existed stays plain until the note is reopened. When the layout is already ready,
+view-preact now rebuilds the open markdown views that contain `dc*` fences (private `rebuildView`, feature-checked;
+it keeps scroll and cursor). Verified in the app by reading the CM6 parse tree: no keyword tokens while the plugin is
+disabled, keyword tokens after enabling it, and the cursor unchanged. P1 never hit this because the engine was enabled
+at startup, before the layout loaded.
+
 Remaining: steps 9–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

@@ -28,6 +28,7 @@
     "@docusaurus/theme-classic": "3.5.2",
     "@docusaurus/tsconfig": "3.5.2",
     "@docusaurus/types": "3.5.2",
+    "@types/node": "^22.20.5",
     "typescript": "~5.9.3"
   },
   "browserslist": {

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved; **P0 complete**, **P1 implemented** (v0.5, 2026-11-11). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11) |
+| **Status** | Approved; **P0 complete**, **P1 complete** (v0.5, 2026-11-11), **P2 planned**. See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11), [p2-plan.md](./p2-plan.md) |
 | **Date** | 2026-11-08 (updated 2026-11-11) |
 | **Owner** | Ken Snyder |
 | **Product** | **datacore-engine** ("Datacore Engine") |

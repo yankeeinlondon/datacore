@@ -32,7 +32,7 @@
     "@types/luxon": "^2.3.2",
     "@types/node": "^16.7.13",
     "@types/parsimmon": "^1.10.6",
-    "esbuild": "^0.16.11",
+    "esbuild": "^0.28.2",
     "esbuild-plugin-inline-worker": "github:mitschabaude/esbuild-plugin-inline-worker#d1aaffc721a62a3fe33f59f8f69b462c7dd05f45",
     "jsdom": "31.0.0",
     "obsidian": "^1.6.6",

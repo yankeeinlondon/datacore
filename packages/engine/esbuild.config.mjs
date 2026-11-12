@@ -35,9 +35,6 @@ async function buildPlugin(prod) {
                 "pdfjs-dist",
                 ...builtins,
             ],
-            alias: {
-                react: "preact/compat",
-            },
             format: "cjs",
             target: "es2018",
             logLevel: "info",
@@ -89,9 +86,6 @@ async function buildLibrary(prod) {
                 "pdfjs-dist",
                 ...builtins,
             ],
-            alias: {
-                react: "preact/compat",
-            },
             format: "cjs",
             target: "es2018",
             logLevel: "info",

@@ -15,7 +15,7 @@
     "@yankeeinlondon/datacore-shared": "workspace:^"
   },
   "devDependencies": {
-    "esbuild": "0.16.17",
+    "esbuild": "0.28.2",
     "obsidian": "^1.6.6"
   }
 }

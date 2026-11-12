@@ -209,3 +209,40 @@ Each step is gated on `pnpm check && pnpm build` and committed separately. Steps
 | The migration command corrupts notes | Pure, fence-aware function with edge-case tests; preview before writing; `vault.process` re-reads current content; recommend a backup in the modal |
 | `inferLink` widens the contract | Small, link-only, mirrors existing engine behaviour; api-extractor review |
 | Test/driver scripts steal focus on a machine in use | Parity and manual checks render detached and use `eval` only; nothing opens leaves, settings, or modals unless the step needs it, and those steps are flagged to run when the machine is free |
+
+## Progress
+
+### Step 1 ✅ (2026-11-11): parity vault and baseline
+
+`fixtures/` (private workspace package): parity notes, generated data, the off-screen **Datacore Parity Helper**
+plugin, the `parity.ts` driver, and `parity/baseline/`. Two snapshots of the same build are identical, including
+across a full reindex. Deviations from the step as planned:
+
+- **Own dataset** (`Parity/Data/`, 40 books + 5 authors, `#pbook`/`#pauthor`) instead of regenerating the scratch
+  vault's 300 `Book NNN` notes: their ratings follow no formula, and separate names keep the parity notes from
+  changing the scratch vault's own checks.
+- **Rendering needs a helper plugin:** `MarkdownRenderer` is not reachable from `obsidian-cli eval` (`require
+  ("obsidian")` fails there).
+- `obsidian-cli` occasionally never answers an eval although the app finished the work; the driver times out
+  (60 s) and retries idempotent calls once.
+
+Bugs found and fixed before taking the baseline:
+
+- **P1 regression** (`482699f`): `Literals.isDate`/`isDuration` used luxon's truthiness checks, and a `DataArray`
+  answers any property with a truthy `DataArray`, so rendering `dc.array(...)` failed (`time.toLocal is not a
+  function`).
+- **Upstream, broken by Obsidian 1.15** (`1c98a46`): `embedRegistry.getEmbedCreator` now returns a factory, not a
+  class, so every `dc.LinkEmbed` failed (`creator is not a constructor`).
+
+Findings recorded in the baseline as-is (fix later, then re-baseline with the diff reviewed):
+
+- **JSX dev props leak into the DOM:** script JSX renders `__self="[object Object]" __source="[object Object]"`
+  attributes. sucrase runs its JSX transform in development mode; set `production: true` in `transpile` (view-preact).
+- **`nullAs: "-"` renders as an empty bullet list:** `Literal` renders the null placeholder through Markdown, where
+  `-` is a list item.
+- **Block-link embeds show the whole note:** `dc.LinkEmbed` of `[[Note#^block]]` passes `link.subpath` without the
+  `#^` prefix Obsidian expects.
+- **Task children:** `dc.List` over tasks with `maxChildDepth={2}` shows no nested list items; check the
+  `childSource` default before treating it as a bug.
+- **Script-facing `dc` lacks contract members** such as `page()` (upstream's local API never had it). Step 5 wraps
+  `ScopedDatacore.local(path)`, which has them; decide whether they become part of the documented script surface.

@@ -172,10 +172,10 @@ function RawLit({
     const sourcePath = maybeSourcePath ?? defaultPath;
 
     // Short-circuit if beyond the maximum render depth.
-    if (depth >= settings.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
+    if (depth >= settings.display.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
 
     if (Literals.isNull(value) || value === undefined) {
-        return <Markdown inline={inline} content={settings.renderNullAs} sourcePath={sourcePath} />;
+        return <Markdown inline={inline} content={settings.display.nullAs} sourcePath={sourcePath} />;
     } else if (Literals.isString(value)) {
         return <Markdown inline={inline} content={value} sourcePath={sourcePath} />;
     } else if (Literals.isNumber(value)) {
@@ -185,7 +185,12 @@ function RawLit({
     } else if (Literals.isDate(value)) {
         return (
             <Fragment>
-                {renderMinimalDate(value, settings.defaultDateFormat, settings.defaultDateTimeFormat, currentLocale())}
+                {renderMinimalDate(
+                    value,
+                    settings.display.dateFormat,
+                    settings.display.dateTimeFormat,
+                    currentLocale()
+                )}
             </Fragment>
         );
     } else if (Literals.isDuration(value)) {

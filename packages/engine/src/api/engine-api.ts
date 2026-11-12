@@ -28,17 +28,9 @@ export interface EngineVersions {
     engineVersion: string;
 }
 
-/** Map the engine's settings to the contract's shared display settings. */
+/** The contract's shared display settings, from the engine's settings (a copy, so callers cannot mutate them). */
 export function displaySettings(settings: Settings): Contract.DisplaySettings {
-    return {
-        dateFormat: settings.defaultDateFormat,
-        dateTimeFormat: settings.defaultDateTimeFormat,
-        nullAs: settings.renderNullAs,
-        pagingEnabled: settings.defaultPagingEnabled,
-        pageSize: settings.defaultPageSize,
-        scrollOnPageChange: settings.scrollOnPageChange,
-        maxRecursiveRenderDepth: settings.maxRecursiveRenderDepth,
-    };
+    return { ...settings.display };
 }
 
 /** Change-detection key for a result set: object identity plus the revision each object was stored at. */

@@ -189,9 +189,9 @@ export function createBinaryOps(linkNormalizer: (x: string) => string): BinaryOp
 /** Convert high level settings to settings used for string rendering. */
 export function stringSettings(settings: Settings): Literals.ToStringSettings {
     return {
-        dateFormat: settings.defaultDateFormat,
-        dateTimeFormat: settings.defaultDateTimeFormat,
-        nullRepresentation: settings.renderNullAs,
+        dateFormat: settings.display.dateFormat,
+        dateTimeFormat: settings.display.dateTimeFormat,
+        nullRepresentation: settings.display.nullAs,
     };
 }
 

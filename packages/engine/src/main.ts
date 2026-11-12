@@ -3,7 +3,8 @@ import { EngineHost } from "api/engine-host";
 import { Datacore } from "index/datacore";
 import { DateTime } from "luxon";
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
-import { DEFAULT_SETTINGS, Settings } from "settings";
+import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
+import { migrateSettings, Settings } from "settings";
 
 /** @internal Reactive data engine for your Obsidian.md vault. */
 export default class DatacorePlugin extends Plugin {
@@ -16,7 +17,7 @@ export default class DatacorePlugin extends Plugin {
     public api: DatacoreApi;
 
     async onload() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) ?? {});
+        this.settings = migrateSettings(await this.loadData());
         this.addSettingTab(new GeneralSettingsTab(this.app, this));
 
         // Initialize the core API for usage in all views and downstream apps.
@@ -93,13 +94,20 @@ export default class DatacorePlugin extends Plugin {
     }
 
     /** Update the given settings to new values. */
-    async updateSettings(settings: Partial<Settings>) {
+    async updateSettings(settings: Partial<Omit<Settings, "display">>) {
         Object.assign(this.settings, settings);
         await this.saveData(this.settings);
     }
+
+    /** Update display settings and notify every view (they re-render on the `display-settings` event). */
+    async updateDisplay(display: Partial<DisplaySettings>) {
+        this.settings.display = { ...this.settings.display, ...display };
+        await this.saveData(this.settings);
+        this.core.notifyDisplaySettings({ ...this.settings.display });
+    }
 }
 
-/** Datacore Settings Tab. */
+/** Datacore Engine settings: the single settings tab for the plugin family (Engine Room spec §8.2). */
 class GeneralSettingsTab extends PluginSettingTab {
     constructor(
         app: App,
@@ -110,8 +118,12 @@ class GeneralSettingsTab extends PluginSettingTab {
 
     public display(): void {
         this.containerEl.empty();
+        const display = this.plugin.settings.display;
 
-        new Setting(this.containerEl).setName("Views").setHeading();
+        new Setting(this.containerEl)
+            .setName("Display")
+            .setDesc("Defaults shared by every Datacore view.")
+            .setHeading();
 
         new Setting(this.containerEl)
             .setName("Pagination")
@@ -122,8 +134,8 @@ class GeneralSettingsTab extends PluginSettingTab {
                     "this setting can also be set on a per-view basis."
             )
             .addToggle((toggle) => {
-                toggle.setValue(this.plugin.settings.defaultPagingEnabled).onChange(async (value) => {
-                    await this.plugin.updateSettings({ defaultPagingEnabled: value });
+                toggle.setValue(display.pagingEnabled).onChange(async (value) => {
+                    await this.plugin.updateDisplay({ pagingEnabled: value });
                 });
             });
 
@@ -138,7 +150,7 @@ class GeneralSettingsTab extends PluginSettingTab {
                     "200": "200",
                     "500": "500",
                 };
-                const current = "" + this.plugin.settings.defaultPageSize;
+                const current = "" + display.pageSize;
                 if (!(current in OPTIONS)) OPTIONS[current] = current;
 
                 dropdown
@@ -148,7 +160,7 @@ class GeneralSettingsTab extends PluginSettingTab {
                         const parsed = parseFloat(value);
                         if (isNaN(parsed)) return;
 
-                        await this.plugin.updateSettings({ defaultPageSize: parsed | 0 });
+                        await this.plugin.updateDisplay({ pageSize: parsed | 0 });
                     });
             });
 
@@ -159,19 +171,17 @@ class GeneralSettingsTab extends PluginSettingTab {
                     "This can be overriden on a per-view basis."
             )
             .addToggle((toggle) => {
-                toggle.setValue(this.plugin.settings.scrollOnPageChange).onChange(async (value) => {
-                    await this.plugin.updateSettings({ scrollOnPageChange: value });
+                toggle.setValue(display.scrollOnPageChange).onChange(async (value) => {
+                    await this.plugin.updateDisplay({ scrollOnPageChange: value });
                 });
             });
-
-        new Setting(this.containerEl).setName("Formatting").setHeading();
 
         new Setting(this.containerEl)
             .setName("Empty values")
             .setDesc("What to show for unset/empty properties.")
             .addText((text) => {
-                text.setValue(this.plugin.settings.renderNullAs).onChange(async (value) => {
-                    await this.plugin.updateSettings({ renderNullAs: value });
+                text.setValue(display.nullAs).onChange(async (value) => {
+                    await this.plugin.updateDisplay({ nullAs: value });
                 });
             });
 
@@ -181,14 +191,14 @@ class GeneralSettingsTab extends PluginSettingTab {
                 "The default format that dates are rendered in. Uses luxon date formatting (https://github.com/moment/luxon/blob/master/docs/formatting.md#formatting-with-tokens-strings-for-cthulhu)."
             )
             .addText((text) => {
-                text.setValue(this.plugin.settings.defaultDateFormat).onChange(async (value) => {
+                text.setValue(display.dateFormat).onChange(async (value) => {
                     // check if date format is valid
                     try {
                         DateTime.fromMillis(Date.now()).toFormat(value);
                     } catch {
                         return;
                     }
-                    await this.plugin.updateSettings({ defaultDateFormat: value });
+                    await this.plugin.updateDisplay({ dateFormat: value });
                 });
             });
 
@@ -198,17 +208,32 @@ class GeneralSettingsTab extends PluginSettingTab {
                 "The default format that date-times are rendered in. Uses luxon date formatting (https://github.com/moment/luxon/blob/master/docs/formatting.md#formatting-with-tokens-strings-for-cthulhu)."
             )
             .addText((text) => {
-                text.setValue(this.plugin.settings.defaultDateTimeFormat).onChange(async (value) => {
+                text.setValue(display.dateTimeFormat).onChange(async (value) => {
                     try {
                         DateTime.fromMillis(Date.now()).toFormat(value);
                     } catch {
                         return;
                     }
-                    await this.plugin.updateSettings({ defaultDateTimeFormat: value });
+                    await this.plugin.updateDisplay({ dateTimeFormat: value });
                 });
             });
 
-        new Setting(this.containerEl).setName("Performance").setHeading();
+        new Setting(this.containerEl)
+            .setName("Maximum recursive render depth")
+            .setDesc(
+                "Maximum depth that objects will be rendered to (i.e., how many levels of subproperties " +
+                    "will be rendered by default). This avoids infinite recursion due to self-referential objects " +
+                    "and ensures that rendering objects is acceptably performant."
+            )
+            .addText((text) => {
+                text.setValue(display.maxRecursiveRenderDepth.toString()).onChange(async (value) => {
+                    const parsed = parseInt(value);
+                    if (isNaN(parsed)) return;
+                    await this.plugin.updateDisplay({ maxRecursiveRenderDepth: parsed });
+                });
+            });
+
+        new Setting(this.containerEl).setName("Indexing").setHeading();
 
         new Setting(this.containerEl)
             .setName("Inline fields")
@@ -247,21 +272,6 @@ class GeneralSettingsTab extends PluginSettingTab {
 
                     const limited = Math.max(0.1, Math.min(1.0, parsed));
                     await this.plugin.updateSettings({ importerUtilization: limited });
-                });
-            });
-
-        new Setting(this.containerEl)
-            .setName("Maximum recursive render depth")
-            .setDesc(
-                "Maximum depth that objects will be rendered to (i.e., how many levels of subproperties " +
-                    "will be rendered by default). This avoids infinite recursion due to self-referential objects " +
-                    "and ensures that rendering objects is acceptably performant."
-            )
-            .addText((text) => {
-                text.setValue(this.plugin.settings.maxRecursiveRenderDepth.toString()).onChange(async (value) => {
-                    const parsed = parseInt(value);
-                    if (isNaN(parsed)) return;
-                    await this.plugin.updateSettings({ maxRecursiveRenderDepth: parsed });
                 });
             });
     }

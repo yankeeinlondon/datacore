@@ -167,7 +167,7 @@ describe("EngineApi: watchFile, onRevision, events, settings", () => {
     });
 
     it("exposes display settings and their change event", () => {
-        expect(api.settings.display.pageSize).toBe(engine.core.settings.defaultPageSize);
+        expect(api.settings.display.pageSize).toBe(engine.core.settings.display.pageSize);
 
         const seen: DisplaySettings[] = [];
         api.on("display-settings", (display) => seen.push(display));

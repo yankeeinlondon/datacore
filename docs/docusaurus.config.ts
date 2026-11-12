@@ -4,16 +4,16 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Datacore',
-  tagline: 'Database for Obsidian power users.',
+  tagline: 'A shared query engine and views for Obsidian power users.',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://blacksmithgu.github.io',
+  url: 'https://yankeeinlondon.github.io',
   baseUrl: '/datacore',
   trailingSlash: false,
 
   // GitHub pages deployment config.
-  organizationName: 'blacksmithgu',
+  organizationName: 'yankeeinlondon',
   projectName: 'datacore',
 
   onBrokenLinks: 'throw',
@@ -34,7 +34,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: "/",
-          editUrl: 'https://github.com/blacksmithgu/datacore/tree/master/docs',
+          editUrl: 'https://github.com/yankeeinlondon/datacore/tree/master/docs',
         },
         blog: {
           showReadingTime: true,
@@ -74,7 +74,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/blacksmithgu/datacore',
+          href: 'https://github.com/yankeeinlondon/datacore',
           label: 'GitHub',
           position: 'right',
         },
@@ -100,17 +100,21 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Github',
+              label: 'GitHub',
+              href: 'https://github.com/yankeeinlondon/datacore',
+            },
+            {
+              label: 'Upstream Datacore',
               href: 'https://github.com/blacksmithgu/datacore',
             },
             {
-              label: 'Discord',
+              label: 'Discord (upstream)',
               href: 'https://discord.gg/KwZUX4BYba',
             },
           ],
         },
       ],
-      copyright: `Copyright Michael Brenan © ${new Date().getFullYear()} Datacore. <a href="https://obsidian.md">Obsidian.md</a> is a trademark of Obsidian.`,
+      copyright: `Datacore © ${new Date().getFullYear()} Michael Brenan. Datacore Engine and Datacore View: Preact are a fork maintained by Ken Snyder. <a href="https://obsidian.md">Obsidian.md</a> is a trademark of Obsidian.`,
     },
     prism: {
       theme: prismThemes.github,

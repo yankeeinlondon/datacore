@@ -1,41 +1,18 @@
 # Website
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The documentation site for Datacore Engine and Datacore View: Preact, built with [Docusaurus](https://docusaurus.io/).
+It is the workspace package `@yankeeinlondon/datacore-docs`. Run these from the repository root:
 
-### Installation
-
-```
-$ yarn
-```
-
-### Local Development
-
-```
-$ yarn start
+```bash
+pnpm install
+pnpm docs:start   # local development server with live reload
+pnpm docs:build   # static site in docs/build
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+To preview a production build under the deployed base URL, run `pnpm --filter @yankeeinlondon/datacore-docs serve`
+after building.
 
-### Build
+## Deployment
 
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+Pushes to `master` build the site and deploy it to GitHub Pages
+(<https://yankeeinlondon.github.io/datacore/>) through `.github/workflows/deploy-docs.yml`.

@@ -14,8 +14,6 @@
     "build-library": "tsc --project tsconfig.library.json && api-extractor run --local --verbose && node esbuild.config.mjs production library",
     "test": "vitest run",
     "test-watch": "vitest",
-    "check-format": "prettier --check src",
-    "format": "prettier --write src",
     "typecheck": "tsc"
   },
   "keywords": [
@@ -38,7 +36,6 @@
     "esbuild-plugin-inline-worker": "github:mitschabaude/esbuild-plugin-inline-worker#d1aaffc721a62a3fe33f59f8f69b462c7dd05f45",
     "jsdom": "31.0.0",
     "obsidian": "^1.6.6",
-    "prettier": "2.3.2",
     "ts-node": "^10.9.2",
     "tslib": "^2.3.1",
     "typescript": "^5.4.2",

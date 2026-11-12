@@ -18,5 +18,9 @@
   },
   "dependencies": {
     "@yankeeinlondon/datacore-contract": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/luxon": "^2.4.0",
+    "luxon": "^2.4.0"
   }
 }

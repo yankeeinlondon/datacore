@@ -2,12 +2,10 @@ import { DateTime, Duration } from "luxon";
 import * as P from "parsimmon";
 import emojiRegex from "emoji-regex";
 import { Link } from "expression/link";
+import { normalizeDuration as sharedNormalizeDuration } from "@yankeeinlondon/datacore-shared";
 
-/** Test-environment-friendly function which fetches the current system locale. */
-export function currentLocale(): string {
-    if (typeof window === "undefined") return "en-US";
-    return window.navigator.language;
-}
+// Locale and date/duration rendering are shared with the views and the client (datacore-shared).
+export { currentLocale, renderMinimalDate, renderMinimalDuration } from "@yankeeinlondon/datacore-shared";
 
 // Date/Time Rendering
 
@@ -15,7 +13,7 @@ export function currentLocale(): string {
 export function normalizeDuration(dur: Duration) {
     if (dur === undefined || dur === null) return dur;
 
-    return dur.shiftTo("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds").normalize();
+    return sharedNormalizeDuration(dur);
 }
 
 /** Strip the time components of a date time object. */
@@ -41,35 +39,6 @@ export function extractDate(str: string): DateTime | undefined {
     }
 
     return undefined;
-}
-
-/** Render a DateTime in a minimal format to save space. */
-export function renderMinimalDate(time: DateTime, dateFormat: string, dateTimeFormat: string, locale?: string): string {
-    // If there is no relevant time specified, fall back to just rendering the date.
-    if (time.second == 0 && time.minute == 0 && time.hour == 0) {
-        return time.toLocal().toFormat(dateFormat, { locale });
-    }
-
-    return time.toLocal().toFormat(dateTimeFormat, { locale });
-}
-
-/** Render a duration in a minimal format to save space. */
-export function renderMinimalDuration(dur: Duration): string {
-    dur = normalizeDuration(dur);
-
-    // TODO: Luxon does not have multi-lingual/locale-aware duration rendering.
-    let result = "";
-    if (dur.years) result += `${dur.years} years, `;
-    if (dur.months) result += `${dur.months} months, `;
-    if (dur.weeks) result += `${dur.weeks} weeks, `;
-    if (dur.days) result += `${dur.days} days, `;
-    if (dur.hours) result += `${dur.hours} hours, `;
-    if (dur.minutes) result += `${dur.minutes} minutes, `;
-    if (dur.seconds) result += `${Math.round(dur.seconds)} seconds, `;
-    if (dur.milliseconds) result += `${Math.round(dur.milliseconds)} ms, `;
-
-    if (result.endsWith(", ")) result = result.substring(0, result.length - 2);
-    return result;
 }
 
 // Path utilities.

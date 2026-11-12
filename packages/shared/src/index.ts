@@ -9,3 +9,4 @@
  */
 
 export * from "./registry";
+export * from "./values/index";

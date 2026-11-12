@@ -1,10 +1,10 @@
 /**
  * @module expressions
  */
-import { BRAND_KEYS } from "@yankeeinlondon/datacore-contract";
-import { DateTime, Duration } from "luxon";
+import type { Literal as ContractLiteral } from "@yankeeinlondon/datacore-contract";
+import * as values from "@yankeeinlondon/datacore-shared";
+import type { DateTime, Duration } from "luxon";
 import { Link } from "expression/link";
-import { renderMinimalDate, renderMinimalDuration } from "utils/normalizers";
 
 // Re-exports of useful generic types.
 export { Link };
@@ -85,29 +85,16 @@ export interface LiteralWrapper<T extends LiteralType> {
 
 /**
  * @hidden
- *  Utility library for handling literal values. */
-const LINK_BRAND = Symbol.for(BRAND_KEYS.link);
-
+ * Utility library for handling literal values. The implementation is shared with the views and the client
+ * (`datacore-shared`), so every bundle compares and stringifies values identically; these wrappers narrow the shared
+ * guards to the engine's own `Link`/luxon types.
+ */
 export namespace Literals {
     /** Settings used when formatting literal values to text. */
-    export interface ToStringSettings {
-        /** What a null will render as. */
-        nullRepresentation: string;
-
-        /** Date format. */
-        dateFormat: string;
-
-        /** Date-time format. */
-        dateTimeFormat: string;
-    }
+    export type ToStringSettings = values.LiteralStringSettings;
 
     /** Sane, English-based defaults for date formats. */
-    export const DEFAULT_TO_STRING: ToStringSettings = {
-        nullRepresentation: "-",
-
-        dateFormat: "MMMM dd, yyyy",
-        dateTimeFormat: "h:mm a - MMMM dd, yyyy",
-    };
+    export const DEFAULT_TO_STRING: Readonly<ToStringSettings> = values.DEFAULT_LITERAL_STRING_SETTINGS;
 
     /** Convert an arbitrary value into a reasonable, Markdown-friendly string if possible. */
     export function toString(
@@ -115,75 +102,22 @@ export namespace Literals {
         setting: ToStringSettings = DEFAULT_TO_STRING,
         recursive: boolean = false
     ): string {
-        let wrapped = wrapValue(field as Literal);
-        if (!wrapped) return setting.nullRepresentation;
-
-        switch (wrapped.type) {
-            case "null":
-                return setting.nullRepresentation;
-            case "string":
-                return wrapped.value;
-            case "number":
-            case "boolean":
-                return "" + wrapped.value;
-            case "link":
-                return wrapped.value.markdown();
-            case "function":
-                return "<function>";
-            case "array":
-                let result = "";
-                if (recursive) result += "[";
-                result += wrapped.value.map((f) => toString(f, setting, true)).join(", ");
-                if (recursive) result += "]";
-                return result;
-            case "object":
-                return (
-                    "{ " +
-                    Object.entries(wrapped.value)
-                        .map((e) => e[0] + ": " + toString(e[1], setting, true))
-                        .join(", ") +
-                    " }"
-                );
-            case "date":
-                return renderMinimalDate(wrapped.value, setting.dateFormat, setting.dateTimeFormat);
-            case "duration":
-                return renderMinimalDuration(wrapped.value);
-        }
+        return values.literalToString(field, setting, recursive);
     }
 
     /** Wrap a literal value so you can switch on it easily. */
     export function wrapValue(val: unknown): WrappedLiteral | undefined {
-        if (isNull(val)) return { type: "null", value: null };
-        else if (isNumber(val)) return { type: "number", value: val };
-        else if (isString(val)) return { type: "string", value: val };
-        else if (isBoolean(val)) return { type: "boolean", value: val };
-        else if (isDuration(val)) return { type: "duration", value: val };
-        else if (isDate(val)) return { type: "date", value: val };
-        else if (isArray(val)) return { type: "array", value: val as Literal[] };
-        else if (isLink(val)) return { type: "link", value: val };
-        else if (isFunction(val)) return { type: "function", value: val };
-        else if (isObject(val)) return { type: "object", value: val };
-        else return undefined;
+        return values.wrapValue(val) as WrappedLiteral | undefined;
     }
 
     /** Recursively map complex objects at the leaves. */
     export function mapLeaves(val: Literal, func: (t: Literal) => Literal): Literal {
-        if (isObject(val)) {
-            let result: DataObject = {};
-            for (let [key, value] of Object.entries(val)) result[key] = mapLeaves(value as Literal, func);
-            return result;
-        } else if (isArray(val)) {
-            let result: Literal[] = [];
-            for (let value of val) result.push(mapLeaves(value, func));
-            return result;
-        } else {
-            return func(val);
-        }
+        return values.mapLeaves(val as ContractLiteral, func as (leaf: ContractLiteral) => ContractLiteral) as Literal;
     }
 
     /** Check if two arbitrary literals are equal. */
-    export function equals(first: Literal | undefined, second: Literal | undefined) {
-        return compare(first, second) == 0;
+    export function equals(first: Literal | undefined, second: Literal | undefined): boolean {
+        return values.equals(first as ContractLiteral | undefined, second as ContractLiteral | undefined);
     }
 
     /** Compare two arbitrary JavaScript values. Produces a total ordering over ANY possible datacore value. */
@@ -192,134 +126,17 @@ export namespace Literals {
         val2: Literal | undefined,
         linkNormalizer?: (link: string) => string
     ): number {
-        // Reference equality - short circuit.
-        if (val1 === val2) return 0;
-
-        // Handle undefined/nulls first.
-        if (val1 === undefined) val1 = null;
-        if (val2 === undefined) val2 = null;
-        if (val1 === null && val2 === null) return 0;
-        else if (val1 === null) return -1;
-        else if (val2 === null) return 1;
-
-        // A non-null value now which we can wrap & compare on.
-        let wrap1 = wrapValue(val1);
-        let wrap2 = wrapValue(val2);
-
-        if (wrap1 === undefined && wrap2 === undefined) return 0;
-        else if (wrap1 === undefined) return -1;
-        else if (wrap2 === undefined) return 1;
-
-        // Short-circuit on different types or on reference equality.
-        if (wrap1.type != wrap2.type) return wrap1.type.localeCompare(wrap2.type);
-        if (wrap1.value === wrap2.value) return 0;
-
-        switch (wrap1.type) {
-            case "string":
-                return wrap1.value.localeCompare(wrap2.value as string);
-            case "number":
-                if (wrap1.value < (wrap2.value as number)) return -1;
-                else if (wrap1.value == (wrap2.value as number)) return 0;
-                return 1;
-            case "null":
-                return 0;
-            case "boolean":
-                if (wrap1.value == wrap2.value) return 0;
-                else return wrap1.value ? 1 : -1;
-            case "link":
-                let link1 = wrap1.value;
-                let link2 = wrap2.value as Link;
-                let normalize = linkNormalizer ?? ((x: string) => x);
-
-                // We can't compare by file name or display, since that would break link equality. Compare by path.
-                let pathCompare = normalize(link1.path).localeCompare(normalize(link2.path));
-                if (pathCompare != 0) return pathCompare;
-
-                // Then compare by type.
-                let typeCompare = link1.type.localeCompare(link2.type);
-                if (typeCompare != 0) return typeCompare;
-
-                // Then compare by subpath existence.
-                if (link1.subpath && !link2.subpath) return 1;
-                if (!link1.subpath && link2.subpath) return -1;
-                if (!link1.subpath && !link2.subpath) return 0;
-
-                // Since both have a subpath, compare by subpath.
-                return (link1.subpath ?? "").localeCompare(link2.subpath ?? "");
-            case "date":
-                return wrap1.value < (wrap2.value as DateTime)
-                    ? -1
-                    : wrap1.value.equals(wrap2.value as DateTime)
-                      ? 0
-                      : 1;
-            case "duration":
-                return wrap1.value < (wrap2.value as Duration)
-                    ? -1
-                    : wrap1.value.equals(wrap2.value as Duration)
-                      ? 0
-                      : 1;
-            case "array":
-                let f1 = wrap1.value;
-                let f2 = wrap2.value as (Literal | undefined)[];
-                for (let index = 0; index < Math.min(f1.length, f2.length); index++) {
-                    let comp = compare(f1[index], f2[index]);
-                    if (comp != 0) return comp;
-                }
-                return f1.length - f2.length;
-            case "object":
-                let o1 = wrap1.value as Record<string, Literal | undefined>;
-                let o2 = wrap2.value as Record<string, Literal | undefined>;
-                let k1 = Array.from(Object.keys(o1));
-                let k2 = Array.from(Object.keys(o2));
-                k1.sort();
-                k2.sort();
-
-                let keyCompare = compare(k1, k2);
-                if (keyCompare != 0) return keyCompare;
-
-                for (let key of k1) {
-                    let comp = compare(o1[key], o2[key]);
-                    if (comp != 0) return comp;
-                }
-
-                return 0;
-            case "function":
-                return 0;
-        }
+        return values.compare(val1 as ContractLiteral | undefined, val2 as ContractLiteral | undefined, linkNormalizer);
     }
 
     /** Find the corresponding datacore type for an arbitrary value. */
     export function typeOf(val: unknown): LiteralType | undefined {
-        return wrapValue(val)?.type;
+        return values.typeOf(val);
     }
 
     /** Determine if the given value is "truthy" (i.e., is non-null and has data in it). */
     export function isTruthy(field: Literal): boolean {
-        let wrapped = wrapValue(field);
-        if (!wrapped) return false;
-
-        switch (wrapped.type) {
-            case "number":
-                return wrapped.value != 0;
-            case "string":
-                return wrapped.value.length > 0;
-            case "boolean":
-                return wrapped.value;
-            case "link":
-                return !!wrapped.value.path;
-            case "date":
-                return wrapped.value.toMillis() != 0;
-            case "duration":
-                return wrapped.value.as("seconds") != 0;
-            case "object":
-                return Object.keys(wrapped.value).length > 0;
-            case "array":
-                return wrapped.value.length > 0;
-            case "null":
-                return false;
-            case "function":
-                return true;
-        }
+        return values.isTruthy(field as ContractLiteral);
     }
 
     /** Deep copy a field. */
@@ -347,20 +164,14 @@ export namespace Literals {
         return typeof val == "number";
     }
 
-    /** Determine if the value is a date. */
+    /** Determine if the value is a date (from any copy of luxon). */
     export function isDate(val: unknown): val is DateTime {
-        // luxon's marker works across separately bundled copies of luxon. It must be strictly `true`: luxon's own
-        // `DateTime.isDateTime` only checks truthiness, and a DataArray answers any property with a (truthy) DataArray.
-        return hasTrueMarker(val, "isLuxonDateTime");
+        return values.isDateTime(val);
     }
 
-    /** Determine if the value is a duration. */
+    /** Determine if the value is a duration (from any copy of luxon). */
     export function isDuration(val: unknown): val is Duration {
-        return hasTrueMarker(val, "isLuxonDuration");
-    }
-
-    function hasTrueMarker(val: unknown, marker: string): boolean {
-        return typeof val === "object" && val !== null && (val as Record<string, unknown>)[marker] === true;
+        return values.isDuration(val);
     }
 
     /** Determine if the value is null or undefined. */
@@ -368,9 +179,9 @@ export namespace Literals {
         return val === null || val === undefined;
     }
 
-    /** Determine if the value is an array. */
+    /** Determine if the value is an array (a plain array or a DataArray). */
     export function isArray(val: unknown): val is unknown[] {
-        return Array.isArray(val);
+        return values.isLiteralArray(val);
     }
 
     /** Determine if the value is a boolean. */
@@ -378,23 +189,14 @@ export namespace Literals {
         return typeof val === "boolean";
     }
 
-    /** Determine if the value is a link. */
+    /** Determine if the value is a link (from any copy of the engine). */
     export function isLink(val: unknown): val is Link {
-        // Brand check: links created by another bundle's copy of the engine are still links.
-        return typeof val === "object" && val !== null && (val as Record<symbol, unknown>)[LINK_BRAND] === true;
+        return values.isLink(val);
     }
 
     /** Checks if the given value is an object (and not any other datacore-recognized object-like type). */
     export function isObject(val: unknown): val is DataObject {
-        return (
-            val !== undefined &&
-            typeof val == "object" &&
-            !isArray(val) &&
-            !isDuration(val) &&
-            !isDate(val) &&
-            !isLink(val) &&
-            !isNull(val)
-        );
+        return values.isDataObject(val);
     }
 
     /** Determines if the given value is a javascript function. */
@@ -419,72 +221,31 @@ export type Grouping<T> = T[] | GroupElement<T>[];
 
 /**
  * @hidden
+ * Grouping helpers (implementation shared via `datacore-shared`).
  */
 export namespace Groupings {
     /** Determines if the given group entry is a standalone value, or a grouping of sub-entries. */
     export function isElementGroup<T>(entry: unknown): entry is GroupElement<T> {
-        return Literals.isObject(entry) && Object.keys(entry).length == 2 && "key" in entry && "rows" in entry;
+        return values.isGroupElement(entry);
     }
 
     /** Determines if the given array is a grouping array. */
     export function isGrouping<T>(entry: Grouping<T>): entry is GroupElement<T>[] {
-        for (let element of entry) if (!isElementGroup(element)) return false;
-
-        return true;
+        return values.isGrouping(entry);
     }
 
     /** Determines if the given array is a leaf and has no subgroupings. */
     export function isLeaf<T>(entry: Grouping<T>): entry is T[] {
-        for (let element of entry) if (isElementGroup(element)) return false;
-
-        return true;
+        return values.isGroupLeaf(entry);
     }
 
     /** Count the total number of elements in a recursive grouping. */
     export function count<T>(elements: Grouping<T> | GroupElement<T>): number {
-        if (isElementGroup(elements)) {
-            return count(elements.rows);
-        } else if (isGrouping(elements)) {
-            let result = 0;
-            for (let subgroup of elements) result += count(subgroup.rows);
-            return result;
-        } else {
-            return elements.length;
-        }
+        return values.groupingSize(elements);
     }
 
     /** Recursively slice a grouping, preserving the group structure that contains elements [start...end). */
     export function slice<T>(elements: Grouping<T>, start: number, end: number): Grouping<T> {
-        if (end <= start) return [];
-        if (isLeaf(elements)) return elements.slice(start, end);
-
-        // Find the first group that contains index `start`.
-        let index = 0,
-            seen = 0;
-        while (index < elements.length && seen + count(elements[index]) <= start) {
-            seen += count(elements[index]);
-            index++;
-        }
-
-        // start was greater than the entire length of the groupings.
-        if (index >= elements.length) return [];
-
-        const result: { key: Literal; rows: Grouping<T> }[] = [];
-        while (index < elements.length && seen < end) {
-            const group = elements[index];
-            const groupSize = count(group);
-            const groupStart = Math.max(seen, start);
-            const groupEnd = Math.min(groupSize + seen, end);
-
-            result.push({
-                key: group.key,
-                rows: slice(group.rows, groupStart - seen, groupEnd - seen),
-            });
-
-            seen += groupSize;
-            index++;
-        }
-
-        return result;
+        return values.sliceGrouping(elements, start, end);
     }
 }

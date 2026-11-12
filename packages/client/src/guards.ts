@@ -3,14 +3,11 @@
  * by the engine's bundle (never use `instanceof` on engine values).
  */
 import {
-    BRAND_KEYS,
     INDEX_TYPES,
     type BaseCanvasCard,
     type Canvas,
-    type DataArray,
     type File,
     type Indexable,
-    type Link,
     type MarkdownBlock,
     type MarkdownCodeblock,
     type MarkdownDatablock,
@@ -20,10 +17,6 @@ import {
     type MarkdownSection,
     type MarkdownTaskItem,
 } from "@yankeeinlondon/datacore-contract";
-import type { DateTime, Duration } from "luxon";
-
-const LINK_BRAND = Symbol.for(BRAND_KEYS.link);
-const DATA_ARRAY_BRAND = Symbol.for(BRAND_KEYS.dataArray);
 
 function isObject(value: unknown): value is Record<PropertyKey, unknown> {
     return typeof value === "object" && value !== null;
@@ -67,22 +60,5 @@ export const isCanvas = (value: unknown): value is Canvas => hasIndexType(value,
 /** A canvas card. */
 export const isCanvasCard = (value: unknown): value is BaseCanvasCard => hasIndexType(value, INDEX_TYPES.canvasCard);
 
-/** A link created by the engine. */
-export function isLink(value: unknown): value is Link {
-    return isObject(value) && value[LINK_BRAND] === true;
-}
-
-/** A `DataArray` created by the engine. */
-export function isDataArray(value: unknown): value is DataArray<unknown> {
-    return isObject(value) && value[DATA_ARRAY_BRAND] === true;
-}
-
-/** A luxon `DateTime` (from any copy of luxon). */
-export function isDateTime(value: unknown): value is DateTime {
-    return isObject(value) && value["isLuxonDateTime"] === true;
-}
-
-/** A luxon `Duration` (from any copy of luxon). */
-export function isDuration(value: unknown): value is Duration {
-    return isObject(value) && value["isLuxonDuration"] === true;
-}
+// Value guards (links, data arrays, luxon values) are shared with the engine; see datacore-shared.
+export { isDataArray, isDateTime, isDuration, isLink } from "@yankeeinlondon/datacore-shared";

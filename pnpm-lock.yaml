@@ -226,6 +226,13 @@ importers:
       '@yankeeinlondon/datacore-contract':
         specifier: workspace:^
         version: link:../contract
+    devDependencies:
+      '@types/luxon':
+        specifier: ^2.4.0
+        version: 2.4.0
+      luxon:
+        specifier: ^2.4.0
+        version: 2.5.2
 
   packages/view-preact:
     dependencies:

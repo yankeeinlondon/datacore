@@ -9,6 +9,7 @@ import { Canvas } from '@yankeeinlondon/datacore-contract';
 import { DataArray } from '@yankeeinlondon/datacore-contract';
 import { DatacoreError } from '@yankeeinlondon/datacore-contract';
 import { DatacoreErrorCode } from '@yankeeinlondon/datacore-contract';
+import { DataObject } from '@yankeeinlondon/datacore-contract';
 import { DateTime } from 'luxon';
 import { Duration } from 'luxon';
 import { File as File_2 } from '@yankeeinlondon/datacore-contract';
@@ -38,6 +39,9 @@ export interface AppLike {
 }
 
 // @public
+export function compare(first: Literal | undefined, second: Literal | undefined, linkNormalizer?: (link: string) => string): number;
+
+// @public
 export interface ComponentLike {
     // (undocumented)
     register(callback: () => unknown): void;
@@ -57,6 +61,12 @@ export type ConsumerLike = (ComponentLike & {
 
 // @public
 export function datacoreError(code: DatacoreErrorCode, message: string): DatacoreError;
+
+// @public
+export const DEFAULT_LITERAL_STRING_SETTINGS: Readonly<LiteralStringSettings>;
+
+// @public
+export function equals(first: Literal | undefined, second: Literal | undefined): boolean;
 
 // @public
 export function getDatacore(app: AppLike, options: GetDatacoreOptions): Promise<GetDatacoreResult>;
@@ -84,6 +94,9 @@ export type GetDatacoreResult = {
 };
 
 // @public
+export function groupingSize<T>(elements: Grouping<T> | GroupElement<T>): number;
+
+// @public
 export function hasIndexType(value: unknown, type: string): value is Indexable;
 
 // @public
@@ -108,6 +121,9 @@ export const isDatablock: (value: unknown) => value is MarkdownDatablock;
 export function isDatacoreError(value: unknown): value is DatacoreError;
 
 // @public
+export function isDataObject(value: unknown): value is DataObject;
+
+// @public
 export function isDateTime(value: unknown): value is DateTime;
 
 // @public
@@ -123,6 +139,9 @@ export function isGroupElement<T>(entry: unknown): entry is GroupElement<T>;
 export function isGrouping<T>(grouping: Grouping<T>): grouping is GroupElement<T>[];
 
 // @public
+export function isGroupLeaf<T>(grouping: Grouping<T>): grouping is T[];
+
+// @public
 export function isIndexable(value: unknown): value is Indexable;
 
 // @public
@@ -133,6 +152,9 @@ export const isListBlock: (value: unknown) => value is MarkdownListBlock;
 
 // @public
 export const isListItem: (value: unknown) => value is MarkdownListItem;
+
+// @public
+export function isLiteralArray(value: unknown): value is unknown[];
 
 // @public
 export const isMarkdownPage: (value: unknown) => value is MarkdownPage;
@@ -147,10 +169,26 @@ export const isTask: (value: unknown) => value is MarkdownTaskItem;
 export function isTruthy(value: Literal): boolean;
 
 // @public
+export interface LiteralStringSettings {
+    dateFormat: string;
+    dateTimeFormat: string;
+    nullRepresentation: string;
+}
+
+// @public
+export function literalToString(value: unknown, settings?: LiteralStringSettings, recursive?: boolean): string;
+
+// @public
+export function mapLeaves(value: Literal, func: (leaf: Literal) => Literal): Literal;
+
+// @public
 export function parseVersion(text: string): Version | undefined;
 
 // @public
 export function satisfiesApi(apiVersion: string, minApi: string): boolean;
+
+// @public
+export function sliceGrouping<T>(elements: Grouping<T>, start: number, end: number): Grouping<T>;
 
 // @public
 export function tryGetDatacore(options: GetDatacoreOptions): ScopedDatacore | undefined;
@@ -167,6 +205,42 @@ export interface Version {
     // (undocumented)
     patch: number;
 }
+
+// @public
+export type WrappedLiteral = {
+    type: "string";
+    value: string;
+} | {
+    type: "number";
+    value: number;
+} | {
+    type: "boolean";
+    value: boolean;
+} | {
+    type: "date";
+    value: DateTime;
+} | {
+    type: "duration";
+    value: Duration;
+} | {
+    type: "link";
+    value: Link;
+} | {
+    type: "array";
+    value: Literal[];
+} | {
+    type: "object";
+    value: DataObject;
+} | {
+    type: "function";
+    value: (...args: never[]) => unknown;
+} | {
+    type: "null";
+    value: null;
+};
+
+// @public
+export function wrapValue(value: unknown): WrappedLiteral | undefined;
 
 
 export * from "@yankeeinlondon/datacore-contract";

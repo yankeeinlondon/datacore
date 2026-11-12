@@ -24,6 +24,7 @@
       "test/*": ["./src/test/*"],
       "utils/*": ["./src/utils/*"],
       "settings": ["./src/settings"],
+      "settings-tab": ["./src/settings-tab"],
       "main": ["./src/main"]
     },
     "customConditions": ["source"],

@@ -10,15 +10,17 @@ import { Fieldbearing, Fieldbearings } from "./field";
 
 /** Handles link resolution and normalization inside of a context. */
 export interface LinkHandler {
+    // Function-typed properties, not methods: callers pass `normalize` around unbound, so implementations must not
+    // rely on `this` (both existing ones are arrow functions).
     /** Resolve a link to the metadata it contains. */
-    resolve(path: string | Link): DataObject | null;
+    resolve: (path: string | Link) => DataObject | null;
     /**
      * Normalize a link to it's fully-qualified path for comparison purposes.
      * If the path does not exist, returns it unchanged.
      */
-    normalize(path: string): string;
+    normalize: (path: string) => string;
     /** Return true if the given path actually exists, false otherwise. */
-    exists(path: string): boolean;
+    exists: (path: string) => boolean;
 }
 
 /** Source of variables which can be referenced in the evaluator. */

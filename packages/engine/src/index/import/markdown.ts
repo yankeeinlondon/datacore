@@ -26,6 +26,7 @@ import {
 import { JsonConversion } from "index/types/json/common";
 import { YamlConversion } from "index/types/yaml";
 import { mapObjectValues } from "utils/data";
+import { describeValue } from "utils/describe";
 
 /** Matches yaml datablocks, which show up as independent objects in the datacore index. */
 const YAML_DATA_REGEX = /```yaml:data/i;
@@ -354,7 +355,7 @@ export function splitFrontmatterTagOrAlias(data: unknown, on: RegExp): string[] 
     }
 
     // Force to a string to handle numbers and so on.
-    return ("" + data)
+    return describeValue(data)
         .split(on)
         .filter((t) => !!t)
         .map((t) => t.trim())

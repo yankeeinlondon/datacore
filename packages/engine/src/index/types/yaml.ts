@@ -16,8 +16,8 @@ export type YamlLiteral = string | number | boolean | null | Record<string, unkn
  */
 export namespace YamlConversion {
     /** Convert a literal into a yaml friendly representation. */
-    export function yaml(_value: Literal): YamlLiteral {
-        const wrapped = Literals.wrapValue(literal);
+    export function yaml(value: Literal): YamlLiteral {
+        const wrapped = Literals.wrapValue(value);
         if (!wrapped) return null;
 
         switch (wrapped.type) {

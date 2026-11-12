@@ -13,7 +13,7 @@ export default defineConfig({
             { find: /^index\/web-worker\/importer\.worker$/, replacement: `${source}/test/shims/importer-worker.ts` },
             // The engine imports its own modules bare, relative to `baseUrl: "src"` (e.g. "index/datacore"); mirror that.
             {
-                find: /^(api|expression|index|test|utils|settings|main)(\/.*)?$/,
+                find: /^(api|expression|index|test|utils|settings|settings-tab|main)(\/.*)?$/,
                 replacement: `${source}/$1$2`,
             },
             // `obsidian` ships types only; tests get a minimal runtime shim.

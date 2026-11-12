@@ -2,6 +2,7 @@ import { Link, JsonLink } from "expression/link";
 import { Literal, Literals } from "expression/literal";
 import { mapObjectValues } from "utils/data";
 import { DateTime, Duration } from "luxon";
+import { describeValue } from "utils/describe";
 
 /** JSON-serialized equivalents for literals. */
 export type JsonLiteral =
@@ -66,7 +67,7 @@ export namespace JsonConversion {
                 case "link":
                     return normalizer(Link.fromObject(json.value as JsonLink));
                 default:
-                    throw new Error(`Unrecognized serialized type '${json["$_type"]}'!`);
+                    throw new Error(`Unrecognized serialized type '${describeValue(json["$_type"])}'!`);
             }
         }
 

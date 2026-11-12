@@ -1,6 +1,7 @@
 import { canvasImport } from "index/import/canvas";
 import { markdownImport } from "index/import/markdown";
 import { CanvasImportResult, ImportCommand, MarkdownImportResult } from "index/web-worker/message";
+import { describeValue } from "utils/describe";
 
 /** Web worker entry point for importing. */
 onmessage = async (event) => {
@@ -25,7 +26,7 @@ onmessage = async (event) => {
             postMessage({ $error: "Unsupported import method." });
         }
     } catch (error) {
-        console.error(`Datacore failed to index ${event.data.path}: ${error}`);
-        postMessage({ $error: error.message });
+        console.error(`Datacore failed to index ${describeValue(event.data.path)}: ${describeValue(error)}`);
+        postMessage({ $error: describeValue(error) });
     }
 };

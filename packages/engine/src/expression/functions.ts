@@ -7,6 +7,7 @@ import { LiteralReprAll, LiteralTypeOrAll, stringSettings } from "expression/bin
 import { Evaluator } from "expression/evaluator";
 import { Expressions } from "expression/expression";
 import { PRIMITIVES } from "expression/parser";
+import { describeValue } from "utils/describe";
 
 /**
  * A function implementation which takes in a function context and a variable number of arguments. Throws an error if an
@@ -98,7 +99,7 @@ export class FunctionBuilder {
             let types: LiteralType[] = [];
             for (let arg of args) {
                 let argType = Literals.typeOf(arg);
-                if (!argType) throw Error(`Unrecognized argument type for argument '${arg}'`);
+                if (!argType) throw Error(`Unrecognized argument type for argument '${describeValue(arg)}'`);
                 types.push(argType);
             }
 

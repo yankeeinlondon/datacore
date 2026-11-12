@@ -14,6 +14,7 @@ import { IndexResolver, execute, optimizeQuery } from "index/storage/query-execu
 import { Result } from "api/result";
 import { Evaluator } from "expression/evaluator";
 import { Settings } from "settings";
+import { describeValue } from "utils/describe";
 
 /**
  * Central, index storage for datacore values.
@@ -306,7 +307,7 @@ export class Datastore {
 
             return undefined;
         } else {
-            throw new Error(`Unrecognized link type: ${link.type}`);
+            throw new Error(`Unrecognized link type: ${describeValue((link as { type: unknown }).type)}`);
         }
     }
 
@@ -345,7 +346,7 @@ export class Datastore {
             {
                 exists: (path: string | Link) =>
                     this.resolveLink(typeof path == "string" ? Link.file(path) : path, sourcePath) != null,
-                resolve: (path: string) =>
+                resolve: (path: string | Link) =>
                     (this.resolveLink(typeof path == "string" ? Link.file(path) : path, sourcePath) as
                         | DataObject
                         | undefined) ?? null,

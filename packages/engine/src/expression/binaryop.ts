@@ -7,6 +7,7 @@ import type { Evaluator } from "expression/evaluator";
 import { DateTime, Duration } from "luxon";
 import { Settings } from "settings";
 import { Fieldbearings } from "./field";
+import { describeValue } from "utils/describe";
 
 /** A literal type or a catch-all '*'. */
 export type LiteralTypeOrAll = LiteralType | "*";
@@ -90,8 +91,8 @@ export class BinaryOpHandler {
     public evaluate(op: BinaryOp, left: Literal, right: Literal, ctx: Evaluator): Result<Literal, string> {
         let leftType = Literals.typeOf(left);
         let rightType = Literals.typeOf(right);
-        if (!leftType) return Result.failure(`Unrecognized value '${left}'`);
-        else if (!rightType) return Result.failure(`Unrecognized value '${right}'`);
+        if (!leftType) return Result.failure(`Unrecognized value '${describeValue(left)}'`);
+        else if (!rightType) return Result.failure(`Unrecognized value '${describeValue(right)}'`);
 
         // Quick case: handle null (op) null by default if enabled.
         if (this.handleDefaultNulls && leftType === "null" && rightType === "null") return Result.success(null);

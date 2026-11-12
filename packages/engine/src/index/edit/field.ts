@@ -7,6 +7,7 @@ import { setInlineField } from "index/import/inline-field";
 import { YamlConversion } from "index/types/yaml";
 import { App, TFile } from "obsidian";
 import { lineReplace } from "utils/normalizers";
+import { describeValue } from "utils/describe";
 
 /** Edit a field by it's provenance (i.e., source); returns a promise which can be awaited to wait for the file write to complete. */
 export async function editProvenance(app: App, provenance: Provenance, value: Literal): Promise<Result<null, string>> {
@@ -43,10 +44,9 @@ export async function editInlineField(
     await app.vault.process(file, (content) => {
         // Find the extent of the given line (0-indexed), extract it and update.
         const updated = lineReplace(content, line, line + 1, (line) => {
-            // TODO: This stringif-ication of the value is not correct and will not work
-            // for arrays or objects, but will serve purpose for now...
+            // TODO (field writes, 1.1): arrays and objects are written as JSON, which inline fields do not parse back.
             if (value == null) return setInlineField(line, key, undefined);
-            else return setInlineField(line, key, "" + YamlConversion.yaml(value));
+            else return setInlineField(line, key, describeValue(YamlConversion.yaml(value)));
         });
 
         return updated;

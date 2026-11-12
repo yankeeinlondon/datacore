@@ -13,7 +13,7 @@
     "typecheck": "pnpm -r typecheck",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
-    "lint": "oxlint --type-aware --deny-warnings packages/contract packages/client packages/shared packages/view-preact && oxlint --type-aware && eslint .",
+    "lint": "oxlint --type-aware --deny-warnings && eslint .",
     "changeset": "changeset",
     "release:version": "changeset version && node scripts/sync-plugin-manifests.mjs && pnpm install --lockfile-only",
     "manifests:check": "node scripts/sync-plugin-manifests.mjs --check",

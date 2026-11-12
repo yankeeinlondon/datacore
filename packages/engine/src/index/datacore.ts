@@ -86,7 +86,7 @@ export class Datacore extends Component {
         this.registerEvent(this.metadataCache.on("resolve", (file) => this.reload(file)));
 
         // Renames do not set off the metadata cache; catch these explicitly.
-        this.registerEvent(this.vault.on("rename", this.rename, this));
+        this.registerEvent(this.vault.on("rename", (file, oldPath) => void this.rename(file, oldPath)));
 
         // Handle generic file creates and updates; resolve generally only applies to markdown files
         // but we do keep basic metadata about all files.

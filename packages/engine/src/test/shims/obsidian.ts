@@ -133,3 +133,44 @@ export class TFolder extends TAbstractFile {
         return this.parent === null;
     }
 }
+
+/** Base class for settings tabs: just enough for the engine tab to construct and describe itself. */
+export class PluginSettingTab {
+    containerEl = document.createElement("div");
+    constructor(
+        public app: unknown,
+        public plugin: unknown
+    ) {}
+}
+
+/** A settings row that records its name, description, and the controls added to it. */
+export class Setting {
+    name = "";
+    desc = "";
+    readonly controls: string[] = [];
+    constructor(public containerEl: HTMLElement) {}
+    setName(name: string): this {
+        this.name = name;
+        return this;
+    }
+    setDesc(desc: string): this {
+        this.desc = desc;
+        return this;
+    }
+    setHeading(): this {
+        return this;
+    }
+    private control(kind: string): this {
+        this.controls.push(kind);
+        return this;
+    }
+    addToggle(): this {
+        return this.control("toggle");
+    }
+    addText(): this {
+        return this.control("text");
+    }
+    addDropdown(): this {
+        return this.control("dropdown");
+    }
+}

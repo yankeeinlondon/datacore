@@ -1,7 +1,7 @@
 import type { DatacoreApi, Disposable, IndexProgress } from "@yankeeinlondon/datacore-contract";
-import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "preact/compat";
+import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from "preact/compat";
 import type { Literal } from "@yankeeinlondon/datacore-contract";
-import { FunctionComponent, JSX, VNode, createElement, isValidElement } from "preact";
+import { type FunctionComponent, type JSX, type VNode, createElement, isValidElement } from "preact";
 import { ErrorMessage, Lit } from "./markdown";
 
 import "./errors.css";

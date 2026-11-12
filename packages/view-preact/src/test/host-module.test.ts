@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isHostModule } from "ui/scripting";
+import { isHostModule } from "../ui/scripting";
 
 describe("isHostModule", () => {
     it.each(["obsidian", "electron", "@codemirror/state", "@codemirror/view", "@lezer/common"])(

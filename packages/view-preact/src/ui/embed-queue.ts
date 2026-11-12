@@ -1,7 +1,7 @@
 import { Queue } from "@datastructures-js/queue";
 import { Result } from "./result";
 import { Component, TFile, Vault } from "obsidian";
-import { Deferred, deferred } from "@yankeeinlondon/datacore-shared";
+import { type Deferred, deferred } from "@yankeeinlondon/datacore-shared";
 
 /** Queues up loads of files to reduce the maximum number of concurrent loads. */
 export class EmbedQueue extends Component {

@@ -42,17 +42,15 @@ async function buildPlugin(prod) {
             logLevel: "info",
             sourcemap: prod ? false : "inline",
             treeShaking: true,
-            alias: {
-                react: "preact/compat",
-                "react-dom": "preact/compat",
-            },
             outfile: "build/plugin/main.js",
         })
         .catch(() => process.exit(1));
 
     // Copy the manifest and styles.
     fs.copyFileSync("manifest-beta.json", "build/plugin/manifest.json");
-    fs.renameSync("build/plugin/main.css", "build/plugin/styles.css");
+    // The engine has no styles of its own since the views moved out; drop any stale stylesheet.
+    if (fs.existsSync("build/plugin/main.css")) fs.renameSync("build/plugin/main.css", "build/plugin/styles.css");
+    else fs.rmSync("build/plugin/styles.css", { force: true });
     fs.appendFileSync("build/plugin/main.js", "\n/* nosourcemap */");
     fs.writeFileSync("build/meta.json", JSON.stringify(result.metafile));
 }

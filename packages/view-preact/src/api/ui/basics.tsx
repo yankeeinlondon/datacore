@@ -1,9 +1,9 @@
 /** Basic UI components that have simple Obsidian theming. */
-import React, { TargetedEvent, useCallback } from "preact/compat";
+import React, { type TargetedEvent, useCallback } from "preact/compat";
 
-import { ComponentChildren } from "preact";
+import { type ComponentChildren } from "preact";
 import { setIcon } from "obsidian";
-import { useControlledState } from "ui/hooks";
+import { useControlledState } from "../../ui/hooks";
 
 import "./basics.css";
 

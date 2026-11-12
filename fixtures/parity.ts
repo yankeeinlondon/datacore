@@ -201,7 +201,7 @@ function snapshot(vault: string, name: string): void {
         // Let pending index updates land: wait for the revision to stay put for a second.
         let revision = -1;
         while (revision !== window.dc.revision) { revision = window.dc.revision; await new Promise((r) => setTimeout(r, 1000)); }
-        return { engine: window.dc.engineVersion, revision, plugins: [...app.plugins.enabledPlugins].sort() };`
+        return { engine: window.dc.engineVersion, revision, plugins: Object.keys(app.plugins.plugins).sort() };`
     );
 
     const unsettled: string[] = [];
@@ -227,12 +227,34 @@ function snapshot(vault: string, name: string): void {
     }
 }
 
+/** Compare the rendered notes of two snapshots (`_meta.json` describes the environment and is only printed). */
 function compare(first: string, second: string): void {
     const [a, b] = [join(SNAPSHOT_DIR, first), join(SNAPSHOT_DIR, second)];
     for (const dir of [a, b]) if (!existsSync(dir)) throw new Error(`No snapshot at ${dir}`);
-    const diff = spawnSync("git", ["diff", "--no-index", "--exit-code", "--", a, b], { stdio: "inherit" });
-    if (diff.status === 0) console.log(`Snapshots "${first}" and "${second}" are identical.`);
-    process.exitCode = diff.status ?? 1;
+    for (const [name, dir] of [
+        [first, a],
+        [second, b],
+    ] as const) {
+        const metaPath = join(dir, "_meta.json");
+        if (existsSync(metaPath)) {
+            const meta = JSON.parse(readFileSync(metaPath, "utf8")) as { engine?: string; plugins?: string[] };
+            console.log(`${name}: engine ${meta.engine ?? "?"}; plugins ${(meta.plugins ?? []).join(", ")}`);
+        }
+    }
+
+    const notes = [...new Set([...readdirSync(a), ...readdirSync(b)])].filter((file) => file.endsWith(".html")).sort();
+    const differing: string[] = [];
+    for (const note of notes) {
+        const diff = spawnSync("git", ["diff", "--no-index", "--exit-code", "--", join(a, note), join(b, note)], {
+            stdio: "inherit",
+        });
+        if (diff.status !== 0) differing.push(note);
+    }
+
+    if (differing.length === 0)
+        console.log(`Snapshots "${first}" and "${second}" are identical (${notes.length} notes).`);
+    else console.error(`${differing.length} of ${notes.length} notes differ: ${differing.join(", ")}`);
+    process.exitCode = differing.length === 0 ? 0 : 1;
 }
 
 const { vault, positional } = parseArgs(process.argv.slice(2));

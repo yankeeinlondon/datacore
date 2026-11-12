@@ -1,9 +1,9 @@
-import { ErrorMessage, SimpleErrorBoundary, CURRENT_FILE_CONTEXT, DatacoreContextProvider } from "ui/markdown";
+import { ErrorMessage, SimpleErrorBoundary, CURRENT_FILE_CONTEXT, DatacoreContextProvider } from "./markdown";
 import { MarkdownRenderChild } from "obsidian";
-import { DatacoreLocalApi } from "api/local-api";
-import { h, render, Fragment, VNode } from "preact";
+import { DatacoreLocalApi } from "../api/local-api";
+import { h, render, Fragment, type VNode } from "preact";
 import { unmountComponentAtNode } from "preact/compat";
-import { ScriptLanguage, asyncEvalInContext, transpile } from "ui/scripting";
+import { type ScriptLanguage, asyncEvalInContext, transpile } from "./scripting";
 import { LoadingBoundary, ScriptContainer } from "./loading-boundary";
 import type { ViewServices } from "./services";
 import type { Literal } from "@yankeeinlondon/datacore-contract";

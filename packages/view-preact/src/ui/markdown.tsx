@@ -20,8 +20,8 @@ import {
 
 import { createContext, Fragment, render } from "preact";
 import { useContext, useMemo, useCallback, useRef, useEffect, useErrorBoundary } from "preact/hooks";
-import { CSSProperties, PropsWithChildren, memo } from "preact/compat";
-import { Embed } from "api/ui/embed";
+import { type CSSProperties, type PropsWithChildren, memo } from "preact/compat";
+import { Embed } from "../api/ui/embed";
 
 import "./errors.css";
 

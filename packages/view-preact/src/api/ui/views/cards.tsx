@@ -3,7 +3,7 @@
  */
 
 import type { Literal } from "@yankeeinlondon/datacore-contract";
-import { VNode } from "preact";
+import { type VNode } from "preact";
 import { useMemo } from "preact/hooks";
 
 import "./cards.css";

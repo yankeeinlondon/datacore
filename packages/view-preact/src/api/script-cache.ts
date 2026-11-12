@@ -1,7 +1,7 @@
 import type { Indexable, Link, MarkdownCodeblock } from "@yankeeinlondon/datacore-contract";
-import { Result } from "ui/result";
+import { Result } from "../ui/result";
 import {
-    Deferred,
+    type Deferred,
     deferred,
     getParentFolder,
     isCodeblock,
@@ -9,7 +9,7 @@ import {
     isSection,
     lineRange,
 } from "@yankeeinlondon/datacore-shared";
-import { ScriptLanguage, asyncEvalInContext, transpile } from "ui/scripting";
+import { type ScriptLanguage, asyncEvalInContext, transpile } from "../ui/scripting";
 import { TFile, Vault } from "obsidian";
 import { Fragment, h } from "preact";
 
@@ -123,7 +123,9 @@ export class ScriptCache {
         try {
             basic = transpile(code, language);
         } catch (error) {
-            return Result.failure(`Failed to import ${path.toString()} while transpiling from ${language}: ${error}`);
+            return Result.failure(
+                `Failed to import ${path.toString()} while transpiling from ${language}: ${String(error)}`
+            );
         }
 
         // Then finally execute the script to 'load' it.
@@ -139,7 +141,7 @@ export class ScriptCache {
         try {
             return Result.success(await asyncEvalInContext(basic, finalContext));
         } catch (error) {
-            return Result.failure(`Failed to execute script '${path.toString()}': ${error}`);
+            return Result.failure(`Failed to execute script '${path.toString()}': ${String(error)}`);
         }
     }
 
@@ -201,7 +203,7 @@ export class ScriptCache {
                 (lang) => lang.toLocaleLowerCase() in ScriptCache.SCRIPT_LANGUAGES
             );
             if (!maybeLanguage)
-                return Result.failure(`The codeblock referenced by '${path}' is not a JS/TS codeblock.`);
+                return Result.failure(`The codeblock referenced by '${String(path)}' is not a JS/TS codeblock.`);
 
             const language = ScriptCache.SCRIPT_LANGUAGES[maybeLanguage];
             return (await this.readCodeblock(tfile, object)).map((code) => ({ code, language, filepath }));
@@ -228,7 +230,7 @@ export class ScriptCache {
                         .join("\n")
                 );
         } catch (error) {
-            return Result.failure(`Failed to read a codeblock from ${file.path}: ${error}`);
+            return Result.failure(`Failed to read a codeblock from ${file.path}: ${String(error)}`);
         }
     }
 }

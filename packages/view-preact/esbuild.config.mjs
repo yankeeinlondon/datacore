@@ -22,18 +22,38 @@ const options = {
         ...builtinModules,
         ...builtinModules.map((name) => `node:${name}`),
     ],
+    // Bundle workspace packages (client, shared) from their TypeScript sources.
+    conditions: ["source"],
+    alias: {
+        react: "preact/compat",
+        "react-dom": "preact/compat",
+    },
     format: "cjs",
     target: "es2018",
     logLevel: "info",
     sourcemap: production ? false : "inline",
     treeShaking: true,
     outfile: `${outdir}/main.js`,
+    plugins: [
+        {
+            // esbuild writes imported CSS next to the bundle as main.css; Obsidian loads styles.css.
+            name: "obsidian-styles",
+            setup(build) {
+                build.onEnd(() => {
+                    if (fs.existsSync(`${outdir}/main.css`)) {
+                        fs.renameSync(`${outdir}/main.css`, `${outdir}/styles.css`);
+                    }
+                });
+            },
+        },
+    ],
 };
 
 fs.copyFileSync("manifest.json", `${outdir}/manifest.json`);
 
 if (production) {
-    await esbuild.build(options);
+    const result = await esbuild.build({ ...options, metafile: true });
+    fs.writeFileSync("build/meta.json", JSON.stringify(result.metafile));
 } else {
     const context = await esbuild.context(options);
     await context.watch();

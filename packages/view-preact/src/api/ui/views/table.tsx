@@ -4,10 +4,10 @@
 import type { GroupElement, Grouping, Literal } from "@yankeeinlondon/datacore-contract";
 import { groupingSize, isGroupElement, sliceGrouping } from "@yankeeinlondon/datacore-shared";
 import { useContext, useMemo, useRef } from "preact/hooks";
-import { CURRENT_FILE_CONTEXT, Lit } from "ui/markdown";
-import { useAsElement, useInterning } from "ui/hooks";
+import { CURRENT_FILE_CONTEXT, Lit } from "../../../ui/markdown";
+import { useAsElement, useInterning } from "../../../ui/hooks";
 import { Fragment } from "preact/jsx-runtime";
-import { ReactNode } from "preact/compat";
+import { type ReactNode } from "preact/compat";
 
 import { ControlledPager, useDatacorePaging } from "./paging";
 

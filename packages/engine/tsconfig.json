@@ -7,8 +7,6 @@
     "allowJs": false,
     "skipLibCheck": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
     "noImplicitAny": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
@@ -24,12 +22,9 @@
       "expression/*": ["./src/expression/*"],
       "index/*": ["./src/index/*"],
       "test/*": ["./src/test/*"],
-      "ui/*": ["./src/ui/*"],
       "utils/*": ["./src/utils/*"],
       "settings": ["./src/settings"],
-      "main": ["./src/main"],
-      "react": ["./node_modules/preact/compat"],
-      "react-dom": ["./node_modules/preact/compat"]
+      "main": ["./src/main"]
     },
     "customConditions": ["source"],
     "resolveJsonModule": true

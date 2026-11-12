@@ -1,9 +1,9 @@
 /**
  * @module views
  */
-import { VNode } from "preact";
-import { PropsWithChildren } from "preact/compat";
-import { useControlledState } from "ui/hooks";
+import { type VNode } from "preact";
+import { type PropsWithChildren } from "preact/compat";
+import { useControlledState } from "../../../ui/hooks";
 
 import "./callout.css";
 import { combineClasses } from "../basics";

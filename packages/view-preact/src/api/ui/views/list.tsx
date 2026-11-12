@@ -3,13 +3,13 @@
  */
 import type { GroupElement, Grouping, Literal } from "@yankeeinlondon/datacore-contract";
 import { groupingSize, isGrouping, isListItem, isLiteralArray, sliceGrouping } from "@yankeeinlondon/datacore-shared";
-import { CURRENT_FILE_CONTEXT, Lit } from "ui/markdown";
+import { CURRENT_FILE_CONTEXT, Lit } from "../../../ui/markdown";
 
-import { Fragment, VNode, isValidElement } from "preact";
+import { Fragment, type VNode, isValidElement } from "preact";
 import { useContext, useMemo, useRef } from "preact/hooks";
 import { ControlledPager, useDatacorePaging } from "./paging";
-import { useAsElement } from "ui/hooks";
-import { CSSProperties, ReactNode } from "preact/compat";
+import { useAsElement } from "../../../ui/hooks";
+import { type CSSProperties, type ReactNode } from "preact/compat";
 
 /** The render type of the list view. */
 export type ListViewType = "ordered" | "unordered" | "block";

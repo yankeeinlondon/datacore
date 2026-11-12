@@ -1,21 +1,21 @@
-import { DatacoreViewApi } from "api/api";
 import { EngineHost } from "api/engine-host";
 import { Datacore } from "index/datacore";
-import { EmbedQueue } from "ui/embed-queue";
 import { DateTime } from "luxon";
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
 import type { DisplaySettings } from "@yankeeinlondon/datacore-contract";
 import { migrateSettings, Settings } from "settings";
 
-/** @internal Reactive data engine for your Obsidian.md vault. */
+/**
+ * @internal Datacore Engine: indexes the vault and serves queries to other plugins through the shared registry
+ * (`getDatacore()` in the client) and to scripts and the console through `window.dc`. It renders nothing; the views
+ * live in datacore-view-preact.
+ */
 export default class DatacorePlugin extends Plugin {
     /** Plugin-wide default settings. */
     public settings: Settings;
 
     /** Central internal state. */
     public core: Datacore;
-    /** Externally visible API for querying. */
-    public api: DatacoreViewApi;
 
     async onload() {
         this.settings = migrateSettings(await this.loadData());
@@ -33,35 +33,6 @@ export default class DatacorePlugin extends Plugin {
         host.start();
         this.register(() => host.stop());
 
-        // The views reach the engine only through the contract API (as datacore-view-preact will in P2).
-        const reader = this.addChild(new EmbedQueue(this.app.vault, () => 8));
-        this.api = new DatacoreViewApi({ engine: host.api, app: this.app, reader });
-
-        // Primary visual elements (DatacoreJS and Datacore blocks).
-        this.registerMarkdownCodeBlockProcessor(
-            "datacorejs",
-            async (source: string, el, ctx) => this.api.executeJs(source, el, ctx, ctx.sourcePath),
-            -100
-        );
-
-        this.registerMarkdownCodeBlockProcessor(
-            "datacorejsx",
-            async (source: string, el, ctx) => this.api.executeJsx(source, el, ctx, ctx.sourcePath),
-            -100
-        );
-
-        this.registerMarkdownCodeBlockProcessor(
-            "datacorets",
-            async (source: string, el, ctx) => this.api.executeTs(source, el, ctx, ctx.sourcePath),
-            -100
-        );
-
-        this.registerMarkdownCodeBlockProcessor(
-            "datacoretsx",
-            async (source: string, el, ctx) => this.api.executeTsx(source, el, ctx, ctx.sourcePath),
-            -100
-        );
-
         // Useful debug and non-debug commands.
         // Drops the current index and reindexes all items.
         this.addCommand({
@@ -73,28 +44,8 @@ export default class DatacorePlugin extends Plugin {
             },
         });
 
-        // Register JS highlighting for codeblocks.
-        this.register(this.registerCodeblockHighlighting());
-
         // Initialize as soon as the workspace is ready.
         this.app.workspace.onLayoutReady(async () => this.core.initialize());
-    }
-
-    /** Register codeblock highlighting and return a closure which unregisters. */
-    registerCodeblockHighlighting(): () => void {
-        window.CodeMirror.defineMode("datacorejs", (config) => window.CodeMirror.getMode(config, "javascript"));
-        window.CodeMirror.defineMode("datacorejsx", (config) => window.CodeMirror.getMode(config, "jsx"));
-        window.CodeMirror.defineMode("datacorets", (config) => window.CodeMirror.getMode(config, "text/typescript"));
-        window.CodeMirror.defineMode("datacoretsx", (config) =>
-            window.CodeMirror.getMode(config, "text/typescript-jsx")
-        );
-
-        return () => {
-            window.CodeMirror.defineMode("datacorejs", (config) => window.CodeMirror.getMode(config, "null"));
-            window.CodeMirror.defineMode("datacorejsx", (config) => window.CodeMirror.getMode(config, "null"));
-            window.CodeMirror.defineMode("datacorets", (config) => window.CodeMirror.getMode(config, "null"));
-            window.CodeMirror.defineMode("datacoretsx", (config) => window.CodeMirror.getMode(config, "null"));
-        };
     }
 
     /** Update the given settings to new values. */

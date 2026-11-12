@@ -56,39 +56,15 @@
   },
   "overrides": [
     {
-      "files": [
-        "packages/engine/src/ui/**",
-        "packages/engine/src/api/ui/**",
-        "packages/engine/src/api/local-api.tsx",
-        "packages/engine/src/api/api.ts",
-        "packages/engine/src/api/script-cache.ts"
-      ],
+      "files": ["packages/engine/**"],
       "rules": {
         "no-restricted-imports": [
           "error",
           {
             "patterns": [
               {
-                "group": [
-                  "expression",
-                  "expression/*",
-                  "index",
-                  "index/*",
-                  "utils",
-                  "utils/*",
-                  "settings",
-                  "main",
-                  "api/*",
-                  "!api/ui",
-                  "!api/ui/*",
-                  "!api/api",
-                  "!api/local-api",
-                  "!api/script-cache",
-                  "**/expression/**",
-                  "**/index/**",
-                  "**/utils/**"
-                ],
-                "message": "The views may import only the contract, datacore-shared, preact, obsidian, and other view modules (ui/**, api/ui/**, api/{api,local-api,script-cache}); they move to datacore-view-preact in P2 step 5 (Engine Room spec D9)."
+                "group": ["preact", "preact/*", "react", "react-dom", "vue", "sucrase"],
+                "message": "The engine renders nothing and runs no scripts; views live in the view plugins (Engine Room spec G1)."
               }
             ]
           }
@@ -104,6 +80,12 @@
             "paths": [
               {
                 "name": "@yankeeinlondon/datacore-engine",
+                "message": "View plugins consume the engine only through @yankeeinlondon/datacore-client (Engine Room spec, D9)."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["**/engine/**", "**/packages/engine/**"],
                 "message": "View plugins consume the engine only through @yankeeinlondon/datacore-client (Engine Room spec, D9)."
               }
             ]

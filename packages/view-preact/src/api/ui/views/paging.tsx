@@ -4,9 +4,9 @@
 import "./paging.css";
 
 import { useCallback, useContext, useMemo, useState } from "preact/hooks";
-import { Fragment, RefObject } from "preact";
+import { Fragment, type RefObject } from "preact";
 import React from "preact/compat";
-import { SETTINGS_CONTEXT } from "ui/markdown";
+import { SETTINGS_CONTEXT } from "../../../ui/markdown";
 
 /** 0-indexed page control. `page` should be the current 0-indexed page, while `totalPages` is the total number of pages.
  * @group Components

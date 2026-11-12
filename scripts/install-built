@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Install built plugins into a vault (for trying them outside the test vault). Run `pnpm build` first.
+# Usage: scripts/install-built <path-to-your-vault-root> [package...]
+#   package: engine, view-preact (default: both)
+set -euo pipefail
+
+VAULT="${1:-}"
+if [ -z "$VAULT" ]; then
+    echo "Usage: scripts/install-built <path-to-your-vault-root> [engine|view-preact ...]" >&2
+    exit 1
+fi
+shift
+PACKAGES=("$@")
+if [ ${#PACKAGES[@]} -eq 0 ]; then PACKAGES=(engine view-preact); fi
+
+# Resolve build outputs relative to this script, not the caller's working directory. CDPATH is cleared so a relative
+# `cd` cannot jump to a same-named directory elsewhere.
+ROOT="$(CDPATH="" cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+for package in "${PACKAGES[@]}"; do
+    BUILD="$ROOT/packages/$package/build/plugin"
+    for file in main.js manifest.json; do
+        if [ ! -f "$BUILD/$file" ]; then
+            echo "Missing $BUILD/$file; run 'pnpm build' first." >&2
+            exit 1
+        fi
+    done
+
+    PLUGIN_ID="$(sed -n 's/.*"id": *"\([^"]*\)".*/\1/p' "$BUILD/manifest.json")"
+    TARGET="$VAULT/.obsidian/plugins/$PLUGIN_ID"
+    mkdir -p "$TARGET"
+    cp -f "$BUILD/main.js" "$BUILD/manifest.json" "$TARGET/"
+    # A plugin without styles must not keep a stale stylesheet from an earlier install.
+    if [ -f "$BUILD/styles.css" ]; then cp -f "$BUILD/styles.css" "$TARGET/"; else rm -f "$TARGET/styles.css"; fi
+    echo "Installed $PLUGIN_ID $(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$BUILD/manifest.json") to $TARGET"
+done

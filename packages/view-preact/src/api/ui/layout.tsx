@@ -5,9 +5,9 @@
  * @module ui
  */
 
-import { HTMLAttributes, useMemo } from "preact/compat";
+import { type HTMLAttributes, useMemo } from "preact/compat";
 
-import "api/ui/layout.css";
+import "./layout.css";
 
 /** Creates a vertical flexbox "stack" of elements.
  *

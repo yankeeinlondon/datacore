@@ -1,10 +1,10 @@
 /**
  * @module api
  */
-import { App, Component, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
-import { DatacoreJSRenderer } from "ui/javascript";
+import { App, Component, type MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import { DatacoreJSRenderer } from "../ui/javascript";
 import { DatacoreLocalApi } from "./local-api";
-import type { ViewServices } from "ui/services";
+import type { ViewServices } from "../ui/services";
 import * as preact from "preact";
 
 /**
@@ -12,7 +12,7 @@ import * as preact from "preact";
  * only through the contract API in its services (Engine Room spec D9).
  * @public
  */
-export class DatacoreViewApi {
+export class PreactViewApi {
     public constructor(public readonly services: ViewServices) {}
 
     /** Get access to preact functions. */
@@ -50,7 +50,7 @@ export class DatacoreViewApi {
         component: Component | MarkdownPostProcessorContext,
         sourcePath: string
     ): MarkdownRenderChild {
-        return this._renderJavascript(source, container, component, sourcePath, "js");
+        return this.renderScript(source, container, component, sourcePath, "js");
     }
 
     /**
@@ -64,7 +64,7 @@ export class DatacoreViewApi {
         component: Component | MarkdownPostProcessorContext,
         sourcePath: string
     ): MarkdownRenderChild {
-        return this._renderJavascript(source, container, component, sourcePath, "jsx");
+        return this.renderScript(source, container, component, sourcePath, "jsx");
     }
 
     /**
@@ -76,7 +76,7 @@ export class DatacoreViewApi {
         component: Component | MarkdownPostProcessorContext,
         sourcePath: string
     ): MarkdownRenderChild {
-        return this._renderJavascript(source, container, component, sourcePath, "ts");
+        return this.renderScript(source, container, component, sourcePath, "ts");
     }
 
     /**
@@ -93,17 +93,17 @@ export class DatacoreViewApi {
         component: Component | MarkdownPostProcessorContext,
         sourcePath: string
     ): MarkdownRenderChild {
-        return this._renderJavascript(source, container, component, sourcePath, "tsx");
+        return this.renderScript(source, container, component, sourcePath, "tsx");
     }
 
-    /** Shared logic for rendering any JS/TS script. */
-    private _renderJavascript(
+    /** Render a JS/TS/JSX/TSX script into the container, as a child of the given component. */
+    public renderScript(
         source: string,
         container: HTMLElement,
         component: Component | MarkdownPostProcessorContext,
         sourcePath: string,
         language: "js" | "ts" | "jsx" | "tsx"
-    ) {
+    ): DatacoreJSRenderer {
         let local = new DatacoreLocalApi(this, sourcePath);
         const renderer = new DatacoreJSRenderer(local, container, sourcePath, source, language);
         component.addChild(renderer);

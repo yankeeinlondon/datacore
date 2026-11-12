@@ -15,21 +15,21 @@ import type {
     Result,
     SearchResult,
 } from "@yankeeinlondon/datacore-contract";
-import { DatacoreViewApi } from "api/api";
+import { PreactViewApi } from "./api";
 import { App } from "obsidian";
-import { useFileMetadata, useFullQuery, useIndexUpdates, useInterning, useQuery } from "ui/hooks";
+import { useFileMetadata, useFullQuery, useIndexUpdates, useInterning, useQuery } from "../ui/hooks";
 import type * as luxon from "luxon";
 import * as preact from "preact";
 import * as hooks from "preact/hooks";
 import { Group, Stack } from "./ui/layout";
-import { Embed, LineSpanEmbed } from "api/ui/embed";
-import { CURRENT_FILE_CONTEXT, ErrorMessage, Lit, Markdown, ObsidianLink } from "ui/markdown";
-import { CSSProperties } from "preact/compat";
+import { Embed, LineSpanEmbed } from "./ui/embed";
+import { CURRENT_FILE_CONTEXT, ErrorMessage, Lit, Markdown, ObsidianLink } from "../ui/markdown";
+import { type CSSProperties } from "preact/compat";
 import { Button, Checkbox, Icon, Slider, Switch, Textbox, VanillaSelect } from "./ui/basics";
 import { TableView } from "./ui/views/table";
 import { Callout } from "./ui/views/callout";
 import { ScriptCache } from "./script-cache";
-import { isHostModule } from "ui/scripting";
+import { isHostModule } from "../ui/scripting";
 import { Card } from "./ui/views/cards";
 import { ListView } from "./ui/views/list";
 
@@ -46,7 +46,7 @@ export class DatacoreLocalApi {
     private readonly scriptCache: ScriptCache;
 
     public constructor(
-        public api: DatacoreViewApi,
+        public api: PreactViewApi,
         public path: string
     ) {
         this.engine = api.services.engine;
@@ -111,7 +111,7 @@ export class DatacoreLocalApi {
             try {
                 return require(path);
             } catch (error) {
-                throw new Error(`Datacore: failed to require host module '${path}': ${error}`);
+                throw new Error(`Datacore: failed to require host module '${path}': ${String(error)}`);
             }
         }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TFile, type EmbedContext, type FileEmbed } from "obsidian";
-import { createEmbed } from "api/ui/embed";
+import { createEmbed } from "../api/ui/embed";
 
 const context = { linktext: "Note", sourcePath: "", showInline: false, depth: 0, displayMode: true } as EmbedContext;
 const file = new TFile();

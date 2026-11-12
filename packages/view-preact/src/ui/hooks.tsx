@@ -5,8 +5,8 @@ import type { DataObject, Literal } from "@yankeeinlondon/datacore-contract";
 import { equals } from "@yankeeinlondon/datacore-shared";
 import { CURRENT_FILE_CONTEXT } from "./markdown";
 import { isValidElement } from "preact";
-import { ReactNode } from "preact/compat";
-import { Lit } from "ui/markdown";
+import { type ReactNode } from "preact/compat";
+import { Lit } from "./markdown";
 
 /** Hook that updates the view whenever the revision updates, returning the newest revision.  */
 export function useIndexUpdates(engine: DatacoreApi, settings?: { debounce?: number }): number {

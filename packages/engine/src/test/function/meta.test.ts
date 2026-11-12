@@ -3,7 +3,7 @@ import { parseEval } from "test/common";
 
 test("Evaluate meta(link).display", () => {
     expect(parseEval(`meta([[2021-11-01|Displayed link text]]).display`)).toEqual("Displayed link text");
-    expect(parseEval(`meta([[2021-11-01]]).display`)).toBeNull;
+    expect(parseEval(`meta([[2021-11-01]]).display`)).toBeNull();
 });
 
 test("Evaluate meta(link).path", () => {
@@ -15,7 +15,7 @@ test("Evaluate meta(link).path", () => {
 test("Evaluate meta(link).subpath", () => {
     expect(parseEval(`meta([[My Project#Next Actions]]).subpath`)).toEqual("Next Actions");
     expect(parseEval(`meta([[My Project#^9bcbe8]]).subpath`)).toEqual("9bcbe8");
-    expect(parseEval(`meta([[My Project]]).subpath`)).toBeNull;
+    expect(parseEval(`meta([[My Project]]).subpath`)).toBeNull();
 });
 
 test("Evaluate meta(link).type", () => {

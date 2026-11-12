@@ -284,4 +284,19 @@ Each step ended with the parity snapshot identical to the baseline.
   identical to the baseline.
 - Docs use the new names. Removed dead CSS for `.block-language-datacore(js)` (no element used those classes).
 
-Remaining: steps 7–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).
+### Step 7 ✅ (2026-11-12): migration command
+
+- `migrate/convert-fences.ts` (`convertFences`): a line-based scanner. A fence opened inside a blockquote ends
+  where the blockquote does, as in CommonMark. Fences are accepted at any indentation, since list-item fences are
+  indented. A backtick "fence" whose info string contains a backtick is inline code. 20 unit tests cover the plan's
+  cases plus mixed line endings, unclosed fences, and whole-word matching.
+- `migrate/migration.ts` (`findPendingNotes`/`convertNotes`, over a structural `MigrationVault` and tested with a
+  fake vault) and `migrate/modal.ts` (the command and preview modal). Notes that fail are listed in the console, and
+  the summary notice then stays up until dismissed.
+- **Round trip:** converting the pre-step-6 parity notes (`6db20b9`) reproduces the committed `fixtures/vault/Parity`
+  byte for byte (11 notes, 23 fences), and a second pass changes nothing.
+- **In the app:** the modal listed `Datacore Check.md (2 blocks)`; Convert rewrote both fences to `dcx` and showed
+  "Converted 2 code blocks in 1 note."; the note now renders as views: "100 books done · 510 open tasks". The old
+  "450" figure predates the parity data: `Fixtures/` has 450 open tasks and `Parity/Data` adds 60.
+
+Remaining: steps 8–10. Engine lint is at 18 warnings (the 5 that moved were fixed in view-preact).

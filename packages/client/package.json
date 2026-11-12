@@ -1,6 +1,6 @@
 {
   "name": "@yankeeinlondon/datacore-client",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Client for datacore-engine: locate the shared engine from any Obsidian plugin, with typed access to its API.",
   "license": "MIT",
   "author": "Ken Snyder",

@@ -1,6 +1,6 @@
 {
   "name": "@yankeeinlondon/datacore-contract",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "The datacore-engine API contract: interfaces, data shapes, registry protocol, and protocol constants.",
   "license": "MIT",
   "author": "Ken Snyder",

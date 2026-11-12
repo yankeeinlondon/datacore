@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -16,15 +15,22 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
-    "downlevelIteration": true,
     "esModuleInterop": true,
     "lib": ["dom", "es5", "scripthost", "es2018", "DOM.Iterable"],
     "paths": {
-      "react": ["preact/compat"],
-      "react-dom": ["preact/compat"]
+      "api/*": ["./src/api/*"],
+      "expression/*": ["./src/expression/*"],
+      "index/*": ["./src/index/*"],
+      "test/*": ["./src/test/*"],
+      "ui/*": ["./src/ui/*"],
+      "utils/*": ["./src/utils/*"],
+      "settings": ["./src/settings"],
+      "main": ["./src/main"],
+      "react": ["./node_modules/preact/compat"],
+      "react-dom": ["./node_modules/preact/compat"]
     }
   },
-  "include": ["src/main.ts", "src/index.ts", "src/typings/*.d.ts", "src/test/**/*.ts", "src/test/**/*.tsx"]
+  "include": ["src"]
 }

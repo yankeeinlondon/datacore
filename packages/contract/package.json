@@ -65,6 +65,7 @@
   },
   "scripts": {
     "build": "tsdown && api-extractor run --local",
+    "prepublishOnly": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

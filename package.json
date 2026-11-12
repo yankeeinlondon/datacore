@@ -13,9 +13,13 @@
     "typecheck": "pnpm -r typecheck",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
-    "lint": "oxlint --type-aware && eslint ."
+    "lint": "oxlint --type-aware && eslint .",
+    "changeset": "changeset",
+    "release:version": "changeset version && node scripts/sync-plugin-manifests.mjs && pnpm install --lockfile-only",
+    "manifests:check": "node scripts/sync-plugin-manifests.mjs --check"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.3",
     "@eslint/json": "2.1.1",
     "eslint": "9.39.5",
     "eslint-plugin-obsidianmd": "0.5.1",

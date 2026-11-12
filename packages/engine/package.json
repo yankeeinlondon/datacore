@@ -1,6 +1,6 @@
 {
   "name": "@yankeeinlondon/datacore-engine",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "private": true,
   "description": "Reactive data engine for Obsidian.md.",
   "main": "build/library/index.js",

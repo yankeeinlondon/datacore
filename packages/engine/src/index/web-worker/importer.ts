@@ -22,8 +22,13 @@ export const DEFAULT_THROTTLE: ImportThrottle = {
     utilization: 0.75,
 };
 
+/** Imports a file into its JSON index representation (an `ImportResult`). */
+export interface FileImportService {
+    import<T>(file: TFile): Promise<T>;
+}
+
 /** Multi-threaded file parser which debounces rapid file requests automatically. */
-export class FileImporter extends Component {
+export class FileImporter extends Component implements FileImportService {
     /* Background workers which do the actual file parsing. */
     workers: Map<number, PoolWorker>;
     /** The next worker ID to hand out. */

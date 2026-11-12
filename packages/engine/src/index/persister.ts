@@ -10,8 +10,20 @@ export interface Cached<T> {
     data: T;
 }
 
+/** Persistent cache of imported file metadata, used to skip re-importing unchanged files on startup. */
+export interface FileCache {
+    /** Load cached metadata for a file, if present. */
+    loadFile(path: string): Promise<Cached<Partial<unknown>> | null | undefined>;
+    /** Store metadata for a file. */
+    storeFile(path: string, data: Partial<unknown>): Promise<void>;
+    /** Drop all cached data. */
+    recreate(): Promise<void>;
+    /** Remove cached entries for files that no longer exist; returns the paths that were removed. */
+    synchronize(existing: string[] | Set<string>): Promise<Set<string>>;
+}
+
 /** Simpler wrapper for a file-backed cache for arbitrary metadata. */
-export class LocalStorageCache {
+export class LocalStorageCache implements FileCache {
     public persister: LocalForage;
 
     public constructor(

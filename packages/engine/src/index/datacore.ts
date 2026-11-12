@@ -1,8 +1,8 @@
 import { deferred, Deferred } from "utils/deferred";
 import { Datastore, Substorer } from "index/datastore";
-import { LocalStorageCache } from "index/persister";
+import { FileCache, LocalStorageCache } from "index/persister";
 import { Indexable, INDEXABLE_EXTENSIONS } from "index/types/indexable";
-import { FileImporter, ImportThrottle } from "index/web-worker/importer";
+import { FileImporter, FileImportService, ImportThrottle } from "index/web-worker/importer";
 import { ImportResult } from "index/web-worker/message";
 import { App, Component, EventRef, Events, MetadataCache, TAbstractFile, TFile, Vault } from "obsidian";
 import { Settings } from "settings";
@@ -12,6 +12,17 @@ import { DateTime } from "luxon";
 import { EmbedQueue } from "./embed-queue";
 import { JsonMarkdownPage } from "./types/json/markdown";
 import { Canvas, CanvasTextCard } from "./types/canvas";
+
+/**
+ * Services Datacore depends on that need a browser/Obsidian environment. Defaults are the production implementations
+ * (web-worker importer, IndexedDB cache); tests and alternative hosts can substitute their own.
+ */
+export interface DatacoreServices {
+    /** Imports files into their JSON representation. Default: background web workers. */
+    importer: FileImportService;
+    /** Persistent metadata cache. Default: IndexedDB via localforage. */
+    persister: FileCache;
+}
 
 /** Central API object; handles initialization, events, debouncing, and access to datacore functionality. */
 export class Datacore extends Component {
@@ -25,11 +36,11 @@ export class Datacore extends Component {
     /** @internal In-memory index over all stored metadata. */
     datastore: Datastore;
     /** @internal Asynchronous multi-threaded file importer with throttling. */
-    importer: FileImporter;
+    importer: FileImportService;
     /** @internal Queue of asynchronous read requests; ensures we limit the maximum number of concurrent file loads. */
     reads: EmbedQueue;
     /** @internal Local-storage backed cache of metadata objects. */
-    persister: LocalStorageCache;
+    persister: FileCache;
     /** @internal Only set when datacore is in the midst of initialization; tracks current progress. */
     initializer?: DatacoreInitializer;
     /** If true, datacore is fully hydrated and all files have been indexed. */
@@ -38,26 +49,31 @@ export class Datacore extends Component {
     constructor(
         public app: App,
         public version: string,
-        public settings: Settings
+        public settings: Settings,
+        services: Partial<DatacoreServices> = {}
     ) {
         super();
 
         this.vault = app.vault;
         this.metadataCache = app.metadataCache;
-        this.persister = new LocalStorageCache("primary", version);
+        this.persister = services.persister ?? new LocalStorageCache("primary", version);
         this.events = new Events();
 
         this.datastore = new Datastore(app.vault, app.metadataCache, settings);
         this.initialized = false;
 
-        this.addChild(
-            (this.importer = new FileImporter(app.vault, app.fileManager, app.metadataCache, () => {
+        if (services.importer) {
+            this.importer = services.importer;
+        } else {
+            const workerImporter = new FileImporter(app.vault, app.fileManager, app.metadataCache, () => {
                 return {
                     workers: settings.importerNumThreads,
                     utilization: Math.max(0.1, Math.min(1.0, settings.importerUtilization)),
                 } as ImportThrottle;
-            }))
-        );
+            });
+            this.addChild(workerImporter);
+            this.importer = workerImporter;
+        }
 
         // TODO (blacksmithgu): Add a new setting for embed queue concurrency.
         this.addChild((this.reads = new EmbedQueue(app.vault, () => 8)));

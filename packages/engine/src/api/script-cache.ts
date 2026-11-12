@@ -1,11 +1,15 @@
-import { Literals } from "expression/literal";
-import { Link } from "expression/link";
-import type { Indexable } from "@yankeeinlondon/datacore-contract";
-import { Result } from "./result";
-import { MarkdownCodeblock, MarkdownSection } from "index/types/markdown";
-import { Deferred, deferred } from "@yankeeinlondon/datacore-shared";
-import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
-import { getParentFolder, lineRange } from "utils/normalizers";
+import type { Indexable, Link, MarkdownCodeblock } from "@yankeeinlondon/datacore-contract";
+import { Result } from "ui/result";
+import {
+    Deferred,
+    deferred,
+    getParentFolder,
+    isCodeblock,
+    isLink,
+    isSection,
+    lineRange,
+} from "@yankeeinlondon/datacore-shared";
+import { ScriptLanguage, asyncEvalInContext, transpile } from "ui/scripting";
 import { TFile, Vault } from "obsidian";
 import { Fragment, h } from "preact";
 
@@ -141,7 +145,7 @@ export class ScriptCache {
 
     /** Normalize a path or link to a textual path. */
     private pathkey(path: string | Link): string {
-        if (Literals.isLink(path)) return path.obsidianLink();
+        if (isLink(path)) return path.obsidianLink();
         else return path;
     }
 
@@ -177,9 +181,9 @@ export class ScriptCache {
         }
 
         // If the object is a markdown section, search for any javascript codeblocks; otherwise, check if it is a full script file.
-        if (object instanceof MarkdownSection) {
+        if (isSection(object)) {
             const maybeBlock = object.$blocks
-                .filter((b): b is MarkdownCodeblock => b.$type === "codeblock")
+                .filter((block): block is MarkdownCodeblock => isCodeblock(block))
                 .find((cb) =>
                     cb.$languages.some((language) => language.toLocaleLowerCase() in ScriptCache.SCRIPT_LANGUAGES)
                 );
@@ -192,7 +196,7 @@ export class ScriptCache {
                     maybeBlock.$languages.find((lang) => lang.toLocaleLowerCase() in ScriptCache.SCRIPT_LANGUAGES)!
                 ];
             return (await this.readCodeblock(tfile, maybeBlock)).map((code) => ({ code, language, filepath }));
-        } else if (object instanceof MarkdownCodeblock) {
+        } else if (isCodeblock(object)) {
             const maybeLanguage = object.$languages.find(
                 (lang) => lang.toLocaleLowerCase() in ScriptCache.SCRIPT_LANGUAGES
             );

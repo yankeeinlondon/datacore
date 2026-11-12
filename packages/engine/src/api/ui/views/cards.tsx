@@ -2,7 +2,7 @@
  * @module views
  */
 
-import { Literal } from "expression/literal";
+import type { Literal } from "@yankeeinlondon/datacore-contract";
 import { VNode } from "preact";
 import { useMemo } from "preact/hooks";
 

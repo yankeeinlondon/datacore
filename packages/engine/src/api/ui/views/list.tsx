@@ -1,7 +1,8 @@
 /**
  * @module views
  */
-import { GroupElement, Grouping, Groupings, Literal, Literals } from "expression/literal";
+import type { GroupElement, Grouping, Literal } from "@yankeeinlondon/datacore-contract";
+import { groupingSize, isGrouping, isListItem, isLiteralArray, sliceGrouping } from "@yankeeinlondon/datacore-shared";
 import { CURRENT_FILE_CONTEXT, Lit } from "ui/markdown";
 
 import { Fragment, VNode, isValidElement } from "preact";
@@ -9,7 +10,6 @@ import { useContext, useMemo, useRef } from "preact/hooks";
 import { ControlledPager, useDatacorePaging } from "./paging";
 import { useAsElement } from "ui/hooks";
 import { CSSProperties, ReactNode } from "preact/compat";
-import { MarkdownListItem } from "index/types/markdown";
 
 /** The render type of the list view. */
 export type ListViewType = "ordered" | "unordered" | "block";
@@ -79,7 +79,7 @@ export function ListView<T>(props: ListViewProps<T>) {
     const renderer = props.renderer ?? ((x: T) => x as Literal);
 
     const containerRef = useRef<HTMLDivElement>(null);
-    const totalElements = useMemo(() => Groupings.count(props.rows), [props.rows]);
+    const totalElements = useMemo(() => groupingSize(props.rows), [props.rows]);
     const paging = useDatacorePaging({
         initialPage: 0,
         paging: props.paging,
@@ -90,7 +90,7 @@ export function ListView<T>(props: ListViewProps<T>) {
 
     const pagedRows = useMemo(() => {
         if (paging.enabled)
-            return Groupings.slice(props.rows, paging.page * paging.pageSize, (paging.page + 1) * paging.pageSize);
+            return sliceGrouping(props.rows, paging.page * paging.pageSize, (paging.page + 1) * paging.pageSize);
         else return props.rows;
     }, [paging.page, paging.pageSize, paging.enabled, props.rows]);
 
@@ -98,7 +98,7 @@ export function ListView<T>(props: ListViewProps<T>) {
         if (!props.groupings) return undefined;
         if (Array.isArray(props.groupings)) return props.groupings;
 
-        if (Literals.isFunction(props.groupings)) return [{ render: props.groupings }];
+        if (typeof props.groupings === "function") return [{ render: props.groupings }];
         else return [props.groupings];
     }, [props.groupings]);
 
@@ -144,7 +144,7 @@ function ListGroup<T>({
 }) {
     const groupingConfig = groupings?.[Math.min(groupings.length - 1, level)];
 
-    if (Groupings.isGrouping(rows)) {
+    if (isGrouping(rows)) {
         return (
             <Fragment>
                 {rows.map((group) => (
@@ -383,7 +383,7 @@ function DefaultListElement<T>({ element }: { element: T }) {
 
     // TODO: Add a generic base class or interface so people can make custom list items.
     // TODO: Add task items as a special subcase in the list view.
-    if (element instanceof MarkdownListItem) {
+    if (isListItem(element)) {
         return <Lit inline={true} value={element.$text} sourcePath={element.$file} />;
     }
 
@@ -400,9 +400,9 @@ function ensureChildrenFunc<T>(childProp: undefined | null | string | string[] |
     } else if (childProp === null) {
         // No-op function.
         return (_element: T) => [];
-    } else if (Literals.isString(childProp)) {
+    } else if (typeof childProp === "string") {
         return (element: T) => fetchProps(element, [childProp]);
-    } else if (Literals.isArray(childProp)) {
+    } else if (isLiteralArray(childProp)) {
         return (element: T) => fetchProps(element, childProp);
     } else {
         return childProp;
@@ -424,7 +424,7 @@ function fetchProps<T>(element: T, props: string[]): T[] {
         const items = (element as Record<string, T>)[prop];
 
         if (!items) continue;
-        if (Literals.isArray(items)) result.push(...(items as T[]));
+        if (isLiteralArray(items)) result.push(...(items as T[]));
         else result.push(items);
     }
 

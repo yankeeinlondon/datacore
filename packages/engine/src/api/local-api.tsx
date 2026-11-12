@@ -16,8 +16,6 @@ import type {
     SearchResult,
 } from "@yankeeinlondon/datacore-contract";
 import { DatacoreViewApi } from "api/api";
-import { Link as EngineLink } from "expression/link";
-import { Literals } from "expression/literal";
 import { App } from "obsidian";
 import { useFileMetadata, useFullQuery, useIndexUpdates, useInterning, useQuery } from "ui/hooks";
 import type * as luxon from "luxon";
@@ -31,7 +29,7 @@ import { Button, Checkbox, Icon, Slider, Switch, Textbox, VanillaSelect } from "
 import { TableView } from "./ui/views/table";
 import { Callout } from "./ui/views/callout";
 import { ScriptCache } from "./script-cache";
-import { isHostModule } from "utils/javascript";
+import { isHostModule } from "ui/scripting";
 import { Card } from "./ui/views/cards";
 import { ListView } from "./ui/views/list";
 
@@ -345,7 +343,7 @@ export class DatacoreLocalApi {
         inline?: boolean;
         sourcePath?: string;
     }) => {
-        const realLink = hooks.useMemo(() => (typeof link === "string" ? EngineLink.file(link) : link), [link]);
+        const realLink = hooks.useMemo(() => (typeof link === "string" ? this.engine.fileLink(link) : link), [link]);
         const implicitSourcePath = hooks.useContext(CURRENT_FILE_CONTEXT);
         return (
             <Embed
@@ -395,7 +393,7 @@ export class DatacoreLocalApi {
         // For now, it's fairly useful enough to just hardcode some useful things that are embeddable.
         if (element.$types.includes("markdown") && element.$file && "$position" in element) {
             const { start, end } = element.$position as { start: number; end: number };
-            if (!Literals.isNumber(start) || !Literals.isNumber(end))
+            if (typeof start !== "number" || typeof end !== "number")
                 return (
                     <ErrorMessage
                         message={`Invalid $position field '${JSON.stringify(element.$position)}' for element '${

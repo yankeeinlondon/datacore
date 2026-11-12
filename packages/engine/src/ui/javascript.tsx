@@ -3,11 +3,11 @@ import { MarkdownRenderChild } from "obsidian";
 import { DatacoreLocalApi } from "api/local-api";
 import { h, render, Fragment, VNode } from "preact";
 import { unmountComponentAtNode } from "preact/compat";
-import { ScriptLanguage, asyncEvalInContext, transpile } from "utils/javascript";
+import { ScriptLanguage, asyncEvalInContext, transpile } from "ui/scripting";
 import { LoadingBoundary, ScriptContainer } from "./loading-boundary";
 import type { ViewServices } from "./services";
-import { Literal } from "expression/literal";
-import { getParentFolder } from "utils/normalizers";
+import type { Literal } from "@yankeeinlondon/datacore-contract";
+import { getParentFolder } from "@yankeeinlondon/datacore-shared";
 
 /**
  * Renders a script by executing it and handing it the appropriate React context to execute

@@ -1,7 +1,8 @@
 /** @module ui */
 import type { DatacoreApi, Indexable, IndexQuery, Result, SearchResult } from "@yankeeinlondon/datacore-contract";
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { DataObject, Literal, Literals } from "expression/literal";
+import type { DataObject, Literal } from "@yankeeinlondon/datacore-contract";
+import { equals } from "@yankeeinlondon/datacore-shared";
 import { CURRENT_FILE_CONTEXT } from "./markdown";
 import { isValidElement } from "preact";
 import { ReactNode } from "preact/compat";
@@ -52,7 +53,7 @@ export function tryUseFullQuery(
 
     // We "intern" the query, meaning we reuse the oldest version if it is semantically equal but just a different object.
     const internedQuery = useInterning(query, (first, second) =>
-        Literals.equals(first as unknown as DataObject, second as unknown as DataObject)
+        equals(first as unknown as DataObject, second as unknown as DataObject)
     );
 
     // Intern the output as well so react diffing "just works" with the result of useQuery.

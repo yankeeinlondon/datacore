@@ -11,8 +11,8 @@ import {
     ErrorMessage,
     Markdown,
 } from "../../ui/markdown";
-import { Link } from "expression/link";
-import { getFileTitle, lineRange } from "utils/normalizers";
+import type { Link } from "@yankeeinlondon/datacore-contract";
+import { getFileTitle, lineRange } from "@yankeeinlondon/datacore-shared";
 import type { EmbedContext, EmbedCreator, FileEmbed, TFile } from "obsidian";
 
 import "./embed.css";

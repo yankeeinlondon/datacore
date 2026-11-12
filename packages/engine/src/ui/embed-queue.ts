@@ -1,5 +1,5 @@
 import { Queue } from "@datastructures-js/queue";
-import { Result } from "api/result";
+import { Result } from "./result";
 import { Component, TFile, Vault } from "obsidian";
 import { Deferred, deferred } from "@yankeeinlondon/datacore-shared";
 

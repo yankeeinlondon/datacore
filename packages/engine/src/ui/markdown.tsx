@@ -3,11 +3,20 @@
  */
 import { App, MarkdownRenderer } from "obsidian";
 import { Component } from "obsidian";
-import { Link, Literal, Literals } from "expression/literal";
-import type { DatacoreApi, DisplaySettings } from "@yankeeinlondon/datacore-contract";
+import type { DatacoreApi, DisplaySettings, Link, Literal } from "@yankeeinlondon/datacore-contract";
 import type { EmbedQueue } from "./embed-queue";
-import { currentLocale, renderMinimalDate, renderMinimalDuration } from "utils/normalizers";
-import { extractImageDimensions, isImageEmbed } from "@yankeeinlondon/datacore-shared";
+import {
+    currentLocale,
+    extractImageDimensions,
+    isDataObject,
+    isDateTime,
+    isDuration,
+    isImageEmbed,
+    isLink,
+    isLiteralArray,
+    renderMinimalDate,
+    renderMinimalDuration,
+} from "@yankeeinlondon/datacore-shared";
 
 import { createContext, Fragment, render } from "preact";
 import { useContext, useMemo, useCallback, useRef, useEffect, useErrorBoundary } from "preact/hooks";
@@ -62,7 +71,8 @@ function RawLink({ link, sourcePath: maybeSourcePath }: { link: Link | string; s
     const workspace = useContext(APP_CONTEXT)?.workspace;
     const currentPath = useContext(CURRENT_FILE_CONTEXT);
     const sourcePath = maybeSourcePath ?? currentPath ?? "";
-    const parsed = useMemo(() => (Literals.isLink(link) ? link : Link.infer(link)), [link]);
+    const engine = useContext(ENGINE_CONTEXT);
+    const parsed = useMemo(() => (isLink(link) ? link : engine.inferLink(link)), [link, engine]);
 
     const onClick = useCallback(
         (event: MouseEvent) => {
@@ -110,6 +120,7 @@ function RawMarkdown({
     const component = useContext(COMPONENT_CONTEXT);
     const defaultPath = useContext(CURRENT_FILE_CONTEXT);
     const app = useContext(APP_CONTEXT);
+    const engine = useContext(ENGINE_CONTEXT);
 
     const sourcePath = maybeSourcePath ?? defaultPath;
 
@@ -142,7 +153,7 @@ function RawMarkdown({
                 render(
                     <APP_CONTEXT.Provider value={app}>
                         <Embed
-                            link={Link.parseInner(embed.getAttribute("src") ?? "")}
+                            link={engine.inferLink(embed.getAttribute("src") ?? "")}
                             sourcePath={sourcePath}
                             inline={true}
                         />
@@ -182,23 +193,23 @@ function RawLit({
     // Short-circuit if beyond the maximum render depth.
     if (depth >= settings.maxRecursiveRenderDepth) return <Fragment>...</Fragment>;
 
-    if (Literals.isNull(value) || value === undefined) {
+    if (value === null || value === undefined) {
         return <Markdown inline={inline} content={settings.nullAs} sourcePath={sourcePath} />;
-    } else if (Literals.isString(value)) {
+    } else if (typeof value === "string") {
         return <Markdown inline={inline} content={value} sourcePath={sourcePath} />;
-    } else if (Literals.isNumber(value)) {
+    } else if (typeof value === "number") {
         return <Fragment>{"" + value}</Fragment>;
-    } else if (Literals.isBoolean(value)) {
+    } else if (typeof value === "boolean") {
         return <Fragment>{"" + value}</Fragment>;
-    } else if (Literals.isDate(value)) {
+    } else if (isDateTime(value)) {
         return (
             <Fragment>
                 {renderMinimalDate(value, settings.dateFormat, settings.dateTimeFormat, currentLocale())}
             </Fragment>
         );
-    } else if (Literals.isDuration(value)) {
+    } else if (isDuration(value)) {
         return <Fragment>{renderMinimalDuration(value)}</Fragment>;
-    } else if (Literals.isLink(value)) {
+    } else if (isLink(value)) {
         // Special case handling of image/video/etc embeddings to bypass the Obsidian API not working.
         if (isImageEmbed(value)) {
             let realFile = app.metadataCache.getFirstLinkpathDest(value.path, sourcePath);
@@ -217,9 +228,9 @@ function RawLit({
         }
 
         return <ObsidianLink link={value} sourcePath={sourcePath} />;
-    } else if (Literals.isFunction(value)) {
+    } else if (typeof value === "function") {
         return <Fragment>&lt;function&gt;</Fragment>;
-    } else if (Literals.isArray(value)) {
+    } else if (isLiteralArray(value)) {
         if (!inline) {
             return (
                 <ul className={"dataview dataview-ul dataview-result-list-ul"}>
@@ -244,7 +255,7 @@ function RawLit({
                 </span>
             );
         }
-    } else if (Literals.isObject(value)) {
+    } else if (isDataObject(value)) {
         // Don't render classes in case they have recursive references; spoopy.
         if (value?.constructor?.name && value?.constructor?.name != "Object") {
             return <Fragment>&lt;{value.constructor.name}&gt;</Fragment>;

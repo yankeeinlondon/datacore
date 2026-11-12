@@ -9,6 +9,7 @@
  */
 
 export * from "./deferred";
+export * from "./indexables";
 export * from "./media";
 export * from "./registry";
 export * from "./text";

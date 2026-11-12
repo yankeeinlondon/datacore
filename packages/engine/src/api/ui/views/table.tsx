@@ -1,7 +1,8 @@
 /**
  * @module views
  */
-import { GroupElement, Grouping, Groupings, Literal, Literals } from "expression/literal";
+import type { GroupElement, Grouping, Literal } from "@yankeeinlondon/datacore-contract";
+import { groupingSize, isGroupElement, sliceGrouping } from "@yankeeinlondon/datacore-shared";
 import { useContext, useMemo, useRef } from "preact/hooks";
 import { CURRENT_FILE_CONTEXT, Lit } from "ui/markdown";
 import { useAsElement, useInterning } from "ui/hooks";
@@ -86,7 +87,7 @@ export function TableView<T>(props: TableViewProps<T>) {
 
     // Count total elements and then page appropriately.
     const tableRef = useRef<HTMLDivElement>(null);
-    const totalElements = useMemo(() => Groupings.count(props.rows), [props.rows]);
+    const totalElements = useMemo(() => groupingSize(props.rows), [props.rows]);
     const paging = useDatacorePaging({
         initialPage: 0,
         paging: props.paging,
@@ -97,7 +98,7 @@ export function TableView<T>(props: TableViewProps<T>) {
 
     const pagedRows = useMemo(() => {
         if (paging.enabled)
-            return Groupings.slice(props.rows, paging.page * paging.pageSize, (paging.page + 1) * paging.pageSize);
+            return sliceGrouping(props.rows, paging.page * paging.pageSize, (paging.page + 1) * paging.pageSize);
         else return props.rows;
     }, [paging.page, paging.pageSize, paging.enabled, props.rows]);
 
@@ -105,7 +106,7 @@ export function TableView<T>(props: TableViewProps<T>) {
         if (!props.groupings) return undefined;
         if (Array.isArray(props.groupings)) return props.groupings;
 
-        if (Literals.isFunction(props.groupings)) return [{ render: props.groupings }];
+        if (typeof props.groupings === "function") return [{ render: props.groupings }];
         else return [props.groupings];
     }, [props.groupings]);
 
@@ -175,7 +176,7 @@ export function VanillaRowGroup<T>({
     element: T | GroupElement<T>;
     groupings?: GroupingConfig<T>[];
 }) {
-    if (Groupings.isElementGroup(element)) {
+    if (isGroupElement(element)) {
         const groupingConfig = groupings?.[Math.min(groupings.length - 1, level)];
 
         return (

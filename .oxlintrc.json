@@ -67,48 +67,28 @@
         "no-restricted-imports": [
           "error",
           {
-            "paths": [
-              {
-                "name": "index/datacore",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "index/datastore",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "index/persister",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "settings",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "api/engine-api",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "api/engine-host",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              },
-              {
-                "name": "api/query-api",
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
-              }
-            ],
             "patterns": [
               {
-                "group": ["index/web-worker/*", "index/storage/*", "index/import/*"],
-                "message": "The views reach the engine only through the contract API (ViewServices.engine); engine internals are off limits (Engine Room spec D9). Type-only imports are fine.",
-                "allowTypeImports": true
+                "group": [
+                  "expression",
+                  "expression/*",
+                  "index",
+                  "index/*",
+                  "utils",
+                  "utils/*",
+                  "settings",
+                  "main",
+                  "api/*",
+                  "!api/ui",
+                  "!api/ui/*",
+                  "!api/api",
+                  "!api/local-api",
+                  "!api/script-cache",
+                  "**/expression/**",
+                  "**/index/**",
+                  "**/utils/**"
+                ],
+                "message": "The views may import only the contract, datacore-shared, preact, obsidian, and other view modules (ui/**, api/ui/**, api/{api,local-api,script-cache}); they move to datacore-view-preact in P2 step 5 (Engine Room spec D9)."
               }
             ]
           }

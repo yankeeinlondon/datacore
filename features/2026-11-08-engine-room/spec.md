@@ -514,7 +514,8 @@ datacore/
 - **Changesets** versions every package; private plugin packages get git tags (e.g. `@yankeeinlondon/datacore-engine@1.2.0`).
 - A post-`changeset version` script syncs each plugin's `manifest.json` (`version`) and `versions.json` (`version → minAppVersion`) from its `package.json`.
 - **npm:** `contract` and `client` publish via `changeset publish`.
-- **Plugins:** a GitHub Action, triggered by a plugin package tag, builds the plugin and publishes a GitHub release tagged with the **bare version** (`1.2.0`, as Obsidian requires) to its release repo (`yankeeinlondon/datacore-engine`, `…/datacore-view-preact`, `…/datacore-view-vue`), with `main.js`, `manifest.json`, `styles.css`, and the root `manifest.json` updated.
+- **Plugins:** `scripts/release-plugin.mjs <plugin> [--dry-run]` builds the plugin and publishes a GitHub release tagged with the **bare version** (`1.2.0`, as Obsidian requires) to its release repo (`releaseRepo` in the package's `package.json`: `yankeeinlondon/datacore-engine`, `…/datacore-view-preact`, later `…/datacore-view-vue`), with `main.js`, `manifest.json`, `styles.css`, after committing the release repo's root `manifest.json` (stable) or `manifest-beta.json` (prerelease), `versions.json`, `README.md` and `LICENSE`. It runs locally (primary path) or from the manually dispatched `release-plugins.yml` workflow, which needs a `RELEASE_TOKEN` secret with write access to the release repos.
+- Each plugin package keeps `manifest.json` (stable versions only; what the store reads) and `manifest-beta.json` (every version; what BRAT reads and what the build ships).
 - **BRAT phase:** Changesets pre-release mode (`changeset pre enter beta`) produces `x.y.z-beta.n` versions; exit pre mode for store releases.
 
 ## 11. Future work (designed for, not built)

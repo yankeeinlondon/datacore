@@ -255,7 +255,7 @@ export namespace CanvasTextCard {
 export class CanvasFileCard extends BaseCanvasCard implements Indexable, Contract.CanvasFileCard {
     static TYPES = ["canvas-card", "markdown", "canvas-file-card", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
-    $types: string[] = CanvasTextCard.TYPES;
+    $types: string[] = CanvasFileCard.TYPES;
     $typename: string = "File card";
 
     private constructor(init: Partial<CanvasFileCard>) {
@@ -288,7 +288,7 @@ export class CanvasFileCard extends BaseCanvasCard implements Indexable, Contrac
 export class CanvasWebCard extends BaseCanvasCard implements Indexable, Contract.CanvasWebCard {
     static TYPES = ["canvas-card", "markdown", "canvas-web-card", TAGGABLE_TYPE, LINKABLE_TYPE, FIELDBEARING_TYPE];
 
-    $types: string[] = CanvasTextCard.TYPES;
+    $types: string[] = CanvasWebCard.TYPES;
     readonly $type: string = "web-card";
     $typename: string = "Web card";
 

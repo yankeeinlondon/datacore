@@ -4,6 +4,7 @@ import { PreactViewApi } from "./api/api";
 import { DatacoreBlock } from "./block";
 import { EngineConnection } from "./connection";
 import { CONVERT_COMMAND_NAME, startConversion } from "./migrate/modal";
+import { rebuildViewsWithCodeBlocks } from "./refresh";
 import { EmbedQueue } from "./ui/embed-queue";
 import type { ScriptLanguage } from "./ui/scripting";
 
@@ -88,6 +89,9 @@ export default class DatacoreViewPreactPlugin extends Plugin {
         }
 
         this.register(this.registerCodeblockHighlighting());
+        // Enabled or reloaded while notes are open: their editors parsed the dc* blocks before our modes and
+        // processors existed, so rebuild them (at startup the layout loads after us, and this is skipped).
+        if (this.app.workspace.layoutReady) void rebuildViewsWithCodeBlocks(this.app, Object.keys(LANGUAGES));
 
         this.addCommand({
             id: "convert-datacore-code-blocks",

@@ -67,3 +67,12 @@ export class TFile extends TAbstractFile {
     basename = "";
     extension = "";
 }
+
+/** A markdown view: just enough for `instanceof` checks and reading the note text. */
+export class MarkdownView {
+    constructor(private readonly data = "") {}
+
+    getViewData(): string {
+        return this.data;
+    }
+}

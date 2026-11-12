@@ -16,9 +16,12 @@ You'll usually be using queries with the datacore `query` and `useQuery` functio
 // whenever the query results change.
 const pages = dc.useQuery("@page");
 
-// In a plugin context or in more advanced usage, you can run a query a single time with `query`.
+// In more advanced usage, you can run a query a single time with `query`.
 const pages = dc.query("@page and rating > 9");
 ```
+
+Other plugins run the same queries through `@yankeeinlondon/datacore-client`, with `query()` for one-off results and
+`subscribe()` for live ones; see [Queries and subscriptions](../plugin-authors/queries.md).
 
 ## Basic Query Types
 
@@ -48,7 +51,7 @@ You can fetch all objects tagged with a given tag using `#tag` - for example, `#
 ### `connected()`
 
 You can fetch objects that link TO or link FROM a given page. To find all pages that link TO a document,
-use `linkedto([[link]])`; to find pages that link FROM a document, use `linkedfrom([[link]])`. If you
+use `linksto([[link]])`; to find pages that link FROM a document, use `linkedfrom([[link]])`. If you
 want all links regardless of direction, just use `connected([[link]])`.
 
 ### `path()`

@@ -23,6 +23,21 @@ return function View() {
 ```
 ~~~
 
+## What `dc` Contains
+
+Inside a code block, `dc` is created for the note the block is in. It combines:
+
+- **The engine's path-scoped query API**, the same one plugins get from `dc.local(path)`: queries (`dc.query`,
+  `dc.fullquery`, ...), lookups (`dc.page`, `dc.resolveLink`), links (`dc.fileLink`, `dc.inferLink`, ...), expressions
+  (`dc.evaluate`), and utilities (`dc.array`, `dc.coerce`, `dc.luxon`). Relative links and paths resolve against the
+  note the block is in, and `dc.currentPath()` / `dc.currentFile()` return that note.
+- **Hooks and components** from Datacore View: Preact (`dc.useQuery`, `dc.Table`, ...), described below.
+- **Script helpers**: `dc.require` (see [Sharing Code](../code-views/index.md#sharing-code)) and `dc.app`, Obsidian's `App`.
+
+The block's `dc` hides the global `window.dc`. The global is the engine API without hooks or components; it exists for
+Templater/QuickAdd scripts and the developer console. Upstream Datacore's `dc.core`, which exposed engine internals,
+does not exist here.
+
 ## Query Hooks
 
 Datacore provides several methods for querying for data, including by the full query language and by path explicitly.
@@ -222,6 +237,7 @@ queries, it does not re-render your view when the page changes; use `dc.useFile(
 ```jsx
 dc.page("Books/Dune.md") => // the page, or undefined
 dc.page(dc.fileLink("Books/Dune.md")) => // the same page
+dc.page("missing.md") => undefined
 ```
 
 ### `dc.query()`
@@ -327,6 +343,27 @@ they have a block ID - generally visible by looking for `^blockId` notation at t
 
 ```jsx
 dc.blockLink("Daily Thoughts.md", "38ha12d") = // equivalent to [[Daily Thoughts#^38ha12d]]
+```
+
+### `dc.inferLink()`
+
+Builds a `Link` from bare link text without brackets: `Note`, `Note#Header`, or `Note#^block`, optionally followed by
+`|Display`. An escaped `\|` is kept as a literal `|`. It never throws, and it does not check that the target exists
+(use `dc.resolvePath` or `dc.resolveLink` for that). Prefer it over building `[[...]]` text for `dc.parseLink`, which
+breaks on paths that contain `]]` or `|`.
+
+```jsx
+dc.inferLink("Daily Thoughts#^38ha12d") = // equivalent to [[Daily Thoughts#^38ha12d]]
+dc.inferLink("Terraria#Review|my review") = // equivalent to [[Terraria#Review|my review]]
+```
+
+### `dc.resolveLink()`
+
+Resolves a link, or link text such as `"Note#Heading"`, to the indexed object it points to: the file for a file link,
+the section for a header link, the block for a block link. Returns `undefined` if nothing matches.
+
+```jsx
+dc.resolveLink("Terraria#Review") = // the MarkdownSection for the "Review" heading in Terraria.md
 ```
 
 ### `dc.parseLink()`
@@ -442,9 +479,21 @@ dc.coerce.link("oof") = undefined
 
 ### `dc.coerce.array()`
 
-If the input is an array, returns that array unchanged; otherwise, wraps the value in an array.
+If the input is an array (or a `DataArray`), returns it unchanged; otherwise, wraps the value in an array.
 
 ```jsx
 dc.coerce.array([1, 2]) = [1, 2]
 dc.coerce.array(1) = [1]
+```
+
+## Dates and Times
+
+### `dc.luxon`
+
+The engine's copy of [luxon](https://moment.github.io/luxon/), the library behind every date and duration Datacore
+returns. Create dates with it when you compare against or store values next to engine values.
+
+```jsx
+const { DateTime, Duration } = dc.luxon;
+const recent = dc.query("@page").filter(page => page.$mtime > DateTime.now().minus(Duration.fromObject({ days: 7 })));
 ```

@@ -110,7 +110,7 @@ You can add paging to any list using the `paging` prop, which accepts several op
 // Explicitly disable paging.
 <dc.List paging={false} ... />
 
-// Enable paging, with the page size equal to your default page size in the Datacore settings.
+// Enable paging, with the page size equal to your default page size in the Datacore Engine settings.
 <dc.List paging={true} ... />
 
 // Enable paging with the specific page size.
@@ -118,7 +118,7 @@ You can add paging to any list using the `paging` prop, which accepts several op
 ```
 
 If `paging` is not specified, it defaults to whatever your default paging configuration is in
-the Datacore settings.
+the **Display** section of the Datacore Engine settings tab.
 
 ### Scroll on Page (`scrollOnPaging`)
 

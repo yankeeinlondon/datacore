@@ -20,6 +20,10 @@ pnpm add @yankeeinlondon/datacore-client
 # or: npm install @yankeeinlondon/datacore-client
 ```
 
+For Deno and other JSR-native projects the same API is on [JSR](https://jsr.io/@yankeeinlondon/datacore-client)
+(`deno add jsr:@yankeeinlondon/datacore-client`). In an npm project, install from npm: JSR's npm-compatibility build
+needs `skipLibCheck: true` for luxon's types.
+
 `@yankeeinlondon/datacore-client` is the only package to install. It re-exports every type of the API contract
 (`@yankeeinlondon/datacore-contract`), such as `MarkdownPage`, `Link`, `DataArray`, and `ScopedDatacore`. Do not add the
 contract package as a separate dependency: two copies of it would not agree on the brand symbols that identify engine

@@ -462,6 +462,19 @@ The Vue authoring model (declarative blocks, render functions/JSX, SFC templates
 2. **Injected framework binding:** the shared script/module loader (§11.4) takes `h`/`Fragment` (or Vue's `h`) as an input; nothing hard-codes Preact.
 3. **Separate codeblock family:** Vue views use their own languages (e.g. `dcv`/`dcvt`/`dcvx`/`dcvtx`, or a declarative `dcview`), decided with the authoring model.
 
+Inputs for the Vue spec (2026-11-13, from building and using the Preact layer; see `docs/preact-view.md`):
+
+- **One TypeScript language, not a JS/TS family.** Script types are only stripped (sucrase), never checked, so
+  TypeScript syntax costs authors nothing and covers plain JavaScript; the Preact family's JS variants (`dc`, `dcx`)
+  exist only to mirror upstream's four names. Whether that one language also accepts JSX depends on the authoring
+  model (a template-based model needs no JSX). TSX's only syntax costs are `value as T` instead of `<T>value` and
+  `<T,>` for generic arrow functions.
+- **Hooks/composables at the top level of a script** should work, or the mistake should be detected and explained:
+  in the Preact layer it fails with an internal `reading '__H'` error (`docs/preact-view.md`, Appendix C #13).
+- **The Preact Table/List/Card limitations and known bugs** (`docs/preact-view.md` §4.4.7, §4.5.5, §4.6.4,
+  Appendix C) are the baseline the Vue views should exceed and not repeat. The Preact layer is in maintenance:
+  bugs are documented there, not fixed, unless they block users.
+
 ## 10. Monorepo layout & tooling
 
 ### 10.1 Layout

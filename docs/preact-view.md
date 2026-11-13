@@ -24,7 +24,8 @@ full path is shown. Line numbers are those of `master` at the time of writing.
 8. [Testing and quality](#8-testing-and-quality)
 9. [Implications for the Vue view layer](#9-implications-for-the-vue-view-layer)
 10. [Appendix A: file map](#appendix-a-file-map-of-packagesview-preactsrc) ·
-    [Appendix B: discrepancies](#appendix-b-discrepancies-between-docs-and-code)
+    [Appendix B: discrepancies](#appendix-b-discrepancies-between-docs-and-code) ·
+    [Appendix C: known bugs](#appendix-c-known-bugs)
 
 ## 1. Overview
 
@@ -1204,3 +1205,30 @@ The code is authoritative. "Docs" means `docs/docs/code-views/*.md` unless state
 | 15 | `table.md` Full Reference | `width?: "minimum" \| "maximum" \| string` | Code: `"minimum" \| "maximum" \| (string & {})` (same meaning; keeps literal autocompletion) |
 | 16 | `tools/release-repo/view-preact/README.md` | Documentation link `https://blacksmithgu.github.io/datacore/` | The fork's docs are deployed at `https://yankeeinlondon.github.io/datacore/` (P3 plan, items 7–9) |
 | 17 | Spec §9.1 hook list | `useQuery`, `useFullQuery`, `useFile`, `useCurrentFile`, `useIndexUpdates`, `useInterning`, Preact hooks | Also `useCurrentPath` and `useArray` |
+
+## Appendix C: known bugs
+
+**Policy (2026-11-13):** the Preact view layer is in maintenance. Known bugs are recorded here rather than fixed;
+effort goes into the Vue view layer (P5), which should not repeat them. A fix is still made when a bug blocks
+existing users or the engine/client work. Limitations (missing features) are listed separately in 4.4.7, 4.5.5 and
+4.6.4. Paths are relative to `packages/view-preact/src/`.
+
+| # | Area | Bug | Where |
+|---|---|---|---|
+| 1 | Table | Grouping settings are not passed to nested groups: `VanillaRowGroup` recurses with `level + 1`, `columns` and `element` but no `groupings`, so only the first level's `GroupingConfig` (header renderer) applies | `api/ui/views/table.tsx:186` |
+| 2 | Table | The component's doc comment says it supports sorting; nothing sorts, and the sort CSS is unused | `api/ui/views/table.tsx:76` |
+| 3 | Table | Grouped rows set `padding-left` on the `<tr>`, which has no visible effect (padding applies to cells) | `api/ui/views/table.tsx:235` |
+| 4 | Paging (all views) | The engine's **Pagination** setting (`display.pagingEnabled`) is never read: views are paged only when the `paging` prop is passed | `api/ui/views/paging.tsx:212` |
+| 5 | Paging (all views) | `scrollOnPaging` as a number is meant as a page-size threshold, but any non-zero number enables scrolling (`!!(scrollOnPageChange ?? …)`) | `api/ui/views/paging.tsx:213` |
+| 6 | List | Every list item emits an empty nested `<ul>`/`<ol>`: the children check `children && …` passes for an empty array | `api/ui/views/list.tsx:287` |
+| 7 | Card | Title, content and footer values are not rendered through `Lit`, so markdown, links and dates show raw | `api/ui/views/cards.tsx:36` |
+| 8 | Stack / Group | With `style` but without `justify`/`align`, the combined inline style starts with an invalid declaration | `api/ui/layout.tsx:24` |
+| 9 | Form controls | Passing `onChange` (or another handler the control uses) replaces the control's internal handler, because props are spread after it; the `on…Change` callback then stops firing | `api/ui/basics.tsx:66` (Checkbox; same pattern in the other controls) |
+| 10 | Script `dc` after a rename | The block updates `dc.path` on rename, but the path-scoped contract API was bound once to `engine.local(oldPath)`, so `dc.query`/`dc.page`/… keep resolving relative to the old path | `api/local-api.tsx:57`, `ui/javascript.tsx` (rename handler) |
+| 11 | `dc.require` | Required scripts are cached and never invalidated: editing a required file has no effect until the plugin reloads | `api/script-cache.ts:80` |
+| 12 | Rendering cost | Every string cell is rendered by its own asynchronous Obsidian markdown render, so large tables issue one render per cell | `ui/markdown.tsx` (`Lit` → `Markdown`) |
+| 13 | Script errors (usability) | Calling a hook at the top level of a script, instead of inside the returned component, fails with Preact's internal `TypeError: Cannot read properties of null (reading '__H')`, which does not say what is wrong. The script body is evaluated once, asynchronously, outside any render; only a returned function component renders, so hooks must be called inside it (`return function View() { const rows = dc.useQuery(…); … }`). Upstream Datacore behaves the same | `ui/javascript.tsx:33` |
+
+For the Vue layer, #13 is a design input: either allow composables at the top level of a script, or detect the
+mistake and explain it ("hooks must be called inside the component your script returns").
+

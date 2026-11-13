@@ -87,3 +87,48 @@ mirror). Step 13 is therefore Ken's to click; everything before it is prepared.
   `0.1.0-beta.1`, `main.js` byte-identical to the release assets (BRAT rewrites `manifest.json` on one line; same
   content), and the parity snapshot is identical to the baseline.
 - GitHub Pages enabled (Actions); docs deployed to https://yankeeinlondon.github.io/datacore/.
+
+### 10–12 ✅ (2026-11-12/13): npm + JSR, example consumer, 1.0.0 plugins
+
+- **npm:** contract and client `1.0.0`, then `1.0.1` (published by Ken; npm needs an authenticator OTP per publish,
+  and `npm login` only works from his own terminal). A publish can sit in npm's validation window for minutes:
+  `npm view` returns 404 and re-publishing gets E409 "Cannot publish over previously staged version" until it
+  clears. `npm stage list` empty means wait, not approve. Both packages also carry a stray `0.0.0-stage` version.
+- **JSR** (Ken's standing preference: publish to JSR too): `scripts/stage-jsr.mjs` stages a self-contained copy
+  (client includes shared's source under `_shared/`; contract via `jsr:`). Two server-side rules the dry run
+  misses: no global type augmentation (the JSR client omits `window.dc` typing) and, for luxon (no bundled types),
+  a `@ts-types="npm:@types/luxon"` directive is needed or the types become `any` (fixed in **1.0.1**).
+- **Verified against the published 1.0.1 packages** in fresh projects outside the repo: npm (strict `tsc` with
+  `skipLibCheck: false`, ESM runtime), Deno (`jsr:` import), JSR via npm (`npx jsr add`; needs `skipLibCheck: true`
+  because JSR's d.ts imports `@types/luxon`, TS6137; documented). Each probe includes a deliberate misuse of a luxon
+  type that must fail.
+- **Example consumer** `examples/consumer-plugin/` (outside the workspace, npm lockfile resolving the client from the
+  registry): live "Datacore: N pages" status bar, a tagged-count command, "engine off" and recovery across an engine
+  reload, listed in the engine's Diagnostics. **P3 exit criterion met.**
+- **API frozen:** each build regenerates the api-extractor reports and CI fails on any uncommitted change, so every
+  public API change needs a reviewed, committed report.
+- **Plugins 1.0.0** released to both release repos (root `manifest.json` at 1.0.0, "Latest"); BRAT upgraded the
+  Test Vault from `0.1.0-beta.1` to `1.0.0`; parity identical.
+
+### 13: store submission (Ken)
+
+Submitted through community.obsidian.md with Ken's Obsidian account (the old `obsidian-releases` PR flow ended in
+May 2026). Not yet in the hourly `community-plugins.json` mirror as of 2026-11-13.
+
+## Outcome (2026-11-13)
+
+Everything before the Vue view layer is done except the store's acceptance, which is up to Obsidian's review:
+
+| Exit criterion | Result |
+|---|---|
+| P2 findings fixed | ✅ P2.1: five view fixes and the script `dc` contract API; parity re-baselined from a reviewed diff |
+| Contract and client 1.0 on npm (and JSR) | ✅ 1.0.1 on both registries, verified as an outside consumer |
+| Release CI / tooling to per-plugin repos | ✅ `release-plugin.mjs` (+ manual workflow needing a `RELEASE_TOKEN` secret) |
+| BRAT install works for both plugins | ✅ beta install and upgrade to 1.0.0 in the Test Vault |
+| External example plugin works against the published client | ✅ `examples/consumer-plugin` |
+| API report frozen | ✅ CI fails on any unreviewed change |
+| Docs | ✅ https://yankeeinlondon.github.io/datacore/ |
+| P4: submitted to the store | Submitted by Ken; awaiting review |
+
+Open, minor: `DatacoreHandle` in the client API report lists only `onReconnected` (the rest comes from the
+contract's `ScopedDatacore`); the release workflow needs a `RELEASE_TOKEN` secret to run from Actions.

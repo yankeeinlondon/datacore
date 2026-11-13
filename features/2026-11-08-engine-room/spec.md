@@ -499,7 +499,7 @@ datacore/
 | Library builds | **tsdown** (contract, client): ESM + `.d.ts`, `exports` maps; **api-extractor** reports | CI fails on unreviewed contract changes |
 | Lint | **oxlint** with `--type-aware` (oxlint-tsgolint): Vitest plugin, `no-restricted-imports` for boundaries, local `datacore/no-class` rule, and **`eslint-plugin-obsidianmd`'s untyped rules via `jsPlugins`**. **ESLint 10** (`eslint.config.mjs`) runs only obsidianmd's 7 type-aware rules plus manifest/license validation | oxlint's JS-plugin bridge provides no TypeScript program, so type-aware ESLint rules cannot run there |
 | Format | **oxfmt**, config migrated from `.prettierrc` (`oxfmt --migrate=prettier`): 4 spaces, width 120, ES5 trailing commas, double quotes | One isolated reformat commit, listed in `.git-blame-ignore-revs` |
-| Task running | pnpm recursive scripts (`pnpm -r`, `--filter`) | Add Turbo only if builds get slow |
+| Task running | pnpm recursive scripts (`pnpm -r`, `--filter`) for package tasks; **`just` recipes** (root `justfile`) as the entry point for key devops operations: checks, installing builds into a vault, parity, releases, publishing | Recipes wrap the pnpm scripts and `scripts/*`; add Turbo only if builds get slow |
 | Versioning | **Changesets for all packages** (`privatePackages: { version: true, tag: true }`; `docs` ignored; internal dependency bumps on) | §10.4 |
 | Docs | Docusaurus as a workspace package | Migration off Docusaurus is out of scope |
 

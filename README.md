@@ -31,37 +31,28 @@ extra functionality.
 
 ## Compiling & Building
 
-You can do a first-time setup of the repository by making sure you have `yarn` installed and then just running
+This is a pnpm workspace (Node 22, see `.nvmrc`). Key development and devops operations (checks, building and
+installing into a vault, parity checks, releases, publishing) are run as [`just`](https://github.com/casey/just)
+recipes from the root `justfile`; run `just` to list them. The recipes wrap the pnpm scripts and `scripts/*` below.
 
 ```bash
-yarn install
-yarn run build
+pnpm install
+pnpm build      # every package except the docs site; plugins land in packages/<plugin>/build/plugin
+pnpm check      # format check, lint, typecheck, tests, plugin manifests
 ```
 
-This will invoke `esbuild` under the hood and dump the final plugin into the `/build` directory. There is a short script which can then copy the compiled plugin into your vault -
+Copy a built plugin into a vault (`engine` or `view-preact`):
 
 ```bash
-./scripts/install-built /path/to/your/vault/root
-```
-
-You can combine the build and install into a single command:
-
-```bash
-yarn run build && ./scripts/install-built /path/to/your/vault/root
+./scripts/install-built /path/to/your/vault engine
+./scripts/install-built /path/to/your/vault view-preact
 ```
 
 ## Formatting & Running Tests
 
-You can format your code via
-
 ```bash
-yarn run format
-```
-
-And you can run jest tests via
-
-```bash
-yarn run test
+pnpm fmt        # format with oxfmt
+pnpm test       # Vitest in every package
 ```
 
 ## Releasing plugins

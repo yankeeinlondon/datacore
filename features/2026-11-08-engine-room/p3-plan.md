@@ -110,14 +110,16 @@ mirror). Step 13 is therefore Ken's to click; everything before it is prepared.
 - **Plugins 1.0.0** released to both release repos (root `manifest.json` at 1.0.0, "Latest"); BRAT upgraded the
   Test Vault from `0.1.0-beta.1` to `1.0.0`; parity identical.
 
-### 13: store submission (Ken)
+### 13: store submission (Ken, not yet started)
 
-Submitted through community.obsidian.md with Ken's Obsidian account (the old `obsidian-releases` PR flow ended in
-May 2026). Not yet in the hourly `community-plugins.json` mirror as of 2026-11-13.
+Submission goes through community.obsidian.md with Ken's Obsidian account and a linked GitHub account (the old
+`obsidian-releases` PR flow ended in May 2026), so it cannot be delegated. Both release repos meet the listed
+requirements (README, LICENSE, root `manifest.json` at 1.0.0 matching a release with `main.js`/`manifest.json`/
+`styles.css`).
 
 ## Outcome (2026-11-13)
 
-Everything before the Vue view layer is done except the store's acceptance, which is up to Obsidian's review:
+Everything before the Vue view layer is done except the store submission, which Ken does in the portal:
 
 | Exit criterion | Result |
 |---|---|
@@ -128,7 +130,7 @@ Everything before the Vue view layer is done except the store's acceptance, whic
 | External example plugin works against the published client | ✅ `examples/consumer-plugin` |
 | API report frozen | ✅ CI fails on any unreviewed change |
 | Docs | ✅ https://yankeeinlondon.github.io/datacore/ |
-| P4: submitted to the store | Submitted by Ken; awaiting review |
+| P4: submitted to the store | Pending: Ken submits through community.obsidian.md |
 
 Open, minor: `DatacoreHandle` in the client API report lists only `onReconnected` (the rest comes from the
 contract's `ScopedDatacore`); the release workflow needs a `RELEASE_TOKEN` secret to run from Actions.

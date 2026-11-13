@@ -30,3 +30,6 @@ examples/*/main.js
 
 # api-extractor scratch output
 packages/*/temp/
+
+# Local overrides for just recipes (TEST_VAULT, TEST_VAULT_NAME, OBSIDIAN_CLI).
+.env

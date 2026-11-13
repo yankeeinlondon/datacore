@@ -110,7 +110,14 @@ mirror). Step 13 is therefore Ken's to click; everything before it is prepared.
 - **Plugins 1.0.0** released to both release repos (root `manifest.json` at 1.0.0, "Latest"); BRAT upgraded the
   Test Vault from `0.1.0-beta.1` to `1.0.0`; parity identical.
 
-### 13: store submission (Ken, not yet started)
+### 13: store submission, deferred to after P5 (decision, 2026-11-13)
+
+**Decision (Ken):** do not submit to the community store until the Vue view layer (P5) ships. Engine + View: Preact
+alone are a repackaging of what upstream Datacore already offers; the store debut should bring something new: a
+new view layer, with table (and possibly list and card) views well beyond the Preact ones. Until then the plugins
+stay on BRAT (1.0.0 releases are live), and the contract/client stay public on npm and JSR.
+
+When it is time, the process is:
 
 Submission goes through community.obsidian.md with Ken's Obsidian account and a linked GitHub account (the old
 `obsidian-releases` PR flow ended in May 2026), so it cannot be delegated. Both release repos meet the listed
@@ -119,7 +126,7 @@ requirements (README, LICENSE, root `manifest.json` at 1.0.0 matching a release 
 
 ## Outcome (2026-11-13)
 
-Everything before the Vue view layer is done except the store submission, which Ken does in the portal:
+Everything before the Vue view layer is done. The store submission is deferred until P5 ships (decision above):
 
 | Exit criterion | Result |
 |---|---|
@@ -130,7 +137,7 @@ Everything before the Vue view layer is done except the store submission, which 
 | External example plugin works against the published client | ✅ `examples/consumer-plugin` |
 | API report frozen | ✅ CI fails on any unreviewed change |
 | Docs | ✅ https://yankeeinlondon.github.io/datacore/ |
-| P4: submitted to the store | Pending: Ken submits through community.obsidian.md |
+| P4: submitted to the store | Deferred to after P5 (Ken submits through community.obsidian.md) |
 
 Open, minor: `DatacoreHandle` in the client API report lists only `onReconnected` (the rest comes from the
 contract's `ScopedDatacore`); the release workflow needs a `RELEASE_TOKEN` secret to run from Actions.

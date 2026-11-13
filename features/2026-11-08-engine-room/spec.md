@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved; **P0 complete**, **P1 complete** (v0.5, 2026-11-11), **P2 complete** (2026-11-12). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11), [p2-plan.md](./p2-plan.md#outcome-2026-11-12) |
+| **Status** | Approved; **P0 complete**, **P1 complete** (v0.5, 2026-11-11), **P2 complete** (2026-11-12), **P3 complete** (2026-11-13; P4 store submission deferred until after P5). See [p0-plan.md](./p0-plan.md#outcome-2026-11-11), [p1-plan.md](./p1-plan.md#outcome-2026-11-11), [p2-plan.md](./p2-plan.md#outcome-2026-11-12) |
 | **Date** | 2026-11-08 (updated 2026-11-12) |
 | **Owner** | Ken Snyder |
 | **Product** | **datacore-engine** ("Datacore Engine") |
@@ -568,7 +568,7 @@ A capped, persisted list of recently opened files with its own `recentFiles()` a
 | **P1 — Contract & engine API** ✅ | `datacore-contract` interfaces + constants; client (`getDatacore`, guards, value helpers); registry protocol; `EngineApiImpl`; settings split; namespaced cache; `window.dc`; Obsidian prototype extensions removed; UI rewired onto the contract API (Preact itself leaves the engine in P2; see p1-plan) | UI uses only the contract API (lint-enforced); contract type tests; registry load-order and revocation tests; api-extractor reports reviewed |
 | **P2 — `datacore-view-preact`** ✅ | Views moved into their own plugin consuming only the client + shared; `dc`/`dct`/`dcx`/`dctx` languages; migration command | Parity vault renders identically; plugins work in either load order; disabling/re-enabling the engine recovers views; runs alongside upstream Datacore |
 | **P3 — Stabilize & publish** | Contract and client `1.0.0` on npm; release CI to per-plugin release repos; BRAT betas; example third-party consumer in `fixtures/`; docs | External example plugin works against the published client; API report frozen; BRAT install works for both plugins |
-| **P4 — Store submission** | Submit `datacore-engine` and `datacore-view-preact` to the community store | Accepted |
+| **P4 — Store submission** (after P5) | Submit `datacore-engine`, `datacore-view-preact` and `datacore-view-vue` to the community store, through community.obsidian.md. Deferred (2026-11-13): engine + Preact alone repackage upstream Datacore; the store debut waits for the Vue view layer and its more advanced table/list/card views. BRAT until then | Accepted |
 | **P5 — `datacore-view-vue`** | Separate spec (`features/2026-11-08-frontend/`) | — |
 
 ## 13. Risks
